@@ -1,137 +1,177 @@
-# **Agent Directive: AI-Native Finance Platform (SaaS)**
+# AI Finance Platform - Agent Instructions
 
-**Objective:** Build a privacy-first personal finance dashboard with a strict "Shared → Feature → Composition" architecture enforced by Turborepo Boundaries.
+## Project Overview
 
-## **1\. Tech Stack & Standards**
+AI-powered personal finance dashboard with automatic transaction categorization and 50/30/20 budgeting. Privacy-first SaaS built with modern web technologies.
 
-* **Core:** Turborepo (v2.x+), Next.js 16 (App Router), TypeScript.  
-* **State/API:** tRPC (v11), React Query, Zod.  
-* **Auth:** Clerk.  
-* **Database:** PostgreSQL, Drizzle ORM.  
-* **AI:** Vercel AI SDK (Adapter pattern).  
-* **Payments:** Stripe.
+## Tech Stack
 
-## **2\. Monorepo Structure & Boundaries**
+- **Build:** Turborepo (v2.x+) monorepo with strict boundary enforcement
+- **Frontend:** Next.js 15 (App Router), React 19, TypeScript
+- **API:** tRPC v11, React Query, Zod validation
+- **Auth:** Clerk
+- **Database:** PostgreSQL + Drizzle ORM
+- **AI:** Vercel AI SDK with OpenAI
+- **Styling:** Tailwind CSS, Shadcn/UI components
+- **Payments:** Stripe (planned)
 
-The repository is partitioned into three layers. Imports must flow strictly **upwards** (Shared → Features → Compositions).
+## Architecture
 
-.  
-├── apps/ (Type: Composition)  
-│   ├── web/                  \# Next.js Dashboard (Imports Features & Shared)  
-│   └── marketing/            \# Landing Page (Imports Features & Shared)  
-│  
-├── packages/  
-│   ├── features/ (Type: Feature)  
-│   │   ├── auth/             \# Clerk wrappers, User context  
-│   │   ├── transactions/     \# Import logic, parsing, classification  
-│   │   └── analytics/        \# 50/30/20 math, Budgeting logic  
-│   │  
-│   └── shared/ (Type: Shared)  
-│       ├── ui/               \# Shadcn UI primitives (Button, Card)  
-│       ├── db/               \# Drizzle Client & Schema  
-│       ├── api/              \# tRPC root builder (no router logic)  
-│       ├── ai/               \# Vercel AI SDK setup  
-│       └── config/           \# TSConfig, ESLint
+Three-layer architecture with strict import boundaries:
 
-### **Boundary Rules (Enforced by turbo.json)**
+```
+apps/                           # Compositions (can import all)
+├── web/                        # Next.js Dashboard
 
-| Package Type | Tag | Can Import | Forbidden Imports |
-| :---- | :---- | :---- | :---- |
-| **Composition** | type:composition | Any (type:feature, type:shared) | None |
-| **Feature** | type:feature | type:shared | type:feature, type:composition |
-| **Shared** | type:shared | type:shared | type:feature, type:composition |
+packages/features/              # Features (can import shared only)
+├── auth/                       # Clerk integration
+├── transactions/               # CSV parsing, AI classification
+└── analytics/                  # 50/30/20 budgeting, charts
 
-## **3\. Configuration**
+packages/shared/                # Shared (can import shared only)
+├── ui/                         # Shadcn components
+├── db/                         # Drizzle schema & client
+├── api/                        # tRPC root builder
+├── ai/                         # Vercel AI SDK setup
+└── config/                     # TypeScript, ESLint configs
+```
 
-### **Root turbo.json**
+**Import Rules (enforced by Turborepo):**
+- Compositions → can import Features + Shared
+- Features → can only import Shared
+- Shared → can only import Shared
 
-Enforce the boundaries globally.
+## Critical Agent Instructions
 
-JSON
+### Before Completing Any Task
 
-{  
-  "$schema": "https://turbo.build/schema.json",  
-  "boundaries": {  
-    "tags": {  
-      "type:feature": {  
-        "dependencies": {  
-          "deny": \["type:feature", "type:composition"\]  
-        }  
-      },  
-      "type:shared": {  
-        "dependencies": {  
-          "deny": \["type:feature", "type:composition"\]  
-        }  
-      }  
-    }  
-  }  
-}
+**ALWAYS run these checks before considering a task complete:**
 
-### **Package-Level turbo.json (Examples)**
+```bash
+# 1. Type checking - must pass with no errors
+pnpm typecheck
 
-**packages/features/transactions/turbo.json**
+# 2. Linting - must pass with no warnings
+pnpm lint
 
-JSON
+# 3. Format code
+pnpm format
 
-{  
-  "extends": \["//"\],  
-  "tags": \["type:feature"\]  
-}
+# 4. Run tests (when available)
+pnpm test
+```
 
-**packages/shared/ui/turbo.json**
+Fix any issues before marking the task complete.
 
-JSON
+### Git Workflow
 
-{  
-  "extends": \["//"\],  
-  "tags": \["type:shared"\]  
-}
+**Commit regularly with meaningful messages:**
 
-## **4\. Development Epics**
+```bash
+# Check status frequently
+git status
 
-### **Epic A: Foundation & Infrastructure**
+# Stage specific files (avoid git add .)
+git add <specific-files>
 
-* \[ \] Initialize Turborepo with the 3-layer structure.  
-* \[ \] Configure packages/shared/db (Drizzle) and packages/shared/ui (Shadcn).  
-* \[ \] Set up **Turborepo Boundaries** to fail build on illegal imports.
+# Commit with descriptive message
+git commit -m "feat/fix/refactor: description of changes"
+```
 
-### **Epic B: Feature Packages (packages/features/\*)**
+**Commit message prefixes:**
+- `feat:` New feature
+- `fix:` Bug fix
+- `refactor:` Code refactoring
+- `style:` Formatting, styling
+- `docs:` Documentation
+- `test:` Adding tests
+- `chore:` Maintenance tasks
 
-* \[ \] **@finance/auth**: Encapsulate Clerk logic and useUser hooks.  
-* \[ \] **@finance/transactions**:  
-  * Zod schemas for Transaction.  
-  * CSV parsing utilities.  
-  * classifyTransaction() function (AI logic).  
-* \[ \] **@finance/analytics**:  
-  * Pure functions for 50/30/20 calculations.  
-  * Budget forecasting algorithms.
+**Commit after:**
+- Completing a logical unit of work
+- Before switching to a different task
+- After fixing lint/type errors
+- At natural stopping points
 
-### **Epic C: Compositions (apps/web)**
+### Code Quality Standards
 
-* \[ \] Create (app)/dashboard/page.tsx.  
-* \[ \] Import TransactionTable from @finance/transactions (Note: Features should export domain-specific components).  
-* \[ \] Import BudgetGauge from @finance/analytics.  
-* \[ \] Wire up tRPC routers by importing routers from features and merging them in apps/web/app/api/trpc.
+1. **TypeScript:** Strict mode, no `any` types without justification
+2. **Security:** Follow OWASP guidelines, sanitize inputs
+3. **React:** Use Server Components by default, `"use client"` only when needed
+4. **Imports:** Respect boundary rules - features cannot import other features
+5. **Testing:** Write tests for business logic (calculations, parsers)
 
-### **Epic D: Intelligence Layer (packages/shared/ai)**
+### Key Files & Locations
 
-* \[ \] Implement the "Model Registry" adapter.  
-* \[ \] Expose generic askAI() helper used by @finance/transactions.  
-* \[ \] **Constraint:** shared/ai cannot import features/transactions. Data must be passed as arguments.
+- **Database Schema:** `packages/shared/db/src/schema/`
+- **tRPC Routers:** `packages/features/*/src/router.ts`
+- **UI Components:** `packages/shared/ui/src/components/`
+- **Dashboard Pages:** `apps/web/src/app/(dashboard)/dashboard/`
+- **API Routes:** `apps/web/src/app/api/`
 
-## **5\. Critical Database Schema (Drizzle)**
+### Environment Variables
 
-Located in packages/shared/db.
+Copy `.env.example` to `.env.local` and fill in:
 
-Code snippet
+```
+DATABASE_URL=postgresql://...
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+OPENAI_API_KEY=sk-...
+```
 
-model Transaction {  
-  id             String   @id @default(cuid())  
-  userId         String   // Managed by @finance/auth  
-  amount         Float  
-  date           DateTime  
-  description    String  
-  merchant       String?  
-  category       String?  // Enriched by @finance/transactions  
-  necessityScore Float?   // Calculated by @finance/analytics  
-}  
+### Common Commands
+
+```bash
+# Development
+pnpm dev                    # Start all apps in dev mode
+pnpm dev --filter=@finance/web  # Start only web app
+
+# Building
+pnpm build                  # Build all packages
+pnpm typecheck              # Type check all packages
+
+# Code Quality
+pnpm lint                   # Lint all packages
+pnpm lint:fix               # Auto-fix lint issues
+pnpm format                 # Format all files
+
+# Database
+pnpm db:generate            # Generate Drizzle migrations
+pnpm db:push                # Push schema to database
+pnpm db:studio              # Open Drizzle Studio
+
+# Cleaning
+pnpm clean                  # Clean all build artifacts
+```
+
+## Current Progress
+
+### Completed
+- [x] Turborepo monorepo setup with boundaries
+- [x] Shared packages: ui, db, api, ai, config
+- [x] Feature packages: auth, transactions, analytics
+- [x] Web app with dashboard, landing page
+- [x] 50/30/20 budget system
+- [x] AI transaction classification
+- [x] CSV import from major banks
+- [x] ESLint & Prettier configuration
+
+### TODO
+- [ ] Set up PostgreSQL database and run migrations
+- [ ] Add Vitest for unit testing
+- [ ] Implement Stripe payments
+- [ ] Add marketing site (apps/marketing)
+- [ ] Add E2E tests with Playwright
+- [ ] Set up CI/CD pipeline
+- [ ] Add email notifications
+- [ ] Implement data export feature
+
+## Security Considerations
+
+- All financial data encrypted at rest
+- Clerk handles authentication securely
+- Input validation with Zod on all endpoints
+- CSRF protection via tRPC
+- Rate limiting on API routes (TODO)
+- Regular dependency audits

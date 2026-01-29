@@ -9,6 +9,11 @@
   },
   "scripts": {
     "build": "tsc",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'No tests configured yet'",
+    "clean": "rm -rf dist .turbo node_modules",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"

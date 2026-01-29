@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'No tests configured yet'",
+    "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.9.6",
