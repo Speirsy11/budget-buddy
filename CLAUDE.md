@@ -146,6 +146,11 @@ pnpm lint                   # Lint all packages
 pnpm lint:fix               # Auto-fix lint issues
 pnpm format                 # Format all files
 
+# Testing
+pnpm test                   # Run tests in watch mode
+pnpm test:run               # Run tests once
+pnpm test:coverage          # Run tests with coverage
+
 # Database
 pnpm db:generate            # Generate Drizzle migrations
 pnpm db:push                # Push schema to database
@@ -171,7 +176,7 @@ pnpm clean                  # Clean all build artifacts
 ### TODO
 
 - [ ] Set up PostgreSQL database and run migrations
-- [ ] Add Vitest for unit testing
+- [x] Add Vitest for unit testing (45 tests passing)
 - [ ] Implement Stripe payments
 - [ ] Add marketing site (apps/marketing)
 - [ ] Add E2E tests with Playwright
