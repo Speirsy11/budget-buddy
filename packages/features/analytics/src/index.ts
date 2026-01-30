@@ -2,7 +2,10 @@
 export {
   calculate503020,
   calculateBudgetProgress,
+  calculateCategoryTotals,
   calculateSpendingTrends,
+  formatCurrency,
+  getPercentageChange,
   type BudgetBreakdown,
   type SpendingTrend,
 } from "./calculations";

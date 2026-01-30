@@ -68,6 +68,13 @@ catalog:
   # Validation
   zod: "^3.24.1"
 
+  # Testing
+  vitest: "^2.1.8"
+  "@testing-library/react": "^16.1.0"
+  "@testing-library/jest-dom": "^6.6.3"
+  "@vitejs/plugin-react": "^4.3.4"
+  jsdom: "^25.0.1"
+
   # Dev Dependencies
   "@eslint/js": "^9.17.0"
   "@types/node": "^22.10.2"

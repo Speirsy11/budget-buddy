@@ -231,3 +231,26 @@ export function calculateCategoryTotals(
     }))
     .sort((a, b) => b.total - a.total);
 }
+
+/**
+ * Format a number as currency (USD)
+ */
+export function formatCurrency(amount: number): string {
+  const isNegative = amount < 0;
+  const absAmount = Math.abs(amount);
+  const formatted = absAmount.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  return isNegative ? `-${formatted}` : formatted;
+}
+
+/**
+ * Calculate percentage change between two values
+ */
+export function getPercentageChange(previous: number, current: number): number {
+  if (previous === 0) return 0;
+  return ((current - previous) / previous) * 100;
+}
