@@ -136,7 +136,10 @@ All external dependencies must be defined in `pnpm-workspace.yaml` under the `ca
 Copy `.env.example` to `.env.local` and fill in:
 
 ```
-DATABASE_URL=postgresql://...
+# Use pnpm infra:up to start local PostgreSQL and Redis
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/finance
+REDIS_URL=redis://localhost:6379
+
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
 OPENAI_API_KEY=sk-...
@@ -170,6 +173,11 @@ pnpm test:coverage          # Run tests with coverage
 pnpm test:e2e               # Run Playwright tests
 pnpm test:e2e:ui            # Run Playwright with UI mode
 
+# Infrastructure (Docker)
+pnpm infra:up               # Start PostgreSQL and Redis containers
+pnpm infra:down             # Stop all containers
+pnpm infra:debug            # Start with pgAdmin and Redis Commander
+
 # Database
 pnpm db:generate            # Generate Drizzle migrations
 pnpm db:push                # Push schema to database
@@ -194,8 +202,7 @@ pnpm clean                  # Clean all build artifacts
 
 ### TODO
 
-- [ ] Set up PostgreSQL database and run migrations (schema ready, needs DB instance)
-- [ ] Add rate limiting on API routes
+- [ ] Set up PostgreSQL database and run migrations (run `pnpm infra:up` then `pnpm db:push`)
 
 ### Recently Completed
 
@@ -206,6 +213,8 @@ pnpm clean                  # Clean all build artifacts
 - [x] Set up CI/CD pipeline (GitHub Actions: lint, typecheck, test, build)
 - [x] Add email notifications (Resend + React Email: welcome, budget alerts, weekly summary)
 - [x] Implement data export feature (CSV, JSON, full data export)
+- [x] Add Docker infrastructure (PostgreSQL, Redis via docker-compose)
+- [x] Add rate limiting on API routes (Redis-backed with in-memory fallback)
 
 ## Security Considerations
 
@@ -213,5 +222,5 @@ pnpm clean                  # Clean all build artifacts
 - Clerk handles authentication securely
 - Input validation with Zod on all endpoints
 - CSRF protection via tRPC
-- Rate limiting on API routes (TODO)
+- Rate limiting on API routes (Redis-backed)
 - Regular dependency audits
