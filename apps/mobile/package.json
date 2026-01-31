@@ -1,0 +1,53 @@
+{
+  "name": "@finance/mobile",
+  "version": "0.0.1",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "build:android": "eas build --platform android",
+    "build:ios": "eas build --platform ios",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .expo node_modules"
+  },
+  "dependencies": {
+    "@clerk/clerk-expo": "^2.5.0",
+    "@expo/vector-icons": "^14.0.4",
+    "@finance/api": "workspace:*",
+    "@react-navigation/native": "^7.0.0",
+    "@tanstack/react-query": "catalog:",
+    "@trpc/client": "catalog:",
+    "@trpc/react-query": "catalog:",
+    "expo": "~52.0.0",
+    "expo-constants": "~17.0.0",
+    "expo-document-picker": "~13.0.0",
+    "expo-file-system": "~18.0.0",
+    "expo-linking": "~7.0.0",
+    "expo-router": "~4.0.0",
+    "expo-secure-store": "~14.0.0",
+    "expo-splash-screen": "~0.29.0",
+    "expo-status-bar": "~2.0.0",
+    "react": "catalog:",
+    "react-native": "0.76.5",
+    "react-native-reanimated": "~3.16.0",
+    "react-native-safe-area-context": "4.12.0",
+    "react-native-screens": "~4.4.0",
+    "react-native-svg": "15.8.0",
+    "react-native-gesture-handler": "~2.20.0",
+    "superjson": "catalog:",
+    "zod": "catalog:",
+    "date-fns": "catalog:"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@finance/config": "workspace:*",
+    "@trpc/server": "catalog:",
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
+  }
+}
