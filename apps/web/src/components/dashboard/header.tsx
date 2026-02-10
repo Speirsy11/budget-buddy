@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@finance/auth";
 import { Button } from "@finance/ui";
 import { Bell, Menu, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { MobileSidebar } from "./sidebar";
+import { useSidebar } from "./sidebar-context";
 
 const pageTitles: Record<string, { title: string; description: string }> = {
   "/dashboard": {
@@ -38,7 +38,7 @@ const pageTitles: Record<string, { title: string; description: string }> = {
 export function DashboardHeader() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileOpen, setMobileOpen } = useSidebar();
 
   // eslint-disable-next-line security/detect-object-injection -- Safe: pathname is from Next.js router, used as key in hardcoded Record
   const page = pageTitles[pathname] || {
@@ -55,7 +55,7 @@ export function DashboardHeader() {
             variant="ghost"
             size="icon"
             className="shrink-0 lg:hidden"
-            onClick={() => setMobileMenuOpen(true)}
+            onClick={() => setMobileOpen(true)}
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -75,7 +75,7 @@ export function DashboardHeader() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-muted-foreground hover:text-foreground h-9 w-9"
+              className="text-muted-foreground hover:text-foreground relative h-9 w-9"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
               <Sun className="h-[1.15rem] w-[1.15rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -89,7 +89,6 @@ export function DashboardHeader() {
               className="text-muted-foreground hover:text-foreground relative h-9 w-9"
             >
               <Bell className="h-[1.15rem] w-[1.15rem]" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-blue-500" />
               <span className="sr-only">Notifications</span>
             </Button>
 
@@ -100,10 +99,7 @@ export function DashboardHeader() {
         </div>
       </header>
 
-      <MobileSidebar
-        open={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-      />
+      <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)} />
     </>
   );
 }

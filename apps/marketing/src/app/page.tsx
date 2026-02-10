@@ -50,12 +50,12 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="http://localhost:3000/sign-in">
+            <Link href={`${process.env.NEXT_PUBLIC_APP_URL || ""}/sign-in`}>
               <Button variant="ghost" size="sm">
                 Sign In
               </Button>
             </Link>
-            <Link href="http://localhost:3000/sign-up">
+            <Link href={`${process.env.NEXT_PUBLIC_APP_URL || ""}/sign-up`}>
               <Button size="sm">Get Started</Button>
             </Link>
           </div>
@@ -87,7 +87,7 @@ export default function HomePage() {
                 you on as you build better money habits.
               </p>
               <div className="mt-10 flex items-center justify-center gap-4">
-                <Link href="http://localhost:3000/sign-up">
+                <Link href={`${process.env.NEXT_PUBLIC_APP_URL || ""}/sign-up`}>
                   <Button
                     size="lg"
                     className="gap-2 shadow-lg shadow-blue-600/20"
@@ -284,7 +284,9 @@ export default function HomePage() {
                   habits with BudgetBuddy.
                 </p>
                 <div className="mt-10 flex items-center justify-center gap-4">
-                  <Link href="http://localhost:3000/sign-up">
+                  <Link
+                    href={`${process.env.NEXT_PUBLIC_APP_URL || ""}/sign-up`}
+                  >
                     <Button
                       size="lg"
                       variant="secondary"
@@ -429,8 +431,8 @@ function PricingCard({
       <Link
         href={
           plan.id === "free"
-            ? "http://localhost:3000/sign-up"
-            : "http://localhost:3000/sign-up?plan=pro"
+            ? `${process.env.NEXT_PUBLIC_APP_URL || ""}/sign-up`
+            : `${process.env.NEXT_PUBLIC_APP_URL || ""}/sign-up?plan=pro`
         }
         className="mt-8 block"
       >

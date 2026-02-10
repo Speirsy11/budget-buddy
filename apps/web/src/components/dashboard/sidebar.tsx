@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn, Button } from "@finance/ui";
@@ -15,7 +15,9 @@ import {
   ChevronsLeft,
   ChevronsRight,
   X,
+  Menu,
 } from "lucide-react";
+import { useSidebar } from "./sidebar-context";
 
 const navigation = [
   {
@@ -55,7 +57,7 @@ const secondaryNavigation = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed, setMobileOpen } = useSidebar();
 
   return (
     <>
@@ -187,23 +189,14 @@ export function DashboardSidebar() {
               </Link>
             );
           })}
-          <Link
-            href="/dashboard/settings"
-            className={cn(
-              "flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-              pathname === "/dashboard/settings"
-                ? "text-primary"
-                : "text-muted-foreground"
-            )}
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            className="text-muted-foreground flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
           >
-            <Settings
-              className={cn(
-                "h-5 w-5",
-                pathname === "/dashboard/settings" && "text-primary"
-              )}
-            />
+            <Menu className="h-5 w-5" />
             <span>More</span>
-          </Link>
+          </button>
         </div>
       </nav>
     </>
@@ -218,14 +211,36 @@ interface MobileSidebarProps {
 export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
   const pathname = usePathname();
 
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    },
+    [onClose]
+  );
+
+  useEffect(() => {
+    if (open) {
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [open, handleKeyDown]);
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
+    <div
+      className="fixed inset-0 z-50 lg:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Navigation menu"
+    >
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Sidebar */}
@@ -243,6 +258,7 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
           </Link>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
+            <span className="sr-only">Close menu</span>
           </Button>
         </div>
 

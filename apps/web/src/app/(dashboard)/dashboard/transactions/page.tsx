@@ -23,13 +23,29 @@ import {
 
 export default function TransactionsPage() {
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [period, setPeriod] = useState("30");
   const [limit] = useState(25);
   const [offset, setOffset] = useState(0);
+
+  const periodFilter = (() => {
+    if (period === "all") return {};
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - Number(period));
+    return { startDate, endDate };
+  })();
 
   const transactionsQuery = trpc.transactions.list.useQuery({
     limit,
     offset,
-    filters: search ? { search } : undefined,
+    filters: {
+      ...(search ? { search } : {}),
+      ...(category !== "all"
+        ? { necessityType: category as "need" | "want" | "savings" }
+        : {}),
+      ...periodFilter,
+    },
   });
 
   const classifyMutation = trpc.transactions.classify.useMutation({
@@ -76,21 +92,31 @@ export default function TransactionsPage() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <Select defaultValue="all">
+          <Select
+            value={category}
+            onValueChange={(value) => {
+              setCategory(value);
+              setOffset(0);
+            }}
+          >
             <SelectTrigger className="w-[160px]">
               <SlidersHorizontal className="mr-2 h-4 w-4" />
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="housing">Housing</SelectItem>
-              <SelectItem value="transportation">Transportation</SelectItem>
-              <SelectItem value="food">Food & Dining</SelectItem>
-              <SelectItem value="entertainment">Entertainment</SelectItem>
-              <SelectItem value="shopping">Shopping</SelectItem>
+              <SelectItem value="need">Needs</SelectItem>
+              <SelectItem value="want">Wants</SelectItem>
+              <SelectItem value="savings">Savings</SelectItem>
             </SelectContent>
           </Select>
-          <Select defaultValue="30">
+          <Select
+            value={period}
+            onValueChange={(value) => {
+              setPeriod(value);
+              setOffset(0);
+            }}
+          >
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Period" />
             </SelectTrigger>

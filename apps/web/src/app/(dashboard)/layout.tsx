@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@finance/auth/server";
-import { DashboardSidebar } from "@/components/dashboard/sidebar";
-import { DashboardHeader } from "@/components/dashboard/header";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 
 export default async function DashboardLayout({
   children,
@@ -14,13 +13,5 @@ export default async function DashboardLayout({
     redirect("/sign-in");
   }
 
-  return (
-    <div className="bg-muted/40 min-h-screen">
-      <DashboardSidebar />
-      <div className="lg:pl-64">
-        <DashboardHeader />
-        <main className="p-4 pb-20 sm:p-6 lg:pb-6">{children}</main>
-      </div>
-    </div>
-  );
+  return <DashboardShell>{children}</DashboardShell>;
 }

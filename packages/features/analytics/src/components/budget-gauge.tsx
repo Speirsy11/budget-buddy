@@ -71,7 +71,9 @@ export function BudgetGauge({ breakdown, className }: BudgetGaugeProps) {
           const progressPercent = Math.min(
             category.data.target > 0
               ? (category.data.actual / category.data.target) * 100
-              : 0,
+              : category.data.actual > 0
+                ? 100
+                : 0,
             100
           );
           const isOver = category.data.actual > category.data.target;

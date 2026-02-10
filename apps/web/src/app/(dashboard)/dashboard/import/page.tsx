@@ -171,6 +171,7 @@ export default function ImportPage() {
                 <button
                   type="button"
                   className="hover:bg-muted/50 flex w-full items-center justify-between px-4 py-3 text-left font-medium transition-colors"
+                  aria-expanded={isExpanded}
                   onClick={() =>
                     setExpandedGuide(isExpanded ? null : guide.name)
                   }

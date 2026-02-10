@@ -136,12 +136,16 @@ export default function DashboardPage() {
         </Card>
 
         <Card className="relative overflow-hidden">
-          <div className="absolute right-0 top-0 h-24 w-24 -translate-y-4 translate-x-8 rounded-full bg-blue-500/10" />
+          <div
+            className={`absolute right-0 top-0 h-24 w-24 -translate-y-4 translate-x-8 rounded-full ${netCashFlow >= 0 ? "bg-blue-500/10" : "bg-red-500/10"}`}
+          />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-muted-foreground text-sm font-medium">
               Net Cash Flow
             </CardTitle>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-lg ${netCashFlow >= 0 ? "bg-blue-500/10" : "bg-red-500/10"}`}
+            >
               {netCashFlow >= 0 ? (
                 <ArrowUpRight className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               ) : (
@@ -193,7 +197,7 @@ export default function DashboardPage() {
                     <div
                       className="h-full rounded-full bg-violet-500 transition-all duration-500"
                       style={{
-                        width: `${Math.min(((budget?.savingsRate || 0) / 20) * 100, 100)}%`,
+                        width: `${Math.max(0, Math.min(((budget?.savingsRate || 0) / 20) * 100, 100))}%`,
                       }}
                     />
                   </div>

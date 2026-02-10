@@ -29,6 +29,28 @@ export default function SettingsPage() {
   const { user } = useCurrentUser();
   const { theme, setTheme } = useTheme();
 
+  const handleExport = () => {
+    // TODO: Wire to full export API once backend endpoint is ready
+    // eslint-disable-next-line no-alert -- Simple notification for stub export action
+    window.alert(
+      "Export functionality coming soon. Your data will be downloadable as a JSON file."
+    );
+  };
+
+  const handleDeleteAccount = () => {
+    // eslint-disable-next-line no-alert -- Simple confirmation dialog for destructive action
+    const confirmed = window.confirm(
+      "Are you sure you want to delete your account? This action is permanent and cannot be undone."
+    );
+    if (confirmed) {
+      // TODO: Wire to account deletion API
+      // eslint-disable-next-line no-alert -- Follow-up confirmation for destructive action
+      window.alert(
+        "Account deletion is not yet implemented. Please contact support."
+      );
+    }
+  };
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       {/* Profile */}
@@ -196,7 +218,7 @@ export default function SettingsPage() {
                 Download all your transactions and settings as a JSON file
               </p>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleExport}>
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
@@ -211,7 +233,11 @@ export default function SettingsPage() {
                 Permanently delete your account and all associated data
               </p>
             </div>
-            <Button variant="destructive" size="sm">
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteAccount}
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </Button>
