@@ -251,12 +251,30 @@ export default function DashboardPage() {
               <Skeleton className="h-[300px] w-full" />
             </CardContent>
           </Card>
-        ) : (
+        ) : trends.length > 0 ? (
           <SpendingChart
             data={trends}
             title="Daily Spending"
             description="Your spending over the past month"
           />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Daily Spending</CardTitle>
+              <CardDescription>Your spending over the past month</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex h-[300px] flex-col items-center justify-center text-center">
+                <div className="bg-primary/10 mb-4 flex h-14 w-14 items-center justify-center rounded-full">
+                  <TrendingDown className="text-primary h-6 w-6" />
+                </div>
+                <h3 className="mb-1 font-semibold">No spending data yet</h3>
+                <p className="text-muted-foreground max-w-sm text-sm">
+                  Import transactions to see your daily spending trends.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
 
