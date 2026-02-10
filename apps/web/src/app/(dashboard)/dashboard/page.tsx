@@ -29,20 +29,21 @@ export default function DashboardPage() {
   const [month] = useState(now.getMonth() + 1);
   const [year] = useState(now.getFullYear());
 
-  const startOfMonth = useMemo(() => new Date(year, month - 1, 1), [year, month]);
-  const endOfMonth = useMemo(() => new Date(year, month, 0, 23, 59, 59), [year, month]);
+  const thirtyDaysAgo = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+  const today = useMemo(() => new Date(), []);
 
   const budgetQuery = trpc.analytics.get503020.useQuery({ month, year });
   const transactionsQuery = trpc.transactions.list.useQuery({
     limit: 5,
-    filters: {
-      startDate: startOfMonth,
-      endDate: endOfMonth,
-    },
   });
   const trendsQuery = trpc.analytics.getSpendingTrends.useQuery({
-    startDate: startOfMonth,
-    endDate: endOfMonth,
+    startDate: thirtyDaysAgo,
+    endDate: today,
     groupBy: "day",
   });
 
