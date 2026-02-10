@@ -48,6 +48,20 @@ export default function BudgetPage() {
   const budget = budgetQuery.data;
   const categories = categoryQuery.data || [];
 
+  // Derive target allocation percentages from budget targets and income
+  const savedNeedsPercent =
+    budget && budget.totalIncome > 0
+      ? Math.round((budget.needs.target / budget.totalIncome) * 100)
+      : 50;
+  const savedWantsPercent =
+    budget && budget.totalIncome > 0
+      ? Math.round((budget.wants.target / budget.totalIncome) * 100)
+      : 30;
+  const savedSavingsPercent =
+    budget && budget.totalIncome > 0
+      ? Math.round((budget.savings.target / budget.totalIncome) * 100)
+      : 20;
+
   const monthName = new Date(year, month - 1).toLocaleDateString("en-GB", {
     month: "long",
     year: "numeric",
@@ -120,17 +134,28 @@ export default function BudgetPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
+                const needsPercent =
+                  parseFloat(formData.get("needs") as string) || 50;
+                const wantsPercent =
+                  parseFloat(formData.get("wants") as string) || 30;
+                const savingsPercent =
+                  parseFloat(formData.get("savings") as string) || 20;
+                const sum = needsPercent + wantsPercent + savingsPercent;
+                if (sum !== 100) {
+                  // eslint-disable-next-line no-alert -- Simple validation feedback for budget form
+                  window.alert(
+                    `Percentages must add up to 100%. Currently: ${sum}%`
+                  );
+                  return;
+                }
                 updateAllocation.mutate({
                   month,
                   year,
                   totalIncome:
                     parseFloat(formData.get("income") as string) || 0,
-                  needsPercent:
-                    parseFloat(formData.get("needs") as string) || 50,
-                  wantsPercent:
-                    parseFloat(formData.get("wants") as string) || 30,
-                  savingsPercent:
-                    parseFloat(formData.get("savings") as string) || 20,
+                  needsPercent,
+                  wantsPercent,
+                  savingsPercent,
                 });
               }}
               className="space-y-4"
@@ -153,7 +178,7 @@ export default function BudgetPage() {
                     name="needs"
                     type="number"
                     placeholder="50"
-                    defaultValue="50"
+                    defaultValue={savedNeedsPercent}
                   />
                 </div>
                 <div className="space-y-2">
@@ -163,7 +188,7 @@ export default function BudgetPage() {
                     name="wants"
                     type="number"
                     placeholder="30"
-                    defaultValue="30"
+                    defaultValue={savedWantsPercent}
                   />
                 </div>
                 <div className="space-y-2">
@@ -173,7 +198,7 @@ export default function BudgetPage() {
                     name="savings"
                     type="number"
                     placeholder="20"
-                    defaultValue="20"
+                    defaultValue={savedSavingsPercent}
                   />
                 </div>
               </div>

@@ -58,7 +58,7 @@ export default function AnalyticsPage() {
   const previousMonth = monthlyData[monthlyData.length - 2];
 
   const spendingChange =
-    latestMonth && previousMonth
+    latestMonth && previousMonth && previousMonth.expenses > 0
       ? ((latestMonth.expenses - previousMonth.expenses) /
           previousMonth.expenses) *
         100

@@ -84,7 +84,13 @@ export default function LandingPage() {
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </SignUpButton>
-              <Button variant="outline" size="lg" className="px-8 text-lg">
+              <Button
+                variant="outline"
+                size="lg"
+                className="px-8 text-lg"
+                disabled
+                title="Demo coming soon"
+              >
                 Watch Demo
               </Button>
             </SignedOut>
