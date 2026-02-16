@@ -41,9 +41,15 @@ export default function BudgetPage() {
       setHasAutoDetected(true);
     }
   }, [dateRangeQuery.data, hasAutoDetected]);
-  
-  const startOfMonth = useMemo(() => new Date(year, month - 1, 1), [year, month]);
-  const endOfMonth = useMemo(() => new Date(year, month, 0, 23, 59, 59), [year, month]);
+
+  const startOfMonth = useMemo(
+    () => new Date(year, month - 1, 1),
+    [year, month]
+  );
+  const endOfMonth = useMemo(
+    () => new Date(year, month, 0, 23, 59, 59),
+    [year, month]
+  );
 
   const budgetQuery = trpc.analytics.get503020.useQuery({ month, year });
   const categoryQuery = trpc.analytics.getCategoryBreakdown.useQuery({

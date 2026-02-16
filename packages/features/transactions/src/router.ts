@@ -1,8 +1,8 @@
 import {
   router,
   protectedProcedure,
-  aiRateLimitedProcedure,
-  uploadRateLimitedProcedure,
+  tieredAiRateLimitedProcedure,
+  tieredUploadRateLimitedProcedure,
   z,
 } from "@finance/api";
 import { db, transactions } from "@finance/db";
@@ -163,7 +163,7 @@ export const transactionsRouter = router({
       return transaction;
     }),
 
-  createMany: uploadRateLimitedProcedure
+  createMany: tieredUploadRateLimitedProcedure
     .input(
       z.object({
         transactions: z.array(
@@ -336,7 +336,7 @@ export const transactionsRouter = router({
       return { success: true };
     }),
 
-  classify: aiRateLimitedProcedure
+  classify: tieredAiRateLimitedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const timer = createTimer();

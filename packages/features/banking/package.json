@@ -1,0 +1,37 @@
+{
+  "name": "@finance/banking",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'No tests configured yet'",
+    "clean": "rm -rf dist .turbo node_modules"
+  },
+  "dependencies": {
+    "@finance/db": "workspace:*",
+    "@finance/api": "workspace:*",
+    "@finance/logger": "workspace:*",
+    "@finance/ui": "workspace:*",
+    "plaid": "catalog:",
+    "react-plaid-link": "catalog:",
+    "drizzle-orm": "catalog:",
+    "lucide-react": "catalog:",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@finance/config": "workspace:*",
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
+  }
+}

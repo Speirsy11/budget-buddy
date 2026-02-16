@@ -1,0 +1,9 @@
+{
+  "extends": "@finance/config/typescript/library",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

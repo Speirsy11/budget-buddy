@@ -166,7 +166,9 @@ export default function DashboardPage() {
                 <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(budget?.totalIncome || 0)}
                 </div>
-                <p className="text-muted-foreground mt-1 text-xs">{monthName}</p>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  {monthName}
+                </p>
               </>
             )}
           </CardContent>
@@ -190,7 +192,9 @@ export default function DashboardPage() {
                 <div className="text-2xl font-bold text-red-600 dark:text-red-400">
                   {formatCurrency(budget?.totalExpenses || 0)}
                 </div>
-                <p className="text-muted-foreground mt-1 text-xs">{monthName}</p>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  {monthName}
+                </p>
               </>
             )}
           </CardContent>
@@ -229,7 +233,9 @@ export default function DashboardPage() {
                   {netCashFlow >= 0 ? "+" : ""}
                   {formatCurrency(netCashFlow)}
                 </div>
-                <p className="text-muted-foreground mt-1 text-xs">{monthName}</p>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  {monthName}
+                </p>
               </>
             )}
           </CardContent>
@@ -322,7 +328,9 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Daily Spending</CardTitle>
-              <CardDescription>Your spending over the past month</CardDescription>
+              <CardDescription>
+                Your spending over the past month
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex h-[300px] flex-col items-center justify-center text-center">

@@ -51,7 +51,9 @@ export async function mockGenerateStructuredOutput<T extends z.ZodTypeAny>(
     if (promptLower.includes("classify all these transactions")) {
       const batchResult = generateMockBatchClassification(prompt);
       log.debug(
-        { resultCount: (batchResult as { results: unknown[] }).results?.length },
+        {
+          resultCount: (batchResult as { results: unknown[] }).results?.length,
+        },
         "Mock batch classification generated"
       );
       const parsedBatch = schema.safeParse(batchResult);

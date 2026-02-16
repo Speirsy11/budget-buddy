@@ -12,7 +12,10 @@ const log = logger.child({ module: "analytics" });
 
 export const analyticsRouter = router({
   getDateRange: protectedProcedure.query(async ({ ctx }) => {
-    log.debug({ userId: ctx.userId }, "getDateRange: fetching transaction date range");
+    log.debug(
+      { userId: ctx.userId },
+      "getDateRange: fetching transaction date range"
+    );
 
     const userTransactions = await db.query.transactions.findMany({
       where: eq(transactions.userId, ctx.userId),

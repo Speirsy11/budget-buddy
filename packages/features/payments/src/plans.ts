@@ -20,7 +20,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     interval: "month",
     features: [
       "Up to 100 transactions/month",
-      "Basic AI categorization",
+      "Basic AI categorisation (5/min)",
       "Smart budget goal tracking",
       "CSV import from major banks",
       "7-day transaction history",
@@ -36,12 +36,13 @@ export const PRICING_PLANS: PricingPlan[] = [
     interval: "month",
     features: [
       "Unlimited transactions",
-      "Advanced AI insights",
+      "Advanced AI insights (50/min)",
+      "Open banking — auto-sync UK banks",
+      "Up to 5 connected bank accounts",
       "Custom budget categories",
       "Unlimited history",
       "Data export (CSV, JSON)",
       "Priority support",
-      "Custom spending rules",
     ],
     highlighted: true,
     cta: "Start Free Trial",
@@ -55,6 +56,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     interval: "year",
     features: [
       "Everything in Pro",
+      "Up to 10 connected bank accounts",
       "Save £16/year",
       "Annual spending reports",
       "Tax categorisation",
