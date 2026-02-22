@@ -12,7 +12,8 @@ import {
   TransactionUploader,
   type ParsedTransaction,
 } from "@finance/transactions";
-import { trpc } from "@/trpc/client";
+import { useMutation, useAction } from "convex/react";
+import { api } from "../../../../../../../convex/_generated/api";
 import {
   CheckCircle2,
   FileSpreadsheet,
@@ -66,22 +67,28 @@ export default function ImportPage() {
   const [lastImportCount, setLastImportCount] = useState<number | null>(null);
   const [expandedGuide, setExpandedGuide] = useState<string | null>(null);
 
-  const createManyMutation = trpc.transactions.createMany.useMutation({
-    onSuccess: (data) => {
-      setLastImportCount(data.count);
-    },
-  });
+  const createMany = useMutation(api.transactions.createMany);
+  const classifyBatch = useAction(api.ai.classifyBatch);
 
   const handleUpload = async (transactions: ParsedTransaction[]) => {
-    await createManyMutation.mutateAsync({
+    // Create transactions
+    const ids = await createMany({
       transactions: transactions.map((t) => ({
         amount: t.amount,
-        date: t.date,
+        date: t.date.getTime(),
         description: t.description,
         merchant: t.merchant,
       })),
-      autoClassify: true,
     });
+
+    setLastImportCount(ids.length);
+
+    // Auto-classify in background
+    if (ids.length > 0) {
+      classifyBatch({ transactionIds: ids }).catch(() => {
+        // Classification is best-effort
+      });
+    }
   };
 
   return (

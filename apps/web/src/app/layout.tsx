@@ -3,7 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { ClerkProvider } from "@finance/auth";
 import { ThemeProvider } from "@/components/theme-provider";
-import { TRPCProvider } from "@/trpc/provider";
+import { ConvexClientProvider } from "@/components/convex-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -32,7 +32,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <TRPCProvider>{children}</TRPCProvider>
+            <ConvexClientProvider>{children}</ConvexClientProvider>
           </ThemeProvider>
         </body>
       </html>

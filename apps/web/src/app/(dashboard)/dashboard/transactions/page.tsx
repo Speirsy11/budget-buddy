@@ -11,7 +11,9 @@ import {
   SelectValue,
 } from "@finance/ui";
 import { TransactionTable } from "@finance/transactions";
-import { trpc } from "@/trpc/client";
+import { useQuery, useMutation, useAction } from "convex/react";
+import { api } from "../../../../../../../convex/_generated/api";
+import type { Id } from "../../../../../../../convex/_generated/dataModel";
 import {
   Search,
   Download,
@@ -25,55 +27,61 @@ export default function TransactionsPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [period, setPeriod] = useState("30");
-  const [limit] = useState(25);
-  const [offset, setOffset] = useState(0);
 
   const periodFilter = useMemo(() => {
     if (period === "all") return {};
-    const endDate = new Date();
+    const endDate = Date.now();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - Number(period));
-    return { startDate, endDate };
+    return { startDate: startDate.getTime(), endDate };
   }, [period]);
 
-  const transactionsQuery = trpc.transactions.list.useQuery({
-    limit,
-    offset,
-    filters: {
-      ...(search ? { search } : {}),
-      ...(category !== "all"
-        ? { necessityType: category as "need" | "want" | "savings" }
-        : {}),
-      ...periodFilter,
-    },
+  const transactions = useQuery(api.transactions.listAll, {
+    ...periodFilter,
   });
 
-  const classifyMutation = trpc.transactions.classify.useMutation({
-    onSuccess: () => {
-      transactionsQuery.refetch();
-    },
-  });
+  const classifyTransaction = useAction(api.ai.classifyTransaction);
+  const deleteTransaction = useMutation(api.transactions.remove);
 
-  const deleteMutation = trpc.transactions.delete.useMutation({
-    onSuccess: () => {
-      transactionsQuery.refetch();
-    },
-  });
+  // Client-side filtering for search and category
+  const filtered = useMemo(() => {
+    if (!transactions) return [];
+    let result = transactions;
 
-  const transactions = transactionsQuery.data?.data || [];
-  const total = transactionsQuery.data?.total || 0;
-  const hasMore = transactionsQuery.data?.hasMore || false;
+    if (search) {
+      const s = search.toLowerCase();
+      result = result.filter(
+        (t) =>
+          t.description.toLowerCase().includes(s) ||
+          t.merchant?.toLowerCase().includes(s)
+      );
+    }
 
+    if (category !== "all") {
+      result = result.filter((t) => {
+        if (!t.necessityScore && t.necessityScore !== 0) return false;
+        if (category === "need") return t.necessityScore >= 0.7;
+        if (category === "savings")
+          return t.necessityScore >= 0.3 && t.necessityScore < 0.7;
+        if (category === "want") return t.necessityScore < 0.3;
+        return true;
+      });
+    }
+
+    return result;
+  }, [transactions, search, category]);
+
+  // Pagination
+  const limit = 25;
+  const [offset, setOffset] = useState(0);
+  const total = filtered.length;
+  const paged = filtered.slice(offset, offset + limit);
+  const hasMore = offset + limit < total;
   const currentPage = Math.floor(offset / limit) + 1;
   const totalPages = Math.ceil(total / limit);
 
-  const handleNextPage = () => {
-    setOffset(offset + limit);
-  };
-
-  const handlePrevPage = () => {
-    setOffset(Math.max(0, offset - limit));
-  };
+  const handleNextPage = () => setOffset(offset + limit);
+  const handlePrevPage = () => setOffset(Math.max(0, offset - limit));
 
   return (
     <div className="space-y-6">
@@ -142,19 +150,33 @@ export default function TransactionsPage() {
 
       {/* Transactions Table */}
       <TransactionTable
-        transactions={transactions.map((t) => ({
-          ...t,
-          category: t.category ?? undefined,
+        transactions={paged.map((t) => ({
+          id: t._id,
+          amount: t.amount,
+          date: new Date(t.date),
+          description: t.description,
+          merchant: t.merchant ?? null,
+          aiClassified: t.aiClassified ?? null,
+          necessityScore: t.necessityScore ?? null,
+          categoryId: t.categoryId ?? null,
+          notes: t.notes ?? null,
+          userId: t.userId,
+          createdAt: new Date(t._creationTime),
+          updatedAt: new Date(t._creationTime),
         }))}
-        isLoading={transactionsQuery.isLoading}
-        onClassify={(id) => classifyMutation.mutate({ id })}
+        isLoading={transactions === undefined}
+        onClassify={(id) =>
+          classifyTransaction({
+            transactionId: id as Id<"transactions">,
+          })
+        }
         onDelete={(id) => {
           // eslint-disable-next-line no-alert -- Simple confirmation dialog for delete action
           const shouldDelete = window.confirm(
             "Are you sure you want to delete this transaction?"
           );
           if (shouldDelete) {
-            deleteMutation.mutate({ id });
+            deleteTransaction({ id: id as Id<"transactions"> });
           }
         }}
         onEdit={(_id) => {

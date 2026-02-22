@@ -26,6 +26,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "convex:dev": "npx convex dev",
+    "convex:deploy": "npx convex deploy",
     "db:generate": "turbo run db:generate --filter=@finance/db",
     "db:push": "turbo run db:push --filter=@finance/db",
     "db:studio": "turbo run db:studio --filter=@finance/db",
@@ -33,6 +35,9 @@
     "infra:up": "./scripts/infra-up.sh",
     "infra:down": "./scripts/infra-down.sh",
     "infra:debug": "./scripts/infra-debug.sh"
+  },
+  "dependencies": {
+    "convex": "catalog:"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["MOCK_FUNCTIONALITY"],
+  "globalEnv": ["MOCK_FUNCTIONALITY", "NEXT_PUBLIC_CONVEX_URL", "CONVEX_DEPLOYMENT"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

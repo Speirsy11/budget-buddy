@@ -15,25 +15,16 @@
   "dependencies": {
     "@clerk/nextjs": "catalog:",
     "@finance/analytics": "workspace:*",
-    "@finance/api": "workspace:*",
     "@finance/auth": "workspace:*",
-    "@finance/db": "workspace:*",
     "@finance/transactions": "workspace:*",
     "@finance/ui": "workspace:*",
-    "@tanstack/react-query": "catalog:",
-    "@trpc/client": "catalog:",
-    "@trpc/react-query": "catalog:",
-    "@trpc/server": "catalog:",
+    "convex": "catalog:",
     "geist": "catalog:",
     "lucide-react": "catalog:",
     "next": "catalog:",
     "next-themes": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:",
-    "superjson": "catalog:",
-    "zod": "catalog:",
-    "ioredis": "catalog:",
-    "postgres": "catalog:"
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@finance/config": "workspace:*",

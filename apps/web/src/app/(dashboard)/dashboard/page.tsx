@@ -13,7 +13,8 @@ import {
 } from "@finance/ui";
 import { BudgetGauge, InsightCard, SpendingChart } from "@finance/analytics";
 import { TransactionCard } from "@finance/transactions";
-import { trpc } from "@/trpc/client";
+import { useQuery } from "convex/react";
+import { api } from "../../../../../../convex/_generated/api";
 import {
   Wallet,
   TrendingDown,
@@ -34,24 +35,24 @@ export default function DashboardPage() {
   const [hasAutoDetected, setHasAutoDetected] = useState(false);
 
   // Auto-detect date range from transactions
-  const dateRangeQuery = trpc.analytics.getDateRange.useQuery();
+  const dateRange = useQuery(api.analytics.getDateRange);
 
   // Update to the most recent transaction month when data loads
   useEffect(() => {
-    if (dateRangeQuery.data?.hasTransactions && !hasAutoDetected) {
-      setMonth(dateRangeQuery.data.suggestedMonth);
-      setYear(dateRangeQuery.data.suggestedYear);
+    if (dateRange?.hasTransactions && !hasAutoDetected) {
+      setMonth(dateRange.suggestedMonth);
+      setYear(dateRange.suggestedYear);
       setHasAutoDetected(true);
     }
-  }, [dateRangeQuery.data, hasAutoDetected]);
+  }, [dateRange, hasAutoDetected]);
 
   const thirtyDaysAgo = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() - 30);
     d.setHours(0, 0, 0, 0);
-    return d;
+    return d.getTime();
   }, []);
-  const today = useMemo(() => new Date(), []);
+  const today = useMemo(() => Date.now(), []);
 
   const monthName = new Date(year, month - 1).toLocaleDateString("en-GB", {
     month: "long",
@@ -76,24 +77,16 @@ export default function DashboardPage() {
     }
   };
 
-  const budgetQuery = trpc.analytics.get503020.useQuery({ month, year });
-  const transactionsQuery = trpc.transactions.list.useQuery({
-    limit: 5,
-  });
-  const trendsQuery = trpc.analytics.getSpendingTrends.useQuery({
+  const budget = useQuery(api.analytics.get503020, { month, year });
+  const allTransactions = useQuery(api.transactions.listAll, {});
+  const trends = useQuery(api.analytics.getSpendingTrends, {
     startDate: thirtyDaysAgo,
     endDate: today,
     groupBy: "day",
   });
 
-  const isLoading =
-    budgetQuery.isLoading ||
-    transactionsQuery.isLoading ||
-    trendsQuery.isLoading;
-
-  const budget = budgetQuery.data;
-  const transactions = transactionsQuery.data?.data || [];
-  const trends = trendsQuery.data || [];
+  const recentTransactions = allTransactions?.slice(0, 5) ?? [];
+  const isLoading = budget === undefined || allTransactions === undefined || trends === undefined;
 
   const netCashFlow = (budget?.totalIncome || 0) - (budget?.totalExpenses || 0);
 
@@ -303,7 +296,7 @@ export default function DashboardPage() {
         )}
 
         {/* Spending Trends */}
-        {trendsQuery.isLoading ? (
+        {trends === undefined ? (
           <Card>
             <CardHeader>
               <CardTitle>Daily Spending</CardTitle>
@@ -355,20 +348,30 @@ export default function DashboardPage() {
           </Link>
         </CardHeader>
         <CardContent>
-          {transactionsQuery.isLoading ? (
+          {allTransactions === undefined ? (
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Skeleton key={i} className="h-16 w-full rounded-lg" />
               ))}
             </div>
-          ) : transactions.length > 0 ? (
+          ) : recentTransactions.length > 0 ? (
             <div className="space-y-2">
-              {transactions.map((transaction) => (
+              {recentTransactions.map((transaction) => (
                 <TransactionCard
-                  key={transaction.id}
+                  key={transaction._id}
                   transaction={{
-                    ...transaction,
-                    category: transaction.category ?? undefined,
+                    id: transaction._id,
+                    amount: transaction.amount,
+                    date: new Date(transaction.date),
+                    description: transaction.description,
+                    merchant: transaction.merchant ?? null,
+                    aiClassified: transaction.aiClassified ?? null,
+                    necessityScore: transaction.necessityScore ?? null,
+                    categoryId: transaction.categoryId ?? null,
+                    notes: transaction.notes ?? null,
+                    userId: transaction.userId,
+                    createdAt: new Date(transaction._creationTime),
+                    updatedAt: new Date(transaction._creationTime),
                   }}
                 />
               ))}
