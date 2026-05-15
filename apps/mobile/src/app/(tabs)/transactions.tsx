@@ -10,6 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { useTheme } from "@/lib/theme/provider";
+import { useTimedLoading } from "@/lib/hooks/use-timed-loading";
 import { trpc, type Transaction } from "@/lib/trpc/client";
 import { Ionicons } from "@expo/vector-icons";
 import { TransactionItem } from "@/components/transactions/transaction-item";
@@ -37,6 +38,7 @@ export default function TransactionsScreen() {
   });
 
   const transactions: Transaction[] = transactionsQuery.data?.data || [];
+  const isInitialLoading = useTimedLoading(transactionsQuery.isLoading);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -114,19 +116,33 @@ export default function TransactionsScreen() {
           />
         }
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Ionicons
-              name="receipt-outline"
-              size={64}
-              color={colors.textMuted}
-            />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              No Transactions
-            </Text>
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              Import your bank statement to get started
-            </Text>
-          </View>
+          isInitialLoading ? (
+            <View style={styles.loadingPlaceholder}>
+              {[1, 2, 3, 4].map((i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.transactionSkeleton,
+                    { backgroundColor: colors.border },
+                  ]}
+                />
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <Ionicons
+                name="receipt-outline"
+                size={64}
+                color={colors.textMuted}
+              />
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                No Transactions
+              </Text>
+              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                Import your bank statement to get started
+              </Text>
+            </View>
+          )
         }
       />
 
@@ -171,6 +187,14 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 100,
     gap: 8,
+  },
+  loadingPlaceholder: {
+    padding: 16,
+    gap: 8,
+  },
+  transactionSkeleton: {
+    height: 64,
+    borderRadius: 12,
   },
   emptyState: {
     alignItems: "center",

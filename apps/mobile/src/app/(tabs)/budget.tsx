@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { useTheme } from "@/lib/theme/provider";
+import { useTimedLoading } from "@/lib/hooks/use-timed-loading";
 import { trpc, type CategoryData } from "@/lib/trpc/client";
 import { formatCurrency } from "@/lib/utils/format";
 import { Ionicons } from "@expo/vector-icons";
@@ -32,6 +33,8 @@ export default function BudgetScreen() {
 
   const budget = budgetQuery.data;
   const categories: CategoryData[] = categoryQuery.data || [];
+  const showBudgetSkeleton = useTimedLoading(budgetQuery.isLoading);
+  const showCategorySkeleton = useTimedLoading(categoryQuery.isLoading);
 
   const monthName = new Date(year, month - 1).toLocaleDateString("en-GB", {
     month: "long",
@@ -96,7 +99,19 @@ export default function BudgetScreen() {
           Track your spending against recommended allocations
         </Text>
 
-        {budget ? (
+        {showBudgetSkeleton ? (
+          <View style={styles.loadingPlaceholder}>
+            <View
+              style={[styles.gaugeSkeleton, { backgroundColor: colors.border }]}
+            />
+            <View
+              style={[styles.gaugeSkeleton, { backgroundColor: colors.border }]}
+            />
+            <View
+              style={[styles.gaugeSkeleton, { backgroundColor: colors.border }]}
+            />
+          </View>
+        ) : budget ? (
           <View style={styles.gaugesContainer}>
             <BudgetGauge
               label="Needs"
@@ -124,16 +139,15 @@ export default function BudgetScreen() {
             />
           </View>
         ) : (
-          <View style={styles.loadingPlaceholder}>
-            <View
-              style={[styles.gaugeSkeleton, { backgroundColor: colors.border }]}
+          <View style={styles.emptyState}>
+            <Ionicons
+              name="bar-chart-outline"
+              size={48}
+              color={colors.textMuted}
             />
-            <View
-              style={[styles.gaugeSkeleton, { backgroundColor: colors.border }]}
-            />
-            <View
-              style={[styles.gaugeSkeleton, { backgroundColor: colors.border }]}
-            />
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+              No budget data for this month
+            </Text>
           </View>
         )}
       </View>
@@ -178,7 +192,7 @@ export default function BudgetScreen() {
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           Spending by Category
         </Text>
-        {categoryQuery.isLoading ? (
+        {showCategorySkeleton ? (
           <View style={styles.loadingPlaceholder}>
             {[1, 2, 3, 4].map((i) => (
               <View

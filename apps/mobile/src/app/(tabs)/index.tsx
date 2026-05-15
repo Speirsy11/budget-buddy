@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Link } from "expo-router";
 import { useTheme } from "@/lib/theme/provider";
+import { useTimedLoading } from "@/lib/hooks/use-timed-loading";
 import { trpc, type Transaction } from "@/lib/trpc/client";
 import { formatCurrency } from "@/lib/utils/format";
 import { Ionicons } from "@expo/vector-icons";
@@ -37,6 +38,8 @@ export default function DashboardScreen() {
 
   const budget = budgetQuery.data;
   const transactions: Transaction[] = transactionsQuery.data?.data || [];
+  const showBudgetSkeleton = useTimedLoading(budgetQuery.isLoading);
+  const showTransactionsSkeleton = useTimedLoading(transactionsQuery.isLoading);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -114,7 +117,19 @@ export default function DashboardScreen() {
             </TouchableOpacity>
           </Link>
         </View>
-        {budget ? (
+        {showBudgetSkeleton ? (
+          <View style={styles.loadingPlaceholder}>
+            <View
+              style={[styles.skeleton, { backgroundColor: colors.border }]}
+            />
+            <View
+              style={[styles.skeleton, { backgroundColor: colors.border }]}
+            />
+            <View
+              style={[styles.skeleton, { backgroundColor: colors.border }]}
+            />
+          </View>
+        ) : budget ? (
           <View style={styles.budgetBars}>
             <BudgetProgress
               label="Needs"
@@ -136,16 +151,18 @@ export default function DashboardScreen() {
             />
           </View>
         ) : (
-          <View style={styles.loadingPlaceholder}>
-            <View
-              style={[styles.skeleton, { backgroundColor: colors.border }]}
+          <View style={styles.emptyState}>
+            <Ionicons
+              name="bar-chart-outline"
+              size={48}
+              color={colors.textMuted}
             />
-            <View
-              style={[styles.skeleton, { backgroundColor: colors.border }]}
-            />
-            <View
-              style={[styles.skeleton, { backgroundColor: colors.border }]}
-            />
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+              No budget data yet
+            </Text>
+            <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
+              Import transactions to populate your 50/30/20 overview.
+            </Text>
           </View>
         )}
       </View>
@@ -164,7 +181,7 @@ export default function DashboardScreen() {
             </TouchableOpacity>
           </Link>
         </View>
-        {transactionsQuery.isLoading ? (
+        {showTransactionsSkeleton ? (
           <View style={styles.loadingPlaceholder}>
             {[1, 2, 3].map((i) => (
               <View
@@ -277,6 +294,11 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     marginTop: 12,
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    textAlign: "center",
     marginBottom: 16,
   },
   emptyButton: {
