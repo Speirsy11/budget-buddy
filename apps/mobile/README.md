@@ -14,10 +14,9 @@ This is the mobile app for BudgetBuddy, built with React Native and Expo.
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - pnpm
-- Expo CLI (`npm install -g expo-cli`)
-- iOS Simulator (macOS) or Android Emulator
+- Xcode/iOS Simulator on macOS, or Android Studio/Android Emulator
 
 ### Setup
 
@@ -46,10 +45,15 @@ This is the mobile app for BudgetBuddy, built with React Native and Expo.
    pnpm dev
    ```
 
-5. Run on simulator/emulator:
-   - Press `i` for iOS Simulator
-   - Press `a` for Android Emulator
-   - Scan QR code with Expo Go app on your device
+5. Run on simulator/emulator from this package:
+
+   ```bash
+   pnpm ios
+   # or
+   pnpm android
+   ```
+
+For local simulator UI work without Clerk credentials, set `EXPO_PUBLIC_LOCAL_SIMULATOR_BYPASS_AUTH=1`. The bypass is guarded by `__DEV__` and must not be set in preview or production builds.
 
 ### Development Notes
 

@@ -19,8 +19,37 @@ function getBaseUrl(): string {
 }
 
 export function TRPCProvider({ children }: { children: React.ReactNode }) {
-  const { getToken } = useAuth();
+  const localSimulatorBypassAuth =
+    __DEV__ && process.env.EXPO_PUBLIC_LOCAL_SIMULATOR_BYPASS_AUTH === "1";
 
+  if (localSimulatorBypassAuth) {
+    return <BaseTRPCProvider>{children}</BaseTRPCProvider>;
+  }
+
+  return <AuthenticatedTRPCProvider>{children}</AuthenticatedTRPCProvider>;
+}
+
+function AuthenticatedTRPCProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const auth = useAuth();
+
+  return (
+    <BaseTRPCProvider getToken={() => auth.getToken()}>
+      {children}
+    </BaseTRPCProvider>
+  );
+}
+
+function BaseTRPCProvider({
+  children,
+  getToken,
+}: {
+  children: React.ReactNode;
+  getToken?: () => Promise<string | null>;
+}) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -41,7 +70,7 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
           url: `${getBaseUrl()}/api/trpc`,
           transformer: superjson,
           async headers() {
-            const token = await getToken();
+            const token = await getToken?.();
             return {
               Authorization: token ? `Bearer ${token}` : "",
             };

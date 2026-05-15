@@ -12,10 +12,55 @@ import { useAuth, useUser } from "@clerk/clerk-expo";
 import { useTheme } from "@/lib/theme/provider";
 import { Ionicons } from "@expo/vector-icons";
 
+type SettingsUser = {
+  firstName?: string | null;
+  fullName?: string | null;
+  emailAddresses: Array<{ emailAddress: string }>;
+};
+
+type SettingsContentProps = {
+  user: SettingsUser;
+  signOut: () => Promise<unknown>;
+};
+
 export default function SettingsScreen() {
-  const { colors } = useTheme();
+  const localSimulatorBypassAuth =
+    __DEV__ && process.env.EXPO_PUBLIC_LOCAL_SIMULATOR_BYPASS_AUTH === "1";
+
+  if (localSimulatorBypassAuth) {
+    return (
+      <SettingsContent
+        signOut={async () => undefined}
+        user={{
+          firstName: "Local",
+          fullName: "Local Simulator User",
+          emailAddresses: [{ emailAddress: "local@example.test" }],
+        }}
+      />
+    );
+  }
+
+  return <AuthenticatedSettingsScreen />;
+}
+
+function AuthenticatedSettingsScreen() {
   const { signOut } = useAuth();
   const { user } = useUser();
+
+  return (
+    <SettingsContent
+      signOut={signOut}
+      user={{
+        firstName: user?.firstName,
+        fullName: user?.fullName,
+        emailAddresses: user?.emailAddresses ?? [],
+      }}
+    />
+  );
+}
+
+function SettingsContent({ user, signOut }: SettingsContentProps) {
+  const { colors } = useTheme();
   const router = useRouter();
 
   const handleSignOut = () => {

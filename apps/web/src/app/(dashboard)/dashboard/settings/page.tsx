@@ -14,6 +14,7 @@ import {
 } from "@finance/ui";
 import { useCurrentUser, UserButton } from "@finance/auth";
 import { useTheme } from "next-themes";
+import { trpc } from "@/trpc/client";
 import {
   User,
   Palette,
@@ -28,27 +29,27 @@ import {
 export default function SettingsPage() {
   const { user } = useCurrentUser();
   const { theme, setTheme } = useTheme();
+  const exportQuery = trpc.transactions.exportAll.useQuery(undefined, {
+    enabled: false,
+  });
 
-  const handleExport = () => {
-    // TODO: Wire to full export API once backend endpoint is ready
-    // eslint-disable-next-line no-alert -- Simple notification for stub export action
-    window.alert(
-      "Export functionality coming soon. Your data will be downloadable as a JSON file."
-    );
-  };
-
-  const handleDeleteAccount = () => {
-    // eslint-disable-next-line no-alert -- Simple confirmation dialog for destructive action
-    const confirmed = window.confirm(
-      "Are you sure you want to delete your account? This action is permanent and cannot be undone."
-    );
-    if (confirmed) {
-      // TODO: Wire to account deletion API
-      // eslint-disable-next-line no-alert -- Follow-up confirmation for destructive action
-      window.alert(
-        "Account deletion is not yet implemented. Please contact support."
-      );
+  const handleExport = async () => {
+    const exportData = await exportQuery.refetch();
+    if (!exportData.data?.json) {
+      return;
     }
+
+    const blob = new Blob([exportData.data.json], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `budget-buddy-export-${new Date().toISOString().split("T")[0]}.json`;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -218,9 +219,14 @@ export default function SettingsPage() {
                 Download all your transactions and settings as a JSON file
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleExport}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              disabled={exportQuery.isFetching}
+            >
               <Download className="mr-2 h-4 w-4" />
-              Export
+              {exportQuery.isFetching ? "Exporting…" : "Export JSON"}
             </Button>
           </div>
           <Separator />
@@ -233,13 +239,9 @@ export default function SettingsPage() {
                 Permanently delete your account and all associated data
               </p>
             </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleDeleteAccount}
-            >
+            <Button variant="destructive" size="sm" disabled>
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+              Contact support
             </Button>
           </div>
         </CardContent>

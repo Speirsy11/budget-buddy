@@ -3,6 +3,17 @@ import { useAuth } from "@clerk/clerk-expo";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 
 export default function Index() {
+  const localSimulatorBypassAuth =
+    __DEV__ && process.env.EXPO_PUBLIC_LOCAL_SIMULATOR_BYPASS_AUTH === "1";
+
+  if (localSimulatorBypassAuth) {
+    return <Redirect href="/(tabs)" />;
+  }
+
+  return <AuthenticatedIndex />;
+}
+
+function AuthenticatedIndex() {
   const { isLoaded, isSignedIn } = useAuth();
 
   if (!isLoaded) {

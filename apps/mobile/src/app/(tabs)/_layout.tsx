@@ -5,8 +5,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/lib/theme/provider";
 
 export default function TabsLayout() {
+  const localSimulatorBypassAuth =
+    __DEV__ && process.env.EXPO_PUBLIC_LOCAL_SIMULATOR_BYPASS_AUTH === "1";
+
+  if (localSimulatorBypassAuth) {
+    return <TabsNavigator />;
+  }
+
+  return <AuthenticatedTabsLayout />;
+}
+
+function AuthenticatedTabsLayout() {
   const { isLoaded, isSignedIn } = useAuth();
-  const { colors } = useTheme();
 
   if (!isLoaded) {
     return (
@@ -19,6 +29,12 @@ export default function TabsLayout() {
   if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />;
   }
+
+  return <TabsNavigator />;
+}
+
+function TabsNavigator() {
+  const { colors } = useTheme();
 
   return (
     <Tabs

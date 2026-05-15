@@ -10,7 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@finance/ui";
-import { TransactionTable } from "@finance/transactions";
+import {
+  createExportBlob,
+  exportToCSV,
+  TransactionTable,
+} from "@finance/transactions";
 import { trpc } from "@/trpc/client";
 import {
   Search,
@@ -75,6 +79,31 @@ export default function TransactionsPage() {
     setOffset(Math.max(0, offset - limit));
   };
 
+  const handleExportVisibleTransactions = () => {
+    const csv = exportToCSV(
+      transactions.map((transaction) => ({
+        id: transaction.id,
+        date: new Date(transaction.date),
+        description: transaction.description,
+        amount: transaction.amount,
+        merchant: transaction.merchant,
+        category: transaction.category?.name,
+        aiClassified: transaction.aiClassified,
+        necessityType: transaction.category?.necessityType,
+        notes: transaction.notes,
+      }))
+    );
+    const { blob, filename } = createExportBlob(csv, "csv");
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       {/* Toolbar */}
@@ -129,11 +158,21 @@ export default function TransactionsPage() {
             </SelectContent>
           </Select>
           <div className="bg-border hidden h-6 w-px sm:block" />
-          <Button variant="outline" size="sm" className="hidden sm:flex">
+          <Button
+            variant="outline"
+            size="sm"
+            className="hidden sm:flex"
+            onClick={handleExportVisibleTransactions}
+            disabled={transactions.length === 0}
+          >
             <Download className="mr-2 h-4 w-4" />
-            Export
+            Export CSV
           </Button>
-          <Button size="sm">
+          <Button
+            size="sm"
+            disabled
+            title="Manual transaction entry is not live yet"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add
           </Button>
@@ -157,9 +196,7 @@ export default function TransactionsPage() {
             deleteMutation.mutate({ id });
           }
         }}
-        onEdit={(_id) => {
-          // TODO: Open edit modal
-        }}
+        onEdit={undefined}
       />
 
       {/* Pagination */}

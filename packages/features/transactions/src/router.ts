@@ -5,11 +5,12 @@ import {
   tieredUploadRateLimitedProcedure,
   z,
 } from "@finance/api";
-import { db, transactions } from "@finance/db";
+import { db, transactions, users, budgets, categories } from "@finance/db";
 import { logger, createTimer } from "@finance/logger";
-import { eq, and, gte, lte, desc, like, sql } from "drizzle-orm";
+import { eq, and, gte, lte, desc, like, sql, or } from "drizzle-orm";
 import { transactionFilterSchema } from "./schema";
 import { classifyTransaction, classifyTransactionsBatch } from "./classifier";
+import { generateFullExport } from "./export";
 
 const log = logger.child({ module: "transactions" });
 
@@ -409,6 +410,75 @@ export const transactionsRouter = router({
 
       return { transaction: updated, classification };
     }),
+
+  exportAll: protectedProcedure.query(async ({ ctx }) => {
+    const timer = createTimer();
+    log.info({ userId: ctx.userId }, "exportAll: generating full export");
+
+    const [user, userTransactions, userBudgets, availableCategories] =
+      await Promise.all([
+        db.query.users.findFirst({ where: eq(users.id, ctx.userId) }),
+        db.query.transactions.findMany({
+          where: eq(transactions.userId, ctx.userId),
+          orderBy: [desc(transactions.date)],
+          with: { category: true },
+        }),
+        db.query.budgets.findMany({
+          where: eq(budgets.userId, ctx.userId),
+          with: { category: true },
+        }),
+        db.query.categories.findMany({
+          where: or(
+            eq(categories.isSystem, true),
+            eq(categories.userId, ctx.userId)
+          ),
+          orderBy: [categories.name],
+        }),
+      ]);
+
+    const exportJson = generateFullExport({
+      user: {
+        id: ctx.userId,
+        email: user?.email ?? "",
+        name: [user?.firstName, user?.lastName].filter(Boolean).join(" "),
+        createdAt: user?.createdAt ?? new Date(),
+      },
+      transactions: userTransactions.map((transaction) => ({
+        id: transaction.id,
+        date: transaction.date,
+        description: transaction.description,
+        amount: transaction.amount,
+        merchant: transaction.merchant,
+        category: transaction.category?.name ?? transaction.aiClassified,
+        aiClassified: transaction.aiClassified,
+        necessityType: transaction.category?.necessityType,
+        notes: transaction.notes,
+      })),
+      budgets: userBudgets.map((budget) => ({
+        category: budget.category?.name ?? budget.name,
+        amount: budget.amount,
+        period: budget.period,
+      })),
+      categories: availableCategories.map((category) => ({
+        id: category.id,
+        name: category.name,
+        isCustom: !category.isSystem,
+      })),
+      settings: {},
+    });
+
+    log.info(
+      {
+        userId: ctx.userId,
+        transactionCount: userTransactions.length,
+        budgetCount: userBudgets.length,
+        durationMs: timer.elapsed(),
+      },
+      "exportAll: completed"
+    );
+
+    return { json: exportJson };
+  }),
 
   getSummary: protectedProcedure
     .input(
