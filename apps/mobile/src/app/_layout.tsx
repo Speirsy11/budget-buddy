@@ -7,6 +7,9 @@ import { ThemeProvider } from "@/lib/theme/provider";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { isMockAuthMode } from "@/lib/auth/mock-mode";
+import { LogBox } from "react-native";
+
+LogBox.ignoreAllLogs();
 
 const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 if (!clerkPublishableKey && !isMockAuthMode) {
