@@ -6,16 +6,17 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Mascot,
   cn,
+  formatCurrency,
 } from "@finance/ui";
 import {
   AreaChart,
   Area,
   XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Dot,
 } from "recharts";
 import type { SpendingTrend } from "../calculations";
 
@@ -24,81 +25,85 @@ interface SpendingChartProps {
   title?: string;
   description?: string;
   className?: string;
+  /** Render the inline mascot + avg/day stat block in the header (overview screen). */
+  showAvg?: boolean;
 }
+
+const EMERALD = "#10B981";
 
 export function SpendingChart({
   data,
-  title = "Spending Trends",
+  title = "Daily spending",
   description,
   className,
+  showAvg = false,
 }: SpendingChartProps) {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return date.toLocaleDateString("en-GB", {
+      month: "short",
+      day: "numeric",
+    });
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
+  const total = data.reduce((sum, d) => sum + d.amount, 0);
+  const avg = data.length ? total / data.length : 0;
 
   return (
-    <Card className={cn(className)}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
+    <Card surface="white" className={cn("flex flex-col p-5", className)}>
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 p-0">
+        <div>
+          <CardTitle className="text-base font-bold">{title}</CardTitle>
+          {description && (
+            <CardDescription className="text-meta mt-0.5">
+              {description}
+            </CardDescription>
+          )}
+        </div>
+        {showAvg && (
+          <div className="flex items-center gap-2.5">
+            <Mascot name="bars" size={42} />
+            <div className="text-right">
+              <div className="tabular text-[22px] font-extrabold leading-none text-ink">
+                {formatCurrency(avg)}
+              </div>
+              <div className="text-meta text-muted-ink mt-0.5">avg / day</div>
+            </div>
+          </div>
+        )}
       </CardHeader>
-      <CardContent>
-        <div className="h-[300px] w-full">
+      <CardContent className="mt-3 flex-1 p-0">
+        <div className="h-[220px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={data}
-              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              margin={{ top: 6, right: 8, left: 8, bottom: 0 }}
             >
               <defs>
-                <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="hsl(var(--primary))"
-                    stopOpacity={0.3}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="hsl(var(--primary))"
-                    stopOpacity={0}
-                  />
+                <linearGradient id="bbSpendArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={EMERALD} stopOpacity={0.3} />
+                  <stop offset="100%" stopColor={EMERALD} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="date"
                 tickFormatter={formatDate}
-                tick={{ fontSize: 12 }}
-                className="text-muted-foreground"
+                tick={{ fontSize: 11, fill: "var(--bb-muted)" }}
                 tickLine={false}
                 axisLine={false}
-              />
-              <YAxis
-                tickFormatter={formatCurrency}
-                tick={{ fontSize: 12 }}
-                className="text-muted-foreground"
-                tickLine={false}
-                axisLine={false}
-                width={80}
+                interval="preserveStartEnd"
+                minTickGap={48}
               />
               <Tooltip
+                cursor={{ stroke: EMERALD, strokeOpacity: 0.3, strokeWidth: 1 }}
                 content={({ active, payload }) => {
                   if (active && payload?.[0]) {
                     return (
-                      <div className="bg-background rounded-lg border p-3 shadow-lg">
-                        <p className="text-muted-foreground text-sm">
+                      <div className="bg-surface-white rounded-pill shadow-card border-0 px-3 py-2">
+                        <p className="text-meta text-muted-ink">
                           {formatDate(payload[0].payload.date)}
                         </p>
-                        <p className="text-lg font-semibold">
+                        <p className="tabular text-sm font-extrabold text-ink">
                           {formatCurrency(payload[0].value as number)}
                         </p>
                       </div>
@@ -110,10 +115,43 @@ export function SpendingChart({
               <Area
                 type="monotone"
                 dataKey="amount"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2}
-                fillOpacity={1}
-                fill="url(#colorAmount)"
+                stroke={EMERALD}
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                fill="url(#bbSpendArea)"
+                dot={(props: {
+                  cx?: number;
+                  cy?: number;
+                  index?: number;
+                  key?: string | number;
+                }) => {
+                  const { cx, cy, index } = props;
+                  if (
+                    cx === undefined ||
+                    cy === undefined ||
+                    index === undefined ||
+                    index % 6 !== 0
+                  ) {
+                    return <Dot cx={0} cy={0} r={0} fill="transparent" />;
+                  }
+                  return (
+                    <circle
+                      key={props.key ?? index}
+                      cx={cx}
+                      cy={cy}
+                      r={3}
+                      fill="#fff"
+                      stroke={EMERALD}
+                      strokeWidth={2}
+                    />
+                  );
+                }}
+                activeDot={{
+                  r: 4,
+                  fill: "#fff",
+                  stroke: EMERALD,
+                  strokeWidth: 2,
+                }}
               />
             </AreaChart>
           </ResponsiveContainer>

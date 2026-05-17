@@ -24,4 +24,8 @@ export {
 export { TransactionTable } from "./components/transaction-table";
 export { TransactionUploader } from "./components/transaction-uploader";
 export { TransactionCard } from "./components/transaction-card";
+export {
+  TransactionRow,
+  type TransactionRowData,
+} from "./components/transaction-row";
 export { CategoryBadge } from "./components/category-badge";

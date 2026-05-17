@@ -1,18 +1,18 @@
 "use client";
 
-import { SidebarProvider, useSidebar } from "./sidebar-context";
+import { SidebarProvider } from "./sidebar-context";
 import { DashboardSidebar } from "./sidebar";
 import { DashboardHeader } from "./header";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
-  const { collapsed } = useSidebar();
-
   return (
-    <div className="bg-muted/40 min-h-screen">
+    <div className="bg-background min-h-screen">
       <DashboardSidebar />
-      <div className={collapsed ? "lg:pl-[72px]" : "lg:pl-64"}>
+      <div className="lg:pl-[244px]">
         <DashboardHeader />
-        <main className="p-4 pb-20 sm:p-6 lg:pb-6">{children}</main>
+        <main className="px-4 pb-24 pt-2 sm:px-6 lg:px-7 lg:pb-7 lg:pt-3">
+          {children}
+        </main>
       </div>
     </div>
   );

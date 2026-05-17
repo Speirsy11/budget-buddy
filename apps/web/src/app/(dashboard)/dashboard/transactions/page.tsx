@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import {
   Input,
   Button,
+  Card,
   Select,
   SelectContent,
   SelectItem,
@@ -24,6 +25,7 @@ import {
   ChevronRight,
   SlidersHorizontal,
 } from "lucide-react";
+import { Greeting } from "@/components/dashboard/greeting";
 
 export default function TransactionsPage() {
   const [search, setSearch] = useState("");
@@ -105,9 +107,19 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-3.5">
+      <Greeting
+        mascot="receiptman"
+        title={<>Your transactions</>}
+        insight={
+          <span className="text-muted-ink text-base font-medium">
+            {total > 0 ? `${total} tracked` : "Ready when you are"}
+          </span>
+        }
+      />
+
       {/* Toolbar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <Card surface="white" className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-md flex-1">
           <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
           <Input
@@ -177,7 +189,7 @@ export default function TransactionsPage() {
             Add
           </Button>
         </div>
-      </div>
+      </Card>
 
       {/* Transactions Table */}
       <TransactionTable

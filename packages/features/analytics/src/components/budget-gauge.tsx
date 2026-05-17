@@ -2,171 +2,92 @@
 
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  Mascot,
   cn,
   formatCurrency,
-  formatPercent,
 } from "@finance/ui";
-import { Home, ShoppingBag, PiggyBank, type LucideIcon } from "lucide-react";
 import type { BudgetBreakdown } from "../calculations";
 
 interface BudgetGaugeProps {
   breakdown: BudgetBreakdown;
   className?: string;
+  /** Lemon surface variant (default for dashboard); set false to render on neutral white. */
+  surface?: "lemon" | "white";
+  /** Title — shown in the top-left. */
+  title?: string;
+  /** Description shown under the title. */
+  description?: string;
+  /** Show the clipboard mascot in the top-right (overview card). */
+  showMascot?: boolean;
 }
 
-export function BudgetGauge({ breakdown, className }: BudgetGaugeProps) {
-  const categories: Array<{
-    name: string;
-    data: BudgetBreakdown["needs"];
-    color: string;
-    bgColor: string;
-    textColor: string;
-    icon: LucideIcon;
-  }> = [
-    {
-      name: "Needs",
-      data: breakdown.needs,
-      color: "bg-blue-500",
-      bgColor: "bg-blue-100 dark:bg-blue-900/30",
-      textColor: "text-blue-600 dark:text-blue-400",
-      icon: Home,
-    },
-    {
-      name: "Wants",
-      data: breakdown.wants,
-      color: "bg-violet-500",
-      bgColor: "bg-violet-100 dark:bg-violet-900/30",
-      textColor: "text-violet-600 dark:text-violet-400",
-      icon: ShoppingBag,
-    },
-    {
-      name: "Savings",
-      data: breakdown.savings,
-      color: "bg-emerald-500",
-      bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
-      textColor: "text-emerald-600 dark:text-emerald-400",
-      icon: PiggyBank,
-    },
-  ];
+type Bucket = "needs" | "wants" | "savings";
 
+const BUCKETS: Array<{ key: Bucket; label: string; dot: string; bar: string }> = [
+  { key: "needs", label: "Needs", dot: "bg-cat-blue", bar: "bg-cat-blue" },
+  { key: "wants", label: "Wants", dot: "bg-cat-pink", bar: "bg-cat-pink" },
+  {
+    key: "savings",
+    label: "Savings",
+    dot: "bg-cat-emerald",
+    bar: "bg-cat-emerald",
+  },
+];
+
+export function BudgetGauge({
+  breakdown,
+  className,
+  surface = "lemon",
+  title = "50/30/20 Budget",
+  description = "Spending vs. your goals",
+  showMascot = true,
+}: BudgetGaugeProps) {
   return (
-    <Card className={className}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>50/30/20 Budget</CardTitle>
-            <CardDescription>Track spending against your goals</CardDescription>
-          </div>
-          <div className="bg-muted/50 flex h-9 items-center rounded-lg border px-3 text-sm font-medium tabular-nums">
-            {formatPercent(breakdown.savingsRate)} saved
-          </div>
+    <Card surface={surface} className={cn("flex flex-col p-5", className)}>
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-base font-bold text-ink">{title}</div>
+          <div className="text-meta text-ink-soft mt-0.5">{description}</div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        {categories.map((category) => {
-          const progressPercent = Math.min(
-            category.data.target > 0
-              ? (category.data.actual / category.data.target) * 100
-              : category.data.actual > 0
-                ? 100
-                : 0,
-            100
-          );
-          const isOver = category.data.actual > category.data.target;
-          const Icon = category.icon;
+        {showMascot && <Mascot name="clipboard" size={50} className="-mr-1" />}
+      </div>
+
+      <div className="mt-3.5 flex flex-1 flex-col gap-3">
+        {BUCKETS.map(({ key, label, dot, bar }) => {
+          // eslint-disable-next-line security/detect-object-injection -- bucket key is from hardcoded array
+          const d = breakdown[key];
+          const pct = d.target > 0 ? Math.min(100, (d.actual / d.target) * 100) : 0;
 
           return (
-            <div key={category.name} className="space-y-2.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-lg",
-                      category.bgColor
-                    )}
-                  >
-                    <Icon className={cn("h-4 w-4", category.textColor)} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{category.name}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {formatPercent(category.data.percentage)} of income
-                    </p>
-                  </div>
+            <div key={key}>
+              <div className="mb-1.5 flex items-baseline justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={cn("h-2.5 w-2.5 rounded-full", dot)} />
+                  <span className="text-sm font-semibold text-ink">{label}</span>
                 </div>
-                <div className="text-right">
-                  <p
-                    className={cn(
-                      "text-sm font-semibold tabular-nums",
-                      isOver
-                        ? "text-red-600 dark:text-red-400"
-                        : "text-foreground"
-                    )}
-                  >
-                    {formatCurrency(category.data.actual)}
-                  </p>
-                  <p className="text-muted-foreground text-xs">
-                    of {formatCurrency(category.data.target)}
-                  </p>
+                <div className="text-meta tabular text-ink-soft">
+                  <span className="font-semibold text-ink">
+                    {formatCurrency(d.actual)}
+                  </span>
+                  <span className="text-muted-ink"> / {formatCurrency(d.target)}</span>
                 </div>
               </div>
-              <div
-                className={cn(
-                  "h-2.5 overflow-hidden rounded-full",
-                  category.bgColor
-                )}
-              >
+              <div className="h-4 overflow-hidden rounded-[8px] bg-black/[0.07]">
                 <div
                   className={cn(
-                    "h-full rounded-full transition-all duration-700 ease-out",
-                    isOver ? "bg-red-500" : category.color
+                    "h-full rounded-[8px] transition-all duration-700",
+                    bar
                   )}
-                  style={{ width: `${progressPercent}%` }}
+                  style={{
+                    width: `${pct}%`,
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25)",
+                  }}
                 />
               </div>
-              <p
-                className={cn(
-                  "text-xs font-medium",
-                  category.data.status === "over"
-                    ? "text-red-600 dark:text-red-400"
-                    : category.data.status === "on-track"
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-muted-foreground"
-                )}
-              >
-                {category.data.status === "over"
-                  ? `${formatCurrency(category.data.actual - category.data.target)} over budget`
-                  : category.data.status === "on-track"
-                    ? "On track"
-                    : `${formatCurrency(category.data.target - category.data.actual)} remaining`}
-              </p>
             </div>
           );
         })}
-
-        <div className="grid grid-cols-2 gap-3 border-t pt-4">
-          <div className="rounded-lg bg-emerald-50 p-3 text-center dark:bg-emerald-950/20">
-            <p className="text-lg font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
-              {formatCurrency(breakdown.totalIncome)}
-            </p>
-            <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70">
-              Total Income
-            </p>
-          </div>
-          <div className="rounded-lg bg-red-50 p-3 text-center dark:bg-red-950/20">
-            <p className="text-lg font-bold tabular-nums text-red-600 dark:text-red-400">
-              {formatCurrency(breakdown.totalExpenses)}
-            </p>
-            <p className="text-xs text-red-600/70 dark:text-red-400/70">
-              Total Expenses
-            </p>
-          </div>
-        </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }

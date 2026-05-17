@@ -23,13 +23,13 @@ import {
 } from "@finance/ui";
 import {
   AlertTriangle,
-  Building2,
   CheckCircle2,
   ExternalLink,
   Lock,
   RefreshCw,
-  ShieldCheck,
 } from "lucide-react";
+import { Mascot } from "@finance/ui";
+import { Greeting } from "@/components/dashboard/greeting";
 
 type SyncState = {
   status: "idle" | "syncing" | "success" | "error";
@@ -214,38 +214,48 @@ export default function OpenBankingPage() {
   const connectionCount = connections.data?.length ?? 0;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-        <div>
-          <div className="mb-3 flex items-center gap-2">
-            <Badge variant="outline" className="gap-1">
-              <ShieldCheck className="h-3 w-3" />
-              UK Open Banking via Plaid
-            </Badge>
+    <div className="mx-auto flex max-w-5xl flex-col gap-3.5">
+      <Greeting
+        mascot="pointer"
+        title={<>Connect your bank</>}
+        insight={
+          <span className="text-muted-ink text-base font-medium">
+            UK Open Banking via Plaid
+          </span>
+        }
+        trailing={
+          <div className="flex items-center gap-2">
             {providerStatus.data?.environment && (
               <Badge variant="secondary">
                 {providerStatus.data.environment}
               </Badge>
             )}
+            <Button
+              variant="outline"
+              onClick={() => connections.refetch()}
+              disabled={connections.isFetching}
+              className="rounded-pill gap-2"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${connections.isFetching ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">Open Banking</h1>
-          <p className="text-muted-foreground mt-2 max-w-2xl">
-            Connect a UK bank account, sync transactions securely, and keep CSV
-            import as a privacy-first fallback.
+        }
+      />
+
+      <Card surface="sage" className="flex items-start gap-4 p-5">
+        <Mascot name="shield" size={64} />
+        <div>
+          <div className="text-ink text-base font-bold">Privacy first</div>
+          <p className="text-deep-sage text-sm leading-snug">
+            We use Plaid Link to collect consent. Public tokens are exchanged
+            once and only the access token is stored — server-side. You can
+            disconnect any bank at any time.
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => connections.refetch()}
-          disabled={connections.isFetching}
-          className="gap-2"
-        >
-          <RefreshCw
-            className={`h-4 w-4 ${connections.isFetching ? "animate-spin" : ""}`}
-          />
-          Refresh
-        </Button>
-      </div>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -287,7 +297,7 @@ export default function OpenBankingPage() {
           <CardHeader className="pb-2">
             <CardDescription>Connected banks</CardDescription>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Building2 className="h-5 w-5 text-blue-600" />
+              <Mascot name="bank" size={32} />
               {connectionCount}
             </CardTitle>
           </CardHeader>
@@ -342,7 +352,7 @@ export default function OpenBankingPage() {
             ) : (
               <Button
                 size="lg"
-                className="gap-2"
+                className="rounded-pill gap-2"
                 disabled={
                   !configured ||
                   !openBankingEnabled ||
@@ -354,7 +364,7 @@ export default function OpenBankingPage() {
                 {createLinkToken.isPending ? (
                   <RefreshCw className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Building2 className="h-4 w-4" />
+                  <Mascot name="bank" size={20} />
                 )}
                 Prepare secure bank link
               </Button>

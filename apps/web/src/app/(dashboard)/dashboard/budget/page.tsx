@@ -13,15 +13,11 @@ import {
   Skeleton,
 } from "@finance/ui";
 import { BudgetGauge, CategoryBreakdown } from "@finance/analytics";
+import { Mascot } from "@finance/ui";
 import { trpc } from "@/trpc/client";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Settings,
-  Home,
-  ShoppingBag,
-  PiggyBank,
-} from "lucide-react";
+import { Settings } from "lucide-react";
+import { Greeting } from "@/components/dashboard/greeting";
+import { MonthPicker } from "@/components/dashboard/month-picker";
 
 export default function BudgetPage() {
   const now = new Date();
@@ -105,39 +101,35 @@ export default function BudgetPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Navigation Bar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9"
-            onClick={handlePrevMonth}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="min-w-[160px] text-center text-lg font-semibold">
+    <div className="flex flex-col gap-3.5">
+      <Greeting
+        mascot="clipboardman"
+        title={<>Your budget</>}
+        insight={
+          <span className="text-muted-ink text-base font-medium">
             {monthName}
           </span>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9"
-            onClick={handleNextMonth}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-        <Button
-          variant={isEditing ? "default" : "outline"}
-          size="sm"
-          onClick={() => setIsEditing(!isEditing)}
-        >
-          <Settings className="mr-2 h-4 w-4" />
-          {isEditing ? "Cancel" : "Customize"}
-        </Button>
-      </div>
+        }
+        trailing={
+          <div className="flex items-center gap-2">
+            <MonthPicker
+              month={month}
+              year={year}
+              onPrev={handlePrevMonth}
+              onNext={handleNextMonth}
+            />
+            <Button
+              variant={isEditing ? "default" : "outline"}
+              size="sm"
+              className="rounded-pill"
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              {isEditing ? "Cancel" : "Customize"}
+            </Button>
+          </div>
+        }
+      />
 
       {/* Editing Panel */}
       {isEditing && (
@@ -297,50 +289,32 @@ export default function BudgetPage() {
       </div>
 
       {/* Budget Education */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-50/50 dark:border-blue-900/50 dark:from-blue-950/30 dark:to-blue-950/10">
-          <CardContent className="pt-6">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
-              <Home className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h4 className="mb-1 text-lg font-bold text-blue-700 dark:text-blue-300">
-              50% Needs
-            </h4>
-            <p className="text-sm text-blue-600/80 dark:text-blue-400/80">
-              Housing, utilities, groceries, healthcare, and minimum debt
-              payments. Your buddy tracks these automatically.
-            </p>
-          </CardContent>
+      <div className="grid gap-3.5 sm:grid-cols-3">
+        <Card surface="sky" className="p-5">
+          <Mascot name="wallet" size={48} className="-mt-1 mb-2" />
+          <h4 className="mb-1 text-lg font-bold text-ink">50% Needs</h4>
+          <p className="text-deep-sky text-sm leading-snug">
+            Housing, utilities, groceries, healthcare, and minimum debt
+            payments. Buddy tracks these automatically.
+          </p>
         </Card>
 
-        <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-violet-50/50 dark:border-violet-900/50 dark:from-violet-950/30 dark:to-violet-950/10">
-          <CardContent className="pt-6">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
-              <ShoppingBag className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-            </div>
-            <h4 className="mb-1 text-lg font-bold text-violet-700 dark:text-violet-300">
-              30% Wants
-            </h4>
-            <p className="text-sm text-violet-600/80 dark:text-violet-400/80">
-              Entertainment, dining out, shopping, and subscriptions. Enjoy life
-              while staying on track!
-            </p>
-          </CardContent>
+        <Card surface="peach" className="p-5">
+          <Mascot name="coin" size={48} className="-mt-1 mb-2" />
+          <h4 className="mb-1 text-lg font-bold text-ink">30% Wants</h4>
+          <p className="text-deep-peach text-sm leading-snug">
+            Entertainment, dining out, shopping, and subscriptions. Enjoy life
+            while staying on track.
+          </p>
         </Card>
 
-        <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-50/50 dark:border-emerald-900/50 dark:from-emerald-950/30 dark:to-emerald-950/10">
-          <CardContent className="pt-6">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
-              <PiggyBank className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <h4 className="mb-1 text-lg font-bold text-emerald-700 dark:text-emerald-300">
-              20% Savings
-            </h4>
-            <p className="text-sm text-emerald-600/80 dark:text-emerald-400/80">
-              Savings, investments, and extra debt payments. Your buddy cheers
-              you on as you build wealth!
-            </p>
-          </CardContent>
+        <Card surface="sage" className="p-5">
+          <Mascot name="piggy" size={48} className="-mt-1 mb-2" />
+          <h4 className="mb-1 text-lg font-bold text-ink">20% Savings</h4>
+          <p className="text-deep-sage text-sm leading-snug">
+            Savings, investments, and extra debt payments. Buddy cheers you on
+            as you build wealth.
+          </p>
         </Card>
       </div>
     </div>

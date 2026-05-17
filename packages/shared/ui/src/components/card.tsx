@@ -3,19 +3,43 @@
 import * as React from "react";
 import { cn } from "../lib/utils";
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "bg-card text-card-foreground rounded-lg border shadow-sm",
-      className
-    )}
-    {...props}
-  />
-));
+export type CardSurface =
+  | "sage"
+  | "peach"
+  | "sky"
+  | "lav"
+  | "lemon"
+  | "linen"
+  | "white";
+
+const surfaceClasses: Record<CardSurface, string> = {
+  sage: "bg-surface-sage",
+  peach: "bg-surface-peach",
+  sky: "bg-surface-sky",
+  lav: "bg-surface-lav",
+  lemon: "bg-surface-lemon",
+  linen: "bg-surface-linen",
+  white: "bg-card",
+};
+
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  surface?: CardSurface;
+}
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, surface = "white", ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        "text-card-foreground rounded-bento shadow-card relative",
+        // eslint-disable-next-line security/detect-object-injection -- surface is from CardSurface union
+        surfaceClasses[surface],
+        className
+      )}
+      {...props}
+    />
+  )
+);
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<
@@ -37,7 +61,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
+      "text-lg font-bold leading-none tracking-tight",
       className
     )}
     {...props}
@@ -51,7 +75,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-muted-foreground text-sm", className)}
+    className={cn("text-ink-soft text-sm", className)}
     {...props}
   />
 ));

@@ -66,15 +66,83 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+
+        // BudgetBuddy V1 palette
+        bg: "var(--bb-bg)",
+        ink: {
+          DEFAULT: "var(--bb-ink)",
+          soft: "var(--bb-ink-soft)",
+        },
+        surface: {
+          sage: "var(--bb-surface-sage)",
+          peach: "var(--bb-surface-peach)",
+          sky: "var(--bb-surface-sky)",
+          lav: "var(--bb-surface-lav)",
+          lemon: "var(--bb-surface-lemon)",
+          linen: "var(--bb-surface-linen)",
+          white: "var(--bb-surface-white)",
+        },
+        deep: {
+          sage: "var(--bb-deep-sage)",
+          peach: "var(--bb-deep-peach)",
+          sky: "var(--bb-deep-sky)",
+          lav: "var(--bb-deep-lav)",
+          lemon: "var(--bb-deep-lemon)",
+        },
+        cat: {
+          blue: "var(--bb-cat-blue)",
+          pink: "var(--bb-cat-pink)",
+          emerald: "var(--bb-cat-emerald)",
+          amber: "var(--bb-cat-amber)",
+          violet: "var(--bb-cat-violet)",
+        },
+        sidebar: {
+          DEFAULT: "var(--bb-sidebar)",
+          text: "var(--bb-sidebar-text)",
+          muted: "var(--bb-sidebar-muted)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        bento: "28px",
+        pill: "14px",
+        chip: "10px",
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        sans: [
+          "var(--font-sans)",
+          "DM Sans",
+          "Instrument Sans",
+          "system-ui",
+          "sans-serif",
+        ],
         mono: ["var(--font-geist-mono)", "monospace"],
+      },
+      fontSize: {
+        eyebrow: [
+          "11px",
+          { lineHeight: "1.2", letterSpacing: "0.06em", fontWeight: "600" },
+        ],
+        meta: ["12px", { lineHeight: "1.4", fontWeight: "500" }],
+        stat: [
+          "40px",
+          { lineHeight: "1", letterSpacing: "-0.02em", fontWeight: "800" },
+        ],
+        hero: [
+          "56px",
+          { lineHeight: "1", letterSpacing: "-0.03em", fontWeight: "800" },
+        ],
+        greeting: [
+          "36px",
+          { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" },
+        ],
+      },
+      boxShadow: {
+        card: "var(--bb-shadow-card)",
+        float: "var(--bb-shadow-float)",
+        btn: "var(--bb-shadow-btn)",
       },
       keyframes: {
         "accordion-down": {

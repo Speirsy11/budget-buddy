@@ -19,8 +19,9 @@ import {
   MonthlyOverview,
   InsightCard,
 } from "@finance/analytics";
+import { Mascot } from "@finance/ui";
 import { trpc } from "@/trpc/client";
-import { TrendingUp, TrendingDown, DollarSign, BarChart3 } from "lucide-react";
+import { Greeting } from "@/components/dashboard/greeting";
 
 export default function AnalyticsPage() {
   const [months, setMonths] = useState(6);
@@ -111,20 +112,34 @@ export default function AnalyticsPage() {
   }>;
 
   return (
-    <div className="space-y-6">
-      {/* Header with tabs */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
-        <Tabs
-          value={months.toString()}
-          onValueChange={(v) => setMonths(parseInt(v))}
-        >
-          <TabsList>
-            <TabsTrigger value="3">3M</TabsTrigger>
-            <TabsTrigger value="6">6M</TabsTrigger>
-            <TabsTrigger value="12">1Y</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+    <div className="flex flex-col gap-3.5">
+      <Greeting
+        mascot="chartman"
+        title={<>Analytics</>}
+        insight={
+          <span className="text-muted-ink text-base font-medium">
+            Past {months} months
+          </span>
+        }
+        trailing={
+          <Tabs
+            value={months.toString()}
+            onValueChange={(v) => setMonths(parseInt(v))}
+          >
+            <TabsList className="rounded-pill bg-surface-white shadow-btn">
+              <TabsTrigger value="3" className="rounded-pill">
+                3M
+              </TabsTrigger>
+              <TabsTrigger value="6" className="rounded-pill">
+                6M
+              </TabsTrigger>
+              <TabsTrigger value="12" className="rounded-pill">
+                1Y
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        }
+      />
 
       {/* Insights */}
       <div className="grid gap-4 md:grid-cols-3">
@@ -210,72 +225,71 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Summary Stats */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Period Summary</CardTitle>
-          <CardDescription>
+      <Card surface="linen" className="px-6 py-5">
+        <div className="mb-4">
+          <CardTitle>Period summary</CardTitle>
+          <CardDescription className="mt-0.5">
             Financial overview for the past {months} months
           </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="flex items-center gap-3 rounded-xl border p-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
-                <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-sm">Total Spent</p>
-                <p className="text-lg font-bold">
-                  {formatCurrency(totalSpent)}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl border p-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
-                <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-sm">Avg. Monthly</p>
-                <p className="text-lg font-bold">
-                  {formatCurrency(avgMonthlySpend)}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl border p-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
-                <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-sm">Total Income</p>
-                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                  {formatCurrency(
-                    monthlyData.reduce((sum, m) => sum + m.income, 0)
-                  )}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl border p-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
-                <DollarSign className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-sm">Net Savings</p>
-                <p
-                  className={`text-lg font-bold ${
-                    monthlyData.reduce((sum, m) => sum + m.savings, 0) >= 0
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {formatCurrency(
-                    monthlyData.reduce((sum, m) => sum + m.savings, 0)
-                  )}
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <SummaryTile
+            surface="peach"
+            mascot="receipt"
+            label="Total spent"
+            value={formatCurrency(totalSpent)}
+          />
+          <SummaryTile
+            surface="sky"
+            mascot="bars"
+            label="Avg. monthly"
+            value={formatCurrency(avgMonthlySpend)}
+          />
+          <SummaryTile
+            surface="sage"
+            mascot="coins"
+            label="Total income"
+            value={formatCurrency(
+              monthlyData.reduce((sum, m) => sum + m.income, 0)
+            )}
+            valueClass="text-cat-emerald"
+          />
+          <SummaryTile
+            surface="lav"
+            mascot="piggy"
+            label="Net savings"
+            value={formatCurrency(
+              monthlyData.reduce((sum, m) => sum + m.savings, 0)
+            )}
+          />
+        </div>
       </Card>
     </div>
+  );
+}
+
+function SummaryTile({
+  surface,
+  mascot,
+  label,
+  value,
+  valueClass,
+}: {
+  surface: "peach" | "sky" | "sage" | "lav";
+  mascot: "receipt" | "bars" | "coins" | "piggy";
+  label: string;
+  value: string;
+  valueClass?: string;
+}) {
+  return (
+    <Card surface={surface} className="flex items-center gap-3 p-4">
+      <Mascot name={mascot} size={44} />
+      <div className="min-w-0">
+        <p className="text-meta text-ink-soft">{label}</p>
+        <p className={`tabular text-lg font-extrabold text-ink ${valueClass ?? ""}`}>
+          {value}
+        </p>
+      </div>
+    </Card>
   );
 }

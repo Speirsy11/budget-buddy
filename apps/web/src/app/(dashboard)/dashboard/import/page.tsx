@@ -3,25 +3,18 @@
 import { useState } from "react";
 import {
   Card,
-  CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
+  Mascot,
 } from "@finance/ui";
 import {
   TransactionUploader,
   type ParsedTransaction,
 } from "@finance/transactions";
 import { trpc } from "@/trpc/client";
-import {
-  CheckCircle2,
-  FileSpreadsheet,
-  Sparkles,
-  Lock,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
+import { Greeting } from "@/components/dashboard/greeting";
 
 const bankGuides = [
   {
@@ -85,92 +78,90 @@ export default function ImportPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-3.5">
+      <Greeting
+        mascot="pointer"
+        title={<>Bring your money in</>}
+        insight={
+          <span className="text-muted-ink text-base font-medium">
+            We&apos;ll do the categorising
+          </span>
+        }
+      />
+
       {/* Uploader */}
       <TransactionUploader onUpload={handleUpload} />
 
       {/* Success Message */}
       {lastImportCount !== null && (
-        <Card className="border-emerald-200 bg-emerald-50/50 dark:border-emerald-800/50 dark:bg-emerald-900/10">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/10">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <p className="font-medium text-emerald-800 dark:text-emerald-200">
-                  Successfully imported {lastImportCount} transactions
-                </p>
-              </div>
-              <Link
-                href="/dashboard/transactions"
-                className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-300"
-              >
-                View transactions
-              </Link>
-            </div>
-          </CardContent>
+        <Card surface="sage" className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <Mascot name="thumbs2" size={44} />
+            <p className="text-ink font-semibold">
+              Successfully imported {lastImportCount} transactions
+            </p>
+            <CheckCircle2 className="text-deep-sage h-5 w-5" />
+          </div>
+          <Link
+            href="/dashboard/transactions"
+            className="text-cat-emerald text-sm font-semibold hover:underline"
+          >
+            View transactions →
+          </Link>
         </Card>
       )}
 
       {/* Info Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
-              <FileSpreadsheet className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h3 className="mb-1 font-semibold">Supported Formats</h3>
-            <p className="text-muted-foreground text-sm">
-              Monzo, Starling, Revolut, Barclays, HSBC, NatWest, Lloyds,
-              Santander, Halifax, Nationwide
-            </p>
-          </CardContent>
+      <div className="grid gap-3.5 md:grid-cols-3">
+        <Card surface="lemon" className="p-5">
+          <Mascot name="csv" size={48} className="-mt-1 mb-2" />
+          <h3 className="mb-1 font-bold text-ink">Supported formats</h3>
+          <p className="text-deep-lemon text-sm leading-snug">
+            Monzo, Starling, Revolut, Barclays, HSBC, NatWest, Lloyds,
+            Santander, Halifax, Nationwide.
+          </p>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
-              <Sparkles className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-            </div>
-            <h3 className="mb-1 font-semibold">AI Classification</h3>
-            <p className="text-muted-foreground text-sm">
-              Our AI automatically analyzes each transaction and assigns the
-              most appropriate category.
-            </p>
-          </CardContent>
+        <Card surface="lav" className="p-5">
+          <Mascot name="clipboardman" size={56} className="-mt-1 mb-1" />
+          <h3 className="mb-1 font-bold text-ink">AI classification</h3>
+          <p className="text-deep-lav text-sm leading-snug">
+            Buddy reads each transaction and picks the right 50/30/20 bucket.
+          </p>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
-              <Lock className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <h3 className="mb-1 font-semibold">Your Data is Secure</h3>
-            <p className="text-muted-foreground text-sm">
-              Files are processed locally in your browser. Only extracted data
-              is sent to our servers, encrypted in transit and at rest.
-            </p>
-          </CardContent>
+        <Card surface="sage" className="p-5">
+          <Mascot name="shield" size={48} className="-mt-1 mb-2" />
+          <h3 className="mb-1 font-bold text-ink">Your data is safe</h3>
+          <p className="text-deep-sage text-sm leading-snug">
+            Files are parsed locally. Only the extracted data goes to our
+            servers — encrypted in transit and at rest.
+          </p>
         </Card>
       </div>
 
-      {/* Bank Export Guides - Accordion Style */}
-      <Card>
-        <CardHeader>
-          <CardTitle>How to Export from Your Bank</CardTitle>
-          <CardDescription>
-            Step-by-step instructions for common banks
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
+      {/* Bank Export Guides */}
+      <Card surface="linen" className="p-6">
+        <div className="mb-3 flex items-center gap-3">
+          <Mascot name="bank" size={44} />
+          <div>
+            <CardTitle>How to export from your bank</CardTitle>
+            <CardDescription className="mt-0.5">
+              Step-by-step instructions for common banks
+            </CardDescription>
+          </div>
+        </div>
+        <div className="space-y-2">
           {bankGuides.map((guide) => {
             const isExpanded = expandedGuide === guide.name;
             return (
-              <div key={guide.name} className="rounded-lg border">
+              <div
+                key={guide.name}
+                className="bg-surface-white rounded-pill shadow-btn overflow-hidden"
+              >
                 <button
                   type="button"
-                  className="hover:bg-muted/50 flex w-full items-center justify-between px-4 py-3 text-left font-medium transition-colors"
+                  className="hover:bg-black/[0.03] flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-ink transition-colors"
                   aria-expanded={isExpanded}
                   onClick={() =>
                     setExpandedGuide(isExpanded ? null : guide.name)
@@ -178,14 +169,14 @@ export default function ImportPage() {
                 >
                   {guide.name}
                   {isExpanded ? (
-                    <ChevronUp className="text-muted-foreground h-4 w-4" />
+                    <ChevronUp className="text-muted-ink h-4 w-4" />
                   ) : (
-                    <ChevronDown className="text-muted-foreground h-4 w-4" />
+                    <ChevronDown className="text-muted-ink h-4 w-4" />
                   )}
                 </button>
                 {isExpanded && (
-                  <div className="border-t px-4 pb-4 pt-3">
-                    <ol className="text-muted-foreground list-inside list-decimal space-y-2 text-sm">
+                  <div className="border-t border-black/[0.05] px-5 pb-4 pt-3">
+                    <ol className="text-ink-soft list-inside list-decimal space-y-2 text-sm">
                       {guide.steps.map((step, i) => (
                         <li key={i}>{step}</li>
                       ))}
@@ -195,7 +186,7 @@ export default function ImportPage() {
               </div>
             );
           })}
-        </CardContent>
+        </div>
       </Card>
     </div>
   );

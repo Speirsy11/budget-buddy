@@ -15,16 +15,9 @@ import {
 import { useCurrentUser, UserButton } from "@finance/auth";
 import { useTheme } from "next-themes";
 import { trpc } from "@/trpc/client";
-import {
-  User,
-  Palette,
-  Bell,
-  Database,
-  Download,
-  Trash2,
-  Monitor,
-  Moon,
-} from "lucide-react";
+import { Download, Trash2, Monitor, Moon } from "lucide-react";
+import { Mascot } from "@finance/ui";
+import { Greeting } from "@/components/dashboard/greeting";
 
 export default function SettingsPage() {
   const { user } = useCurrentUser();
@@ -53,14 +46,22 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-3.5">
+      <Greeting
+        mascot="peaceful"
+        title={<>Settings</>}
+        insight={
+          <span className="text-muted-ink text-base font-medium">
+            Make Buddy yours
+          </span>
+        }
+      />
+
       {/* Profile */}
-      <Card>
+      <Card surface="sage">
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-              <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            </div>
+          <div className="flex items-center gap-3">
+            <Mascot name="wave" size={44} />
             <div>
               <CardTitle>Profile</CardTitle>
               <CardDescription>Your personal information</CardDescription>
@@ -102,15 +103,13 @@ export default function SettingsPage() {
       </Card>
 
       {/* Appearance */}
-      <Card>
+      <Card surface="lemon">
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
-              <Palette className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-            </div>
+          <div className="flex items-center gap-3">
+            <Mascot name="star" size={44} />
             <div>
               <CardTitle>Appearance</CardTitle>
-              <CardDescription>Customize how the app looks</CardDescription>
+              <CardDescription>Customise how the app looks</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -153,12 +152,10 @@ export default function SettingsPage() {
       </Card>
 
       {/* Notifications */}
-      <Card>
+      <Card surface="sky">
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
-              <Bell className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            </div>
+          <div className="flex items-center gap-3">
+            <Mascot name="pointer" size={44} />
             <div>
               <CardTitle>Notifications</CardTitle>
               <CardDescription>
@@ -199,14 +196,12 @@ export default function SettingsPage() {
       </Card>
 
       {/* Data Management */}
-      <Card>
+      <Card surface="linen">
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
-              <Database className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-            </div>
+          <div className="flex items-center gap-3">
+            <Mascot name="csv" size={44} />
             <div>
-              <CardTitle>Data Management</CardTitle>
+              <CardTitle>Data management</CardTitle>
               <CardDescription>Export or delete your data</CardDescription>
             </div>
           </div>

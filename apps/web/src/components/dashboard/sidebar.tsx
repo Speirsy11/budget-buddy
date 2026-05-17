@@ -3,206 +3,222 @@
 import { useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn, Button } from "@finance/ui";
-import {
-  LayoutDashboard,
-  Receipt,
-  PieChart,
-  Settings,
-  Upload,
-  Smile,
-  TrendingUp,
-  Landmark,
-  ChevronsLeft,
-  ChevronsRight,
-  X,
-  Menu,
-} from "lucide-react";
-import { useSidebar } from "./sidebar-context";
+import { cn, Mascot, formatCurrency, type MascotName } from "@finance/ui";
+import { X } from "lucide-react";
+import { trpc } from "@/trpc/client";
 
-const navigation = [
-  {
-    name: "Overview",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
+type SurfaceKey = "sage" | "peach" | "sky" | "lav" | "lemon" | "linen";
+
+interface NavItem {
+  name: string;
+  href: string;
+  mascot: MascotName;
+  surface: SurfaceKey;
+}
+
+const navigation: NavItem[] = [
+  { name: "Overview", href: "/dashboard", mascot: "coins", surface: "sage" },
   {
     name: "Transactions",
     href: "/dashboard/transactions",
-    icon: Receipt,
+    mascot: "receipt",
+    surface: "peach",
   },
-  {
-    name: "Budget",
-    href: "/dashboard/budget",
-    icon: PieChart,
-  },
+  { name: "Budget", href: "/dashboard/budget", mascot: "pie", surface: "sky" },
   {
     name: "Analytics",
     href: "/dashboard/analytics",
-    icon: TrendingUp,
+    mascot: "bars",
+    surface: "lav",
   },
   {
     name: "Import",
     href: "/dashboard/import",
-    icon: Upload,
+    mascot: "csv",
+    surface: "lemon",
   },
   {
     name: "Open Banking",
     href: "/dashboard/open-banking",
-    icon: Landmark,
+    mascot: "bank",
+    surface: "linen",
   },
 ];
 
-const secondaryNavigation = [
+const secondaryNavigation: NavItem[] = [
   {
     name: "Settings",
     href: "/dashboard/settings",
-    icon: Settings,
+    mascot: "shield",
+    surface: "linen",
   },
 ];
 
+const surfaceBg: Record<SurfaceKey, string> = {
+  sage: "bg-surface-sage",
+  peach: "bg-surface-peach",
+  sky: "bg-surface-sky",
+  lav: "bg-surface-lav",
+  lemon: "bg-surface-lemon",
+  linen: "bg-surface-linen",
+};
+
+function MonthLabel() {
+  const now = new Date();
+  const month = now.toLocaleString("en-GB", { month: "short", year: "2-digit" });
+  return <span>Personal · {month}</span>;
+}
+
+function NavLink({
+  item,
+  active,
+  onClick,
+}: {
+  item: NavItem;
+  active: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <Link
+      href={item.href}
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-3 rounded-pill px-2.5 py-2 text-sm transition-all",
+        active
+          ? "bg-white/[0.07] font-semibold text-white"
+          : "font-medium text-[#C8C2B5] hover:bg-white/[0.04] hover:text-white"
+      )}
+    >
+      <span
+        className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-chip",
+          surfaceBg[item.surface],
+          active
+            ? "shadow-[0_0_0_2px_rgba(255,255,255,0.18)]"
+            : "shadow-[inset_0_-2px_0_rgba(0,0,0,0.06)]"
+        )}
+      >
+        <Mascot
+          name={item.mascot}
+          size={26}
+          className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]"
+        />
+      </span>
+      <span className="flex-1 truncate">{item.name}</span>
+      {active && (
+        <span className="bg-surface-peach h-1.5 w-1.5 rounded-full" />
+      )}
+    </Link>
+  );
+}
+
+function SavingsGoalCard() {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+  const { data } = trpc.analytics.get503020.useQuery({ month, year });
+
+  const saved = data ? Math.max(0, data.totalIncome - data.totalExpenses) : 0;
+  const goal = data?.savings?.target ?? 840;
+  const pct = goal > 0 ? Math.min(100, (saved / goal) * 100) : 0;
+
+  return (
+    <div className="relative mt-auto overflow-hidden rounded-[18px] bg-white/[0.04] p-3.5">
+      <Mascot
+        name="star"
+        size={64}
+        className="absolute -right-3.5 -top-2.5 opacity-85"
+      />
+      <div className="text-[11px] text-[#A39C8E]">Monthly savings goal</div>
+      <div className="mt-1 flex items-baseline gap-1.5">
+        <div className="text-xl font-extrabold text-white">
+          {formatCurrency(saved)}
+        </div>
+        <div className="text-surface-peach text-[11px]">
+          / {formatCurrency(goal)}
+        </div>
+      </div>
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
+        <div
+          className="h-full bg-gradient-to-r from-[#FFB48A] to-[#FFE5D6] transition-all"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <div className="mt-1.5 text-[10px] text-[#A39C8E]">
+        {pct >= 100
+          ? "Goal smashed — nice work!"
+          : `${pct.toFixed(0)}% of monthly goal`}
+      </div>
+    </div>
+  );
+}
+
+function BrandBlock() {
+  return (
+    <div className="flex items-center gap-3 px-1.5 pb-5">
+      <div className="bg-surface-sage relative grid h-14 w-14 shrink-0 place-items-end overflow-hidden rounded-[18px] shadow-[0_4px_14px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.4)]">
+        <Mascot name="wave" size={64} className="-mb-2" />
+      </div>
+      <div className="min-w-0">
+        <div className="truncate text-[17px] font-bold tracking-tight text-white">
+          BudgetBuddy
+        </div>
+        <div className="text-[11px] text-[#9C958A]">
+          <MonthLabel />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function DashboardSidebar() {
   const pathname = usePathname();
-  const { collapsed, setCollapsed, setMobileOpen } = useSidebar();
 
   return (
     <>
       {/* Desktop sidebar */}
-      <aside
-        className={cn(
-          "hidden transition-all duration-300 lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:flex-col",
-          collapsed ? "lg:w-[72px]" : "lg:w-64"
-        )}
-      >
-        <div className="bg-card flex grow flex-col border-r">
-          {/* Logo */}
-          <div className="flex h-16 shrink-0 items-center justify-between border-b px-4">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2.5 overflow-hidden"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md shadow-blue-600/25">
-                <Smile className="h-5 w-5 text-white" />
-              </div>
-              {!collapsed && (
-                <span className="text-lg font-bold tracking-tight">
-                  BudgetBuddy
-                </span>
-              )}
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden h-8 w-8 shrink-0 lg:flex"
-              onClick={() => setCollapsed(!collapsed)}
-            >
-              {collapsed ? (
-                <ChevronsRight className="h-4 w-4" />
-              ) : (
-                <ChevronsLeft className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex flex-1 flex-col px-3 py-4">
-            <ul role="list" className="flex flex-1 flex-col gap-1">
-              {navigation.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        "group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-                        collapsed && "justify-center px-2",
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                      )}
-                      title={collapsed ? item.name : undefined}
-                    >
-                      <item.icon
-                        className={cn(
-                          "h-5 w-5 shrink-0 transition-colors",
-                          isActive
-                            ? "text-primary"
-                            : "text-muted-foreground group-hover:text-foreground"
-                        )}
-                      />
-                      {!collapsed && item.name}
-                      {isActive && !collapsed && (
-                        <div className="bg-primary ml-auto h-1.5 w-1.5 rounded-full" />
-                      )}
-                    </Link>
-                  </li>
-                );
-              })}
-
-              <li className="mt-auto pt-4">
-                <div className="mb-2 border-t" />
-                {secondaryNavigation.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={cn(
-                        "group flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-                        collapsed && "justify-center px-2",
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                      )}
-                      title={collapsed ? item.name : undefined}
-                    >
-                      <item.icon
-                        className={cn(
-                          "h-5 w-5 shrink-0 transition-colors",
-                          isActive
-                            ? "text-primary"
-                            : "text-muted-foreground group-hover:text-foreground"
-                        )}
-                      />
-                      {!collapsed && item.name}
-                    </Link>
-                  );
-                })}
-              </li>
-            </ul>
-          </nav>
+      <aside className="bg-sidebar text-sidebar hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-[244px] lg:flex-col lg:p-4">
+        <BrandBlock />
+        <nav className="flex flex-col gap-1">
+          {navigation.map((item) => (
+            <NavLink
+              key={item.name}
+              item={item}
+              active={pathname === item.href}
+            />
+          ))}
+        </nav>
+        <div className="mt-5 border-t border-white/[0.06] pt-3">
+          {secondaryNavigation.map((item) => (
+            <NavLink
+              key={item.name}
+              item={item}
+              active={pathname === item.href}
+            />
+          ))}
         </div>
+        <SavingsGoalCard />
       </aside>
 
-      {/* Mobile bottom navigation */}
-      <nav className="bg-card/95 fixed inset-x-0 bottom-0 z-50 border-t backdrop-blur-lg lg:hidden">
-        <div className="flex h-16 items-center justify-around px-2">
-          {navigation.slice(0, 4).map((item) => {
-            const isActive = pathname === item.href;
+      {/* Mobile bottom navigation — dark pill with claymation icons */}
+      <nav className="fixed inset-x-3 bottom-3 z-50 lg:hidden">
+        <div className="bg-sidebar shadow-card flex items-center justify-around rounded-[22px] px-2 py-2">
+          {navigation.slice(0, 5).map((item) => {
+            const active = pathname === item.href;
             return (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  "flex items-center justify-center rounded-pill px-3 py-1.5 transition-all",
+                  active && surfaceBg[item.surface]
                 )}
               >
-                <item.icon
-                  className={cn("h-5 w-5", isActive && "text-primary")}
-                />
-                <span>{item.name}</span>
+                <Mascot name={item.mascot} size={28} />
+                <span className="sr-only">{item.name}</span>
               </Link>
             );
           })}
-          <button
-            type="button"
-            onClick={() => setMobileOpen(true)}
-            className="text-muted-foreground flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
-          >
-            <Menu className="h-5 w-5" />
-            <span>More</span>
-          </button>
         </div>
       </nav>
     </>
@@ -242,61 +258,46 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
       aria-modal="true"
       aria-label="Navigation menu"
     >
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Sidebar */}
-      <div className="bg-card fixed inset-y-0 left-0 w-72 shadow-2xl">
-        <div className="flex h-16 items-center justify-between border-b px-4">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2.5"
+      <div className="bg-sidebar text-sidebar fixed inset-y-0 left-0 flex w-[244px] flex-col p-4 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <BrandBlock />
+          <button
+            type="button"
             onClick={onClose}
+            className="text-sidebar-muted hover:text-sidebar -mt-3 rounded-chip p-1.5"
+            aria-label="Close menu"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600">
-              <Smile className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-lg font-bold">BudgetBuddy</span>
-          </Link>
-          <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
-            <span className="sr-only">Close menu</span>
-          </Button>
+          </button>
         </div>
 
-        <nav className="px-3 py-4">
-          <ul className="space-y-1">
-            {[...navigation, ...secondaryNavigation].map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <li key={item.name}>
-                  <Link
-                    href={item.href}
-                    onClick={onClose}
-                    className={cn(
-                      "flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-                      isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                    )}
-                  >
-                    <item.icon
-                      className={cn(
-                        "h-5 w-5 shrink-0",
-                        isActive && "text-primary"
-                      )}
-                    />
-                    {item.name}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        <nav className="flex flex-col gap-1">
+          {navigation.map((item) => (
+            <NavLink
+              key={item.name}
+              item={item}
+              active={pathname === item.href}
+              onClick={onClose}
+            />
+          ))}
         </nav>
+        <div className="mt-5 border-t border-white/[0.06] pt-3">
+          {secondaryNavigation.map((item) => (
+            <NavLink
+              key={item.name}
+              item={item}
+              active={pathname === item.href}
+              onClick={onClose}
+            />
+          ))}
+        </div>
+        <SavingsGoalCard />
       </div>
     </div>
   );
