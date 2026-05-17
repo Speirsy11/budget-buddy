@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./csv-parser": "./src/csv-parser.ts",
     "./server": "./src/server.ts"
   },
   "scripts": {
