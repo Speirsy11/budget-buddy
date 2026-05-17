@@ -6,16 +6,43 @@ import { tokenCache } from "@/lib/auth/token-cache";
 import { ThemeProvider } from "@/lib/theme/provider";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { isMockAuthMode } from "@/lib/auth/mock-mode";
 
 const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-if (!clerkPublishableKey) {
+if (!clerkPublishableKey && !isMockAuthMode) {
   throw new Error(
     "Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY. Please set it in your .env file."
   );
 }
 
+function AppProviders() {
+  return (
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <TRPCProvider>
+          <Slot />
+          <StatusBar style="auto" />
+        </TRPCProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
+}
+
 export default function RootLayout() {
+  if (isMockAuthMode) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <AppProviders />
+      </GestureHandlerRootView>
+    );
+  }
+
+  if (!clerkPublishableKey) {
+    throw new Error(
+      "Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY. Please set it in your .env file."
+    );
+  }
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ClerkProvider
@@ -23,14 +50,7 @@ export default function RootLayout() {
         tokenCache={tokenCache}
       >
         <ClerkLoaded>
-          <SafeAreaProvider>
-            <ThemeProvider>
-              <TRPCProvider>
-                <Slot />
-                <StatusBar style="auto" />
-              </TRPCProvider>
-            </ThemeProvider>
-          </SafeAreaProvider>
+          <AppProviders />
         </ClerkLoaded>
       </ClerkProvider>
     </GestureHandlerRootView>

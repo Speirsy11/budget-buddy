@@ -11,11 +11,45 @@ import { useRouter } from "expo-router";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { useTheme } from "@/lib/theme/provider";
 import { Ionicons } from "@expo/vector-icons";
+import { isMockAuthMode, mockUser } from "@/lib/auth/mock-mode";
+
+type SettingsUser = {
+  firstName?: string | null;
+  fullName?: string | null;
+  emailAddresses: Array<{ emailAddress: string }>;
+};
+
+type SettingsContentProps = {
+  user: SettingsUser;
+  signOut: () => Promise<unknown>;
+};
 
 export default function SettingsScreen() {
-  const { colors } = useTheme();
+  if (isMockAuthMode) {
+    return <SettingsContent signOut={async () => undefined} user={mockUser} />;
+  }
+
+  return <AuthenticatedSettingsScreen />;
+}
+
+function AuthenticatedSettingsScreen() {
   const { signOut } = useAuth();
   const { user } = useUser();
+
+  return (
+    <SettingsContent
+      signOut={signOut}
+      user={{
+        firstName: user?.firstName,
+        fullName: user?.fullName,
+        emailAddresses: user?.emailAddresses ?? [],
+      }}
+    />
+  );
+}
+
+function SettingsContent({ user, signOut }: SettingsContentProps) {
+  const { colors } = useTheme();
   const router = useRouter();
 
   const handleSignOut = () => {

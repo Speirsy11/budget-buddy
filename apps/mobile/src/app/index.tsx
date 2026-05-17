@@ -1,8 +1,17 @@
 import { Redirect } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { isMockAuthMode } from "@/lib/auth/mock-mode";
 
 export default function Index() {
+  if (isMockAuthMode) {
+    return <Redirect href="/(tabs)" />;
+  }
+
+  return <AuthenticatedIndex />;
+}
+
+function AuthenticatedIndex() {
   const { isLoaded, isSignedIn } = useAuth();
 
   if (!isLoaded) {

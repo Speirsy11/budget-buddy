@@ -3,10 +3,18 @@ import { useAuth } from "@clerk/clerk-expo";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/lib/theme/provider";
+import { isMockAuthMode } from "@/lib/auth/mock-mode";
 
 export default function TabsLayout() {
+  if (isMockAuthMode) {
+    return <TabsNavigator />;
+  }
+
+  return <AuthenticatedTabsLayout />;
+}
+
+function AuthenticatedTabsLayout() {
   const { isLoaded, isSignedIn } = useAuth();
-  const { colors } = useTheme();
 
   if (!isLoaded) {
     return (
@@ -19,6 +27,12 @@ export default function TabsLayout() {
   if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />;
   }
+
+  return <TabsNavigator />;
+}
+
+function TabsNavigator() {
+  const { colors } = useTheme();
 
   return (
     <Tabs
