@@ -58,6 +58,9 @@ export const bankingRouter = router({
         country_codes: [CountryCode.Gb],
         language: "en",
         ...(input.redirectUri && { redirect_uri: input.redirectUri }),
+        ...(input.androidPackageName && {
+          android_package_name: input.androidPackageName,
+        }),
         ...(process.env.PLAID_WEBHOOK_URL && {
           webhook: process.env.PLAID_WEBHOOK_URL,
         }),
