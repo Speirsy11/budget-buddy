@@ -22,6 +22,24 @@ const log = logger.child({ module: "banking" });
 
 export const bankingRouter = router({
   /**
+   * Return non-secret Open Banking setup state for the current user/UI.
+   */
+  getProviderStatus: protectedProcedure.query(async ({ ctx }) => {
+    const tierConfig = getTierConfig(ctx.userPlan as UserPlan | undefined);
+
+    return {
+      configured: Boolean(
+        process.env.PLAID_CLIENT_ID && process.env.PLAID_SECRET
+      ),
+      environment: process.env.PLAID_ENV || "sandbox",
+      webhookConfigured: Boolean(process.env.PLAID_WEBHOOK_URL),
+      openBankingEnabled: tierConfig.openBankingEnabled,
+      maxBankConnections: tierConfig.maxBankConnections,
+      plan: (ctx.userPlan as UserPlan | undefined) ?? "free",
+    };
+  }),
+
+  /**
    * Create a Plaid Link token for the frontend.
    * Pro-only: open banking requires a paid subscription.
    */
@@ -40,6 +58,9 @@ export const bankingRouter = router({
         country_codes: [CountryCode.Gb],
         language: "en",
         ...(input.redirectUri && { redirect_uri: input.redirectUri }),
+        ...(input.androidPackageName && {
+          android_package_name: input.androidPackageName,
+        }),
         ...(process.env.PLAID_WEBHOOK_URL && {
           webhook: process.env.PLAID_WEBHOOK_URL,
         }),

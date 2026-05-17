@@ -166,6 +166,26 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Data</Text>
         <TouchableOpacity
           style={styles.settingRow}
+          onPress={() => router.push("/(tabs)/banking" as never)}
+        >
+          <View style={styles.settingInfo}>
+            <Ionicons name="business" size={20} color={colors.primary} />
+            <View style={styles.settingText}>
+              <Text style={[styles.settingLabel, { color: colors.text }]}>
+                Open Banking
+              </Text>
+              <Text
+                style={[styles.settingDescription, { color: colors.textMuted }]}
+              >
+                Connect or sync UK bank accounts
+              </Text>
+            </View>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+        </TouchableOpacity>
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+        <TouchableOpacity
+          style={styles.settingRow}
           onPress={() => {
             Alert.alert(
               "Export Data",
