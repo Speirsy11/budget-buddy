@@ -12,6 +12,7 @@ import {
   Upload,
   Smile,
   TrendingUp,
+  Landmark,
   ChevronsLeft,
   ChevronsRight,
   X,
@@ -44,6 +45,11 @@ const navigation = [
     name: "Import",
     href: "/dashboard/import",
     icon: Upload,
+  },
+  {
+    name: "Open Banking",
+    href: "/dashboard/open-banking",
+    icon: Landmark,
   },
 ];
 
