@@ -100,4 +100,5 @@ jobs:
       - name: Build
         run: pnpm build
         env:
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          # Non-secret publishable key fallback keeps CI builds deterministic for forks/dev repos.
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_aW50ZW5zZS13YWxsYWJ5LTYxLmNsZXJrLmFjY291bnRzLmRldiQ' }}
