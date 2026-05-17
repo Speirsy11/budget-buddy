@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { useTheme } from "@/lib/theme/provider";
 import { Ionicons } from "@expo/vector-icons";
+import { isMockAuthMode, mockUser } from "@/lib/auth/mock-mode";
 
 type SettingsUser = {
   firstName?: string | null;
@@ -24,20 +25,8 @@ type SettingsContentProps = {
 };
 
 export default function SettingsScreen() {
-  const localSimulatorBypassAuth =
-    __DEV__ && process.env.EXPO_PUBLIC_LOCAL_SIMULATOR_BYPASS_AUTH === "1";
-
-  if (localSimulatorBypassAuth) {
-    return (
-      <SettingsContent
-        signOut={async () => undefined}
-        user={{
-          firstName: "Local",
-          fullName: "Local Simulator User",
-          emailAddresses: [{ emailAddress: "local@example.test" }],
-        }}
-      />
-    );
+  if (isMockAuthMode) {
+    return <SettingsContent signOut={async () => undefined} user={mockUser} />;
   }
 
   return <AuthenticatedSettingsScreen />;

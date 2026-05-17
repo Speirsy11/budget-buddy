@@ -49,5 +49,5 @@ set -a; source .env; set +a; pnpm build
 ## Safety notes
 
 - Never commit real `.env` files or service secrets.
-- The mobile local simulator auth bypass is development-only and gated behind `__DEV__` plus `EXPO_PUBLIC_LOCAL_SIMULATOR_BYPASS_AUTH=1`.
+- The mobile development mock auth mode is gated behind `__DEV__` plus `EXPO_PUBLIC_AUTH_MODE=mock`, and release builds fail if it is enabled.
 - Generated native Expo folders are ignored; use `expo prebuild`/`expo run:*` locally when needed.

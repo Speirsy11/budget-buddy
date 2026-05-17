@@ -53,7 +53,14 @@ This is the mobile app for BudgetBuddy, built with React Native and Expo.
    pnpm android
    ```
 
-For local simulator UI work without Clerk credentials, set `EXPO_PUBLIC_LOCAL_SIMULATOR_BYPASS_AUTH=1`. The bypass is guarded by `__DEV__` and must not be set in preview or production builds.
+For local simulator UI work without Clerk credentials, set `EXPO_PUBLIC_AUTH_MODE=mock`. This is an explicit development-only mock auth mode, guarded by `__DEV__`, and must not be set in preview or production builds.
+
+The Expo config reads `EXPO_PUBLIC_API_URL` into `extra.apiUrl` and `EXPO_PUBLIC_WEB_URL` into `extra.webUrl`. Development can use `http://localhost:3000` on an iOS simulator, but preview/production builds must set a real HTTPS API URL. `app.config.js` and `scripts/assert-safe-env.js` fail release builds if the API URL is missing, points at localhost, or the development mock auth mode is enabled.
+
+EAS profiles are defined in `eas.json`:
+
+- `development` is internal and may use localhost for simulator/dev-client work.
+- `preview` and `production` intentionally require `EXPO_PUBLIC_API_URL` to be supplied by the build environment or EAS environment variables.
 
 ### Development Notes
 

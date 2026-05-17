@@ -8,12 +8,20 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
+  Linking,
 } from "react-native";
+import Constants from "expo-constants";
 import { useTheme } from "@/lib/theme/provider";
 import { useTimedLoading } from "@/lib/hooks/use-timed-loading";
 import { trpc, type Transaction } from "@/lib/trpc/client";
 import { Ionicons } from "@expo/vector-icons";
 import { TransactionItem } from "@/components/transactions/transaction-item";
+
+function getWebImportUrl() {
+  const webUrl = Constants.expoConfig?.extra?.webUrl;
+  const baseUrl = typeof webUrl === "string" ? webUrl : "http://localhost:3000";
+  return `${baseUrl.replace(/\/$/, "")}/dashboard/import`;
+}
 
 export default function TransactionsScreen() {
   const { colors } = useTheme();
@@ -63,6 +71,18 @@ export default function TransactionsScreen() {
 
   const handleClassify = (id: string) => {
     classifyMutation.mutate({ id });
+  };
+
+  const openWebImport = async () => {
+    const url = getWebImportUrl();
+    const canOpen = await Linking.canOpenURL(url);
+
+    if (!canOpen) {
+      Alert.alert("Import CSV on web", url);
+      return;
+    }
+
+    await Linking.openURL(url);
   };
 
   return (
@@ -115,6 +135,35 @@ export default function TransactionsScreen() {
             tintColor={colors.primary}
           />
         }
+        ListHeaderComponent={
+          <View
+            style={[
+              styles.importCard,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
+            <View style={styles.importIconWrap}>
+              <Ionicons name="cloud-upload" size={22} color={colors.primary} />
+            </View>
+            <View style={styles.importCopy}>
+              <Text style={[styles.importTitle, { color: colors.text }]}>
+                Import CSV on web
+              </Text>
+              <Text style={[styles.importText, { color: colors.textMuted }]}>
+                Upload a bank CSV from web, then review, search, classify, and
+                track it here. No persistent bank connection required.
+              </Text>
+            </View>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Open web CSV import"
+              style={[styles.importButton, { backgroundColor: colors.primary }]}
+              onPress={openWebImport}
+            >
+              <Text style={styles.importButtonText}>Open</Text>
+            </TouchableOpacity>
+          </View>
+        }
         ListEmptyComponent={
           isInitialLoading ? (
             <View style={styles.loadingPlaceholder}>
@@ -139,25 +188,13 @@ export default function TransactionsScreen() {
                 No Transactions
               </Text>
               <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                Import your bank statement to get started
+                Start with a web CSV import, then your mobile budget view will
+                update here.
               </Text>
             </View>
           )
         }
       />
-
-      {/* Import FAB */}
-      <TouchableOpacity
-        style={[styles.fab, { backgroundColor: colors.primary }]}
-        onPress={() => {
-          Alert.alert(
-            "Import Transactions",
-            "To import transactions, please use the web app. Mobile import coming soon!"
-          );
-        }}
-      >
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
     </View>
   );
 }
@@ -185,8 +222,47 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 16,
     paddingTop: 8,
-    paddingBottom: 100,
+    paddingBottom: 32,
     gap: 8,
+  },
+  importCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 14,
+    marginBottom: 8,
+    gap: 12,
+  },
+  importIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(16, 185, 129, 0.12)",
+  },
+  importCopy: {
+    flex: 1,
+    gap: 3,
+  },
+  importTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  importText: {
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  importButton: {
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  importButtonText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "700",
   },
   loadingPlaceholder: {
     padding: 16,
@@ -210,20 +286,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 8,
     textAlign: "center",
-  },
-  fab: {
-    position: "absolute",
-    bottom: 24,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    paddingHorizontal: 24,
   },
 });

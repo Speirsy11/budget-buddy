@@ -3,12 +3,10 @@ import { useAuth } from "@clerk/clerk-expo";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/lib/theme/provider";
+import { isMockAuthMode } from "@/lib/auth/mock-mode";
 
 export default function TabsLayout() {
-  const localSimulatorBypassAuth =
-    __DEV__ && process.env.EXPO_PUBLIC_LOCAL_SIMULATOR_BYPASS_AUTH === "1";
-
-  if (localSimulatorBypassAuth) {
+  if (isMockAuthMode) {
     return <TabsNavigator />;
   }
 

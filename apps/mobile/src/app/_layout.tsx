@@ -6,12 +6,10 @@ import { tokenCache } from "@/lib/auth/token-cache";
 import { ThemeProvider } from "@/lib/theme/provider";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { isMockAuthMode } from "@/lib/auth/mock-mode";
 
 const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
-const localSimulatorBypassAuth =
-  __DEV__ && process.env.EXPO_PUBLIC_LOCAL_SIMULATOR_BYPASS_AUTH === "1";
-
-if (!clerkPublishableKey && !localSimulatorBypassAuth) {
+if (!clerkPublishableKey && !isMockAuthMode) {
   throw new Error(
     "Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY. Please set it in your .env file."
   );
@@ -31,7 +29,7 @@ function AppProviders() {
 }
 
 export default function RootLayout() {
-  if (localSimulatorBypassAuth) {
+  if (isMockAuthMode) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
         <AppProviders />

@@ -3,4 +3,9 @@ export { authRouter } from "./router";
 export { syncUser } from "./sync-user";
 
 // Re-exports from Clerk (server-only)
-export { currentUser, auth } from "@clerk/nextjs/server";
+export {
+  auth,
+  clerkClient,
+  currentUser,
+  verifyToken,
+} from "@clerk/nextjs/server";

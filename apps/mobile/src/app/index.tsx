@@ -1,12 +1,10 @@
 import { Redirect } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { isMockAuthMode } from "@/lib/auth/mock-mode";
 
 export default function Index() {
-  const localSimulatorBypassAuth =
-    __DEV__ && process.env.EXPO_PUBLIC_LOCAL_SIMULATOR_BYPASS_AUTH === "1";
-
-  if (localSimulatorBypassAuth) {
+  if (isMockAuthMode) {
     return <Redirect href="/(tabs)" />;
   }
 
