@@ -4,16 +4,18 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
   RefreshControl,
+  SafeAreaView,
 } from "react-native";
 import { useTheme } from "@/lib/theme/provider";
 import { useTimedLoading } from "@/lib/hooks/use-timed-loading";
 import { trpc, type CategoryData } from "@/lib/trpc/client";
 import { formatCurrency } from "@/lib/utils/format";
-import { Ionicons } from "@expo/vector-icons";
 import { BudgetGauge } from "@/components/budget/budget-gauge";
 import { CategoryBreakdownList } from "@/components/budget/category-breakdown";
+import { GreetingHeader } from "@/components/greeting-header";
+import { MonthPicker } from "@/components/month-picker";
+import { Mascot } from "@/components/mascot";
 
 export default function BudgetScreen() {
   const { colors } = useTheme();
@@ -66,36 +68,45 @@ export default function BudgetScreen() {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colors.primary}
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
+        }
+      >
+        <GreetingHeader
+          mascot="clipboardman"
+          title="Your budget"
+          insight={monthName}
+          insightTone="muted"
         />
-      }
-    >
-      {/* Month Navigation */}
-      <View style={[styles.monthNav, { backgroundColor: colors.card }]}>
-        <TouchableOpacity onPress={handlePrevMonth} style={styles.navButton}>
-          <Ionicons name="chevron-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.monthText, { color: colors.text }]}>
-          {monthName}
-        </Text>
-        <TouchableOpacity onPress={handleNextMonth} style={styles.navButton}>
-          <Ionicons name="chevron-forward" size={24} color={colors.text} />
-        </TouchableOpacity>
-      </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginVertical: 12,
+          }}
+        >
+          <MonthPicker
+            month={month}
+            year={year}
+            onPrev={handlePrevMonth}
+            onNext={handleNextMonth}
+          />
+        </View>
 
       {/* Budget Gauges */}
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+      <View style={[styles.section, { backgroundColor: colors.surface.lemon }]}>
+        <Text style={[styles.sectionTitle, { color: colors.ink }]}>
           50/30/20 Budget
         </Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <Text style={[styles.sectionSubtitle, { color: colors.inkSoft }]}>
           Track your spending against recommended allocations
         </Text>
 
@@ -140,12 +151,8 @@ export default function BudgetScreen() {
           </View>
         ) : (
           <View style={styles.emptyState}>
-            <Ionicons
-              name="bar-chart-outline"
-              size={48}
-              color={colors.textMuted}
-            />
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+            <Mascot name="bars" size={56} />
+            <Text style={[styles.emptyText, { color: colors.inkSoft }]}>
               No budget data for this month
             </Text>
           </View>
@@ -154,31 +161,36 @@ export default function BudgetScreen() {
 
       {/* Income Summary */}
       {budget && (
-        <View style={[styles.incomeCard, { backgroundColor: colors.card }]}>
+        <View style={[styles.incomeCard, { backgroundColor: colors.surface.linen }]}>
           <View style={styles.incomeRow}>
-            <Text style={[styles.incomeLabel, { color: colors.textMuted }]}>
+            <Text style={[styles.incomeLabel, { color: colors.inkSoft }]}>
               Monthly Income
             </Text>
-            <Text style={[styles.incomeValue, { color: "#22c55e" }]}>
+            <Text style={[styles.incomeValue, { color: colors.cat.emerald }]}>
               {formatCurrency(budget.totalIncome)}
             </Text>
           </View>
           <View style={styles.incomeRow}>
-            <Text style={[styles.incomeLabel, { color: colors.textMuted }]}>
+            <Text style={[styles.incomeLabel, { color: colors.inkSoft }]}>
               Total Spent
             </Text>
-            <Text style={[styles.incomeValue, { color: colors.text }]}>
+            <Text style={[styles.incomeValue, { color: colors.ink }]}>
               {formatCurrency(budget.needs.actual + budget.wants.actual)}
             </Text>
           </View>
           <View style={styles.incomeRow}>
-            <Text style={[styles.incomeLabel, { color: colors.textMuted }]}>
+            <Text style={[styles.incomeLabel, { color: colors.inkSoft }]}>
               Savings Rate
             </Text>
             <Text
               style={[
                 styles.incomeValue,
-                { color: budget.savingsRate >= 20 ? "#22c55e" : "#f59e0b" },
+                {
+                  color:
+                    budget.savingsRate >= 20
+                      ? colors.cat.emerald
+                      : colors.cat.amber,
+                },
               ]}
             >
               {budget.savingsRate.toFixed(1)}%
@@ -188,8 +200,8 @@ export default function BudgetScreen() {
       )}
 
       {/* Category Breakdown */}
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+      <View style={[styles.section, { backgroundColor: colors.surface.lav }]}>
+        <Text style={[styles.sectionTitle, { color: colors.ink }]}>
           Spending by Category
         </Text>
         {showCategorySkeleton ? (
@@ -208,18 +220,15 @@ export default function BudgetScreen() {
           <CategoryBreakdownList categories={categories} />
         ) : (
           <View style={styles.emptyState}>
-            <Ionicons
-              name="pie-chart-outline"
-              size={48}
-              color={colors.textMuted}
-            />
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+            <Mascot name="pie" size={56} />
+            <Text style={[styles.emptyText, { color: colors.inkSoft }]}>
               No spending data for this month
             </Text>
           </View>
         )}
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -228,28 +237,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
-    paddingBottom: 32,
-  },
-  monthNav: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-  },
-  navButton: {
-    padding: 8,
-  },
-  monthText: {
-    fontSize: 18,
-    fontWeight: "600",
+    padding: 18,
+    paddingBottom: 110,
   },
   section: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 28,
+    padding: 18,
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,
@@ -275,9 +269,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   incomeCard: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 28,
+    padding: 18,
+    marginBottom: 12,
     gap: 12,
   },
   incomeRow: {

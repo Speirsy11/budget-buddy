@@ -6,8 +6,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   RefreshControl,
+  SafeAreaView,
 } from "react-native";
 import { useTheme } from "@/lib/theme/provider";
+import { GreetingHeader } from "@/components/greeting-header";
 import {
   trpc,
   type TrendData,
@@ -123,34 +125,40 @@ export default function AnalyticsScreen() {
   ];
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colors.primary}
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
+        }
+      >
+        <GreetingHeader
+          mascot="chartman"
+          title="Analytics"
+          insight={`Past ${months} months`}
+          insightTone="muted"
         />
-      }
-    >
-      {/* Period Selector */}
-      <View style={[styles.periodSelector, { backgroundColor: colors.card }]}>
+        <View style={{ height: 12 }} />
+        {/* Period Selector */}
+        <View style={[styles.periodSelector, { backgroundColor: colors.surface.white }]}>
         {periodOptions.map((option) => (
           <TouchableOpacity
             key={option.value}
             style={[
               styles.periodButton,
-              months === option.value && {
-                backgroundColor: colors.primary,
-              },
+              months === option.value && { backgroundColor: colors.ink },
             ]}
             onPress={() => setMonths(option.value)}
           >
             <Text
               style={[
                 styles.periodText,
-                { color: months === option.value ? "#fff" : colors.text },
+                { color: months === option.value ? "#fff" : colors.ink },
               ]}
             >
               {option.label}
@@ -167,18 +175,18 @@ export default function AnalyticsScreen() {
       </View>
 
       {/* Monthly Comparison */}
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+      <View style={[styles.section, { backgroundColor: colors.surface.white }]}>
+        <Text style={[styles.sectionTitle, { color: colors.ink }]}>
           Monthly Overview
         </Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <Text style={[styles.sectionSubtitle, { color: colors.inkSoft }]}>
           Income vs Expenses comparison
         </Text>
         {monthlyData.length > 0 ? (
           <MonthlyComparisonChart data={monthlyData} />
         ) : (
           <View style={styles.chartPlaceholder}>
-            <Text style={[styles.placeholderText, { color: colors.textMuted }]}>
+            <Text style={[styles.placeholderText, { color: colors.inkSoft }]}>
               Not enough data
             </Text>
           </View>
@@ -186,24 +194,25 @@ export default function AnalyticsScreen() {
       </View>
 
       {/* Spending Trends */}
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+      <View style={[styles.section, { backgroundColor: colors.surface.white }]}>
+        <Text style={[styles.sectionTitle, { color: colors.ink }]}>
           Spending Trends
         </Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <Text style={[styles.sectionSubtitle, { color: colors.inkSoft }]}>
           {months > 3 ? "Weekly" : "Daily"} spending over time
         </Text>
         {trends.length > 0 ? (
           <SpendingTrendChart data={trends} />
         ) : (
           <View style={styles.chartPlaceholder}>
-            <Text style={[styles.placeholderText, { color: colors.textMuted }]}>
+            <Text style={[styles.placeholderText, { color: colors.inkSoft }]}>
               Not enough data
             </Text>
           </View>
         )}
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -212,20 +221,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
-    paddingBottom: 32,
+    padding: 18,
+    paddingBottom: 110,
   },
   periodSelector: {
     flexDirection: "row",
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 4,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   periodButton: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 9,
     alignItems: "center",
-    borderRadius: 8,
+    borderRadius: 10,
   },
   periodText: {
     fontSize: 14,
@@ -236,9 +245,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   section: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 28,
+    padding: 18,
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,

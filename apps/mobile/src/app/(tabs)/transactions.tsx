@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Alert,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
@@ -18,6 +19,8 @@ import { useTimedLoading } from "@/lib/hooks/use-timed-loading";
 import { trpc, type Transaction } from "@/lib/trpc/client";
 import { Ionicons } from "@expo/vector-icons";
 import { TransactionItem } from "@/components/transactions/transaction-item";
+import { GreetingHeader } from "@/components/greeting-header";
+import { Mascot } from "@/components/mascot";
 
 const MAX_CSV_SIZE_BYTES = 5 * 1024 * 1024;
 
@@ -155,30 +158,38 @@ export default function TransactionsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
+      <View style={{ paddingHorizontal: 18, paddingTop: 8 }}>
+        <GreetingHeader
+          mascot="receiptman"
+          title="Your transactions"
+          insight={
+            transactions.length > 0
+              ? `${transactions.length} loaded`
+              : "Ready when you are"
+          }
+          insightTone="muted"
+        />
+      </View>
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View
           style={[
             styles.searchBar,
-            { backgroundColor: colors.inputBackground },
+            { backgroundColor: colors.surface.white },
           ]}
         >
-          <Ionicons name="search" size={20} color={colors.textMuted} />
+          <Ionicons name="search" size={20} color={colors.muted} />
           <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
+            style={[styles.searchInput, { color: colors.ink }]}
             placeholder="Search transactions..."
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColor={colors.muted}
             value={search}
             onChangeText={setSearch}
           />
           {search ? (
             <TouchableOpacity onPress={() => setSearch("")}>
-              <Ionicons
-                name="close-circle"
-                size={20}
-                color={colors.textMuted}
-              />
+              <Ionicons name="close-circle" size={20} color={colors.muted} />
             </TouchableOpacity>
           ) : null}
         </View>
@@ -209,23 +220,17 @@ export default function TransactionsScreen() {
             <View
               style={[
                 styles.importCard,
-                { backgroundColor: colors.card, borderColor: colors.border },
+                { backgroundColor: colors.surface.lemon },
               ]}
             >
-              <View style={styles.importIconWrap}>
-                <Ionicons
-                  name="document-attach"
-                  size={22}
-                  color={colors.primary}
-                />
-              </View>
+              <Mascot name="csv" size={48} />
               <View style={styles.importCopy}>
-                <Text style={[styles.importTitle, { color: colors.text }]}>
-                  Import CSV on mobile
+                <Text style={[styles.importTitle, { color: colors.ink }]}>
+                  Import CSV
                 </Text>
-                <Text style={[styles.importText, { color: colors.textMuted }]}>
-                  Pick a bank CSV from Files. BudgetBuddy parses it locally on
-                  this device, then uploads only the extracted transactions.
+                <Text style={[styles.importText, { color: colors.deep.lemon }]}>
+                  Parsed locally on this device — only the extracted
+                  transactions are uploaded.
                 </Text>
               </View>
               <TouchableOpacity
@@ -234,9 +239,7 @@ export default function TransactionsScreen() {
                 style={[
                   styles.importButton,
                   {
-                    backgroundColor: isImporting
-                      ? colors.border
-                      : colors.primary,
+                    backgroundColor: isImporting ? colors.muted : colors.ink,
                   },
                 ]}
                 disabled={isImporting}
@@ -253,15 +256,11 @@ export default function TransactionsScreen() {
               <View
                 style={[
                   styles.importNotice,
-                  { backgroundColor: colors.card, borderColor: colors.border },
+                  { backgroundColor: colors.surface.sage },
                 ]}
               >
-                <Ionicons
-                  name="checkmark-circle"
-                  size={18}
-                  color={colors.success}
-                />
-                <Text style={[styles.importNoticeText, { color: colors.text }]}>
+                <Mascot name="thumbs2" size={32} />
+                <Text style={[styles.importNoticeText, { color: colors.ink }]}>
                   {importSummary}
                 </Text>
               </View>
@@ -276,22 +275,18 @@ export default function TransactionsScreen() {
                   key={i}
                   style={[
                     styles.transactionSkeleton,
-                    { backgroundColor: colors.border },
+                    { backgroundColor: colors.surface.white },
                   ]}
                 />
               ))}
             </View>
           ) : (
             <View style={styles.emptyState}>
-              <Ionicons
-                name="receipt-outline"
-                size={64}
-                color={colors.textMuted}
-              />
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                No Transactions
+              <Mascot name="receipt" size={72} />
+              <Text style={[styles.emptyTitle, { color: colors.ink }]}>
+                No transactions
               </Text>
-              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+              <Text style={[styles.emptyText, { color: colors.muted }]}>
                 Import a CSV from Files or connect Open Banking when you are
                 ready.
               </Text>
@@ -299,7 +294,7 @@ export default function TransactionsScreen() {
           )
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -308,15 +303,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   searchContainer: {
-    padding: 16,
+    paddingHorizontal: 18,
+    paddingTop: 12,
     paddingBottom: 8,
   },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    height: 48,
-    borderRadius: 12,
+    height: 44,
+    borderRadius: 14,
     gap: 12,
   },
   searchInput: {
@@ -324,30 +320,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 18,
     paddingTop: 8,
-    paddingBottom: 32,
+    paddingBottom: 110,
     gap: 8,
   },
   headerStack: {
-    gap: 8,
-    marginBottom: 8,
+    gap: 10,
+    marginBottom: 10,
   },
   importCard: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 16,
-    borderWidth: 1,
+    borderRadius: 28,
     padding: 14,
     gap: 12,
-  },
-  importIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(16, 185, 129, 0.12)",
   },
   importCopy: {
     flex: 1,
@@ -378,10 +365,9 @@ const styles = StyleSheet.create({
   importNotice: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 14,
-    borderWidth: 1,
+    borderRadius: 18,
     padding: 12,
-    gap: 8,
+    gap: 10,
   },
   importNoticeText: {
     flex: 1,

@@ -1,71 +1,90 @@
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
 import { useTheme } from "@/lib/theme/provider";
-import { Ionicons } from "@expo/vector-icons";
+import { Mascot, type MascotName } from "@/components/mascot";
+
+type SurfaceKey = "sage" | "peach" | "sky" | "lav" | "lemon" | "linen" | "white";
 
 interface StatCardProps {
   title: string;
   value: string;
-  icon: string;
-  color: string;
+  mascot: MascotName;
+  surface: SurfaceKey;
+  meta?: string;
   isLoading?: boolean;
 }
-
-const iconMap = new Map<string, keyof typeof Ionicons.glyphMap>([
-  ["wallet", "wallet"],
-  ["trending-down", "trending-down"],
-  ["piggy-bank", "cash"],
-  ["percent", "analytics"],
-]);
 
 export function StatCard({
   title,
   value,
-  icon,
-  color,
+  mascot,
+  surface,
+  meta,
   isLoading,
 }: StatCardProps) {
-  const { colors } = useTheme();
+  const { colors, radius, shadow } = useTheme();
+  // eslint-disable-next-line security/detect-object-injection -- key from SurfaceKey union
+  const bg = colors.surface[surface];
+  const deep =
+    surface === "linen" || surface === "white"
+      ? colors.inkSoft
+      : colors.deep[surface as keyof typeof colors.deep];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.card }]}>
-      <View style={[styles.iconContainer, { backgroundColor: `${color}20` }]}>
-        <Ionicons
-          name={iconMap.get(icon) || "stats-chart"}
-          size={20}
-          color={color}
+    <View
+      style={[
+        {
+          width: "48%",
+          backgroundColor: bg,
+          borderRadius: radius.bento,
+          paddingHorizontal: 14,
+          paddingVertical: 12,
+          overflow: "hidden",
+          position: "relative",
+        },
+        shadow.card,
+      ]}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+        }}
+      >
+        <Text style={{ fontSize: 11, fontWeight: "600", color: deep }}>
+          {title}
+        </Text>
+        <Mascot
+          name={mascot}
+          size={36}
+          style={{ marginTop: -4, marginRight: -6 }}
         />
       </View>
-      <Text style={[styles.title, { color: colors.textMuted }]}>{title}</Text>
       {isLoading ? (
-        <ActivityIndicator size="small" color={colors.primary} />
+        <ActivityIndicator
+          size="small"
+          color={colors.primary}
+          style={{ marginTop: 8, alignSelf: "flex-start" }}
+        />
       ) : (
-        <Text style={[styles.value, { color: colors.text }]}>{value}</Text>
+        <Text
+          style={{
+            fontSize: 26,
+            fontWeight: "800",
+            marginTop: 4,
+            letterSpacing: -0.5,
+            lineHeight: 28,
+            color: colors.ink,
+          }}
+        >
+          {value}
+        </Text>
+      )}
+      {meta && (
+        <Text style={{ fontSize: 10, color: colors.inkSoft, marginTop: 4 }}>
+          {meta}
+        </Text>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    minWidth: "45%",
-    borderRadius: 12,
-    padding: 16,
-  },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  value: {
-    fontSize: 18,
-    fontWeight: "700",
-  },
-});

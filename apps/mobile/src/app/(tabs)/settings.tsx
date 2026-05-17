@@ -6,12 +6,15 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  SafeAreaView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { useTheme } from "@/lib/theme/provider";
 import { Ionicons } from "@expo/vector-icons";
 import { isMockAuthMode, mockUser } from "@/lib/auth/mock-mode";
+import { Mascot } from "@/components/mascot";
+import { GreetingHeader } from "@/components/greeting-header";
 
 type SettingsUser = {
   firstName?: string | null;
@@ -67,28 +70,28 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.content}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <GreetingHeader
+          mascot="peaceful"
+          title="Settings"
+          insight="Make Buddy yours"
+          insightTone="muted"
+        />
+        <View style={{ height: 6 }} />
+
       {/* Profile Section */}
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+      <View style={[styles.section, { backgroundColor: colors.surface.sage }]}>
+        <Text style={[styles.sectionTitle, { color: colors.deep.sage }]}>
           Profile
         </Text>
         <View style={styles.profileRow}>
-          <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-            <Text style={styles.avatarText}>
-              {user?.firstName?.[0] ||
-                user?.emailAddresses[0]?.emailAddress[0]?.toUpperCase() ||
-                "U"}
-            </Text>
-          </View>
+          <Mascot name="wave" size={56} />
           <View style={styles.profileInfo}>
-            <Text style={[styles.profileName, { color: colors.text }]}>
+            <Text style={[styles.profileName, { color: colors.ink }]}>
               {user?.fullName || "User"}
             </Text>
-            <Text style={[styles.profileEmail, { color: colors.textMuted }]}>
+            <Text style={[styles.profileEmail, { color: colors.inkSoft }]}>
               {user?.emailAddresses[0]?.emailAddress}
             </Text>
           </View>
@@ -96,19 +99,19 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
       </View>
 
       {/* Preferences Section */}
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+      <View style={[styles.section, { backgroundColor: colors.surface.sky }]}>
+        <Text style={[styles.sectionTitle, { color: colors.deep.sky }]}>
           Preferences
         </Text>
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
             <Ionicons name="notifications" size={20} color={colors.primary} />
             <View style={styles.settingText}>
-              <Text style={[styles.settingLabel, { color: colors.text }]}>
+              <Text style={[styles.settingLabel, { color: colors.ink }]}>
                 Budget Alerts
               </Text>
               <Text
-                style={[styles.settingDescription, { color: colors.textMuted }]}
+                style={[styles.settingDescription, { color: colors.inkSoft }]}
               >
                 Get notified when approaching limits
               </Text>
@@ -119,16 +122,16 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
             trackColor={{ false: colors.border, true: colors.primary }}
           />
         </View>
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+        <View style={[styles.divider, { backgroundColor: "rgba(0,0,0,0.07)" }]} />
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
             <Ionicons name="mail" size={20} color={colors.primary} />
             <View style={styles.settingText}>
-              <Text style={[styles.settingLabel, { color: colors.text }]}>
+              <Text style={[styles.settingLabel, { color: colors.ink }]}>
                 Weekly Summary
               </Text>
               <Text
-                style={[styles.settingDescription, { color: colors.textMuted }]}
+                style={[styles.settingDescription, { color: colors.inkSoft }]}
               >
                 Receive weekly spending summary
               </Text>
@@ -139,16 +142,16 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
             trackColor={{ false: colors.border, true: colors.primary }}
           />
         </View>
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+        <View style={[styles.divider, { backgroundColor: "rgba(0,0,0,0.07)" }]} />
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
             <Ionicons name="warning" size={20} color={colors.primary} />
             <View style={styles.settingText}>
-              <Text style={[styles.settingLabel, { color: colors.text }]}>
+              <Text style={[styles.settingLabel, { color: colors.ink }]}>
                 Large Transaction Alerts
               </Text>
               <Text
-                style={[styles.settingDescription, { color: colors.textMuted }]}
+                style={[styles.settingDescription, { color: colors.inkSoft }]}
               >
                 Notify for transactions over £100
               </Text>
@@ -162,28 +165,28 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
       </View>
 
       {/* Data Section */}
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Data</Text>
+      <View style={[styles.section, { backgroundColor: colors.surface.linen }]}>
+        <Text style={[styles.sectionTitle, { color: colors.inkSoft }]}>Data</Text>
         <TouchableOpacity
           style={styles.settingRow}
           onPress={() => router.push("/(tabs)/banking" as never)}
         >
           <View style={styles.settingInfo}>
-            <Ionicons name="business" size={20} color={colors.primary} />
+            <Mascot name="bank" size={28} />
             <View style={styles.settingText}>
-              <Text style={[styles.settingLabel, { color: colors.text }]}>
+              <Text style={[styles.settingLabel, { color: colors.ink }]}>
                 Open Banking
               </Text>
               <Text
-                style={[styles.settingDescription, { color: colors.textMuted }]}
+                style={[styles.settingDescription, { color: colors.inkSoft }]}
               >
                 Connect or sync UK bank accounts
               </Text>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          <Ionicons name="chevron-forward" size={20} color={colors.muted} />
         </TouchableOpacity>
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+        <View style={[styles.divider, { backgroundColor: "rgba(0,0,0,0.07)" }]} />
         <TouchableOpacity
           style={styles.settingRow}
           onPress={() => {
@@ -194,44 +197,44 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
           }}
         >
           <View style={styles.settingInfo}>
-            <Ionicons name="download" size={20} color={colors.primary} />
+            <Mascot name="csv" size={28} />
             <View style={styles.settingText}>
-              <Text style={[styles.settingLabel, { color: colors.text }]}>
+              <Text style={[styles.settingLabel, { color: colors.ink }]}>
                 Export Data
               </Text>
               <Text
-                style={[styles.settingDescription, { color: colors.textMuted }]}
+                style={[styles.settingDescription, { color: colors.inkSoft }]}
               >
                 Download your data as CSV or JSON
               </Text>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          <Ionicons name="chevron-forward" size={20} color={colors.muted} />
         </TouchableOpacity>
       </View>
 
       {/* About Section */}
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>About</Text>
+      <View style={[styles.section, { backgroundColor: colors.surface.white }]}>
+        <Text style={[styles.sectionTitle, { color: colors.inkSoft }]}>About</Text>
         <View style={styles.aboutRow}>
-          <Text style={[styles.aboutLabel, { color: colors.textMuted }]}>
+          <Text style={[styles.aboutLabel, { color: colors.inkSoft }]}>
             Version
           </Text>
-          <Text style={[styles.aboutValue, { color: colors.text }]}>1.0.0</Text>
+          <Text style={[styles.aboutValue, { color: colors.ink }]}>1.0.0</Text>
         </View>
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+        <View style={[styles.divider, { backgroundColor: "rgba(0,0,0,0.07)" }]} />
         <TouchableOpacity style={styles.aboutRow}>
-          <Text style={[styles.aboutLabel, { color: colors.textMuted }]}>
+          <Text style={[styles.aboutLabel, { color: colors.inkSoft }]}>
             Privacy Policy
           </Text>
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          <Ionicons name="chevron-forward" size={20} color={colors.muted} />
         </TouchableOpacity>
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+        <View style={[styles.divider, { backgroundColor: "rgba(0,0,0,0.07)" }]} />
         <TouchableOpacity style={styles.aboutRow}>
-          <Text style={[styles.aboutLabel, { color: colors.textMuted }]}>
+          <Text style={[styles.aboutLabel, { color: colors.inkSoft }]}>
             Terms of Service
           </Text>
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          <Ionicons name="chevron-forward" size={20} color={colors.muted} />
         </TouchableOpacity>
       </View>
 
@@ -239,16 +242,17 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
       <TouchableOpacity
         style={[
           styles.signOutButton,
-          { backgroundColor: colors.errorBackground },
+          { backgroundColor: colors.surface.peach },
         ]}
         onPress={handleSignOut}
       >
-        <Ionicons name="log-out" size={20} color={colors.error} />
-        <Text style={[styles.signOutText, { color: colors.error }]}>
+        <Mascot name="concerned" size={24} />
+        <Text style={[styles.signOutText, { color: colors.deep.peach }]}>
           Sign Out
         </Text>
       </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -257,13 +261,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
-    paddingBottom: 32,
+    padding: 18,
+    paddingBottom: 110,
   },
   section: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 28,
+    padding: 18,
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 14,
@@ -344,9 +348,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: 10,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 18,
   },
   signOutText: {
     fontSize: 16,

@@ -8,8 +8,11 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Mascot } from "@/components/mascot";
+import { GreetingHeader } from "@/components/greeting-header";
 import {
   create,
   destroy,
@@ -227,25 +230,27 @@ export default function BankingScreen() {
     createUpdateLinkToken.isPending;
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.content}
-    >
-      <View style={[styles.heroCard, { backgroundColor: colors.card }]}>
-        <View style={styles.heroHeader}>
-          <View style={[styles.heroIcon, { backgroundColor: colors.primary }]}>
-            <Ionicons name="business" size={24} color="#fff" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <GreetingHeader
+          mascot="pointer"
+          title="Connect your bank"
+          insight="UK Open Banking via Plaid"
+          insightTone="muted"
+        />
+        <View style={[styles.heroCard, { backgroundColor: colors.surface.sage }]}>
+          <View style={styles.heroHeader}>
+            <Mascot name="shield" size={56} />
+            <View style={styles.heroCopy}>
+              <Text style={[styles.heroTitle, { color: colors.ink }]}>
+                Privacy first
+              </Text>
+              <Text style={[styles.heroSubtitle, { color: colors.deep.sage }]}>
+                Plaid handles bank consent; BudgetBuddy stores only the
+                server-side access token. Disconnect any time.
+              </Text>
+            </View>
           </View>
-          <View style={styles.heroCopy}>
-            <Text style={[styles.heroTitle, { color: colors.text }]}>
-              Open Banking
-            </Text>
-            <Text style={[styles.heroSubtitle, { color: colors.textMuted }]}>
-              Connect UK bank accounts with Plaid, then sync transactions
-              straight into BudgetBuddy.
-            </Text>
-          </View>
-        </View>
 
         <View style={styles.statusGrid}>
           <StatusPill
@@ -296,7 +301,7 @@ export default function BankingScreen() {
       </View>
 
       {statusMessage ? (
-        <View style={[styles.notice, { backgroundColor: colors.card }]}>
+        <View style={[styles.notice, { backgroundColor: colors.surface.linen }]}>
           <Ionicons
             name="information-circle"
             size={20}
@@ -309,7 +314,7 @@ export default function BankingScreen() {
       ) : null}
 
       {lastSync ? (
-        <View style={[styles.notice, { backgroundColor: colors.card }]}>
+        <View style={[styles.notice, { backgroundColor: colors.surface.linen }]}>
           <Ionicons name="checkmark-circle" size={20} color={colors.success} />
           <Text style={[styles.noticeText, { color: colors.text }]}>
             Added {lastSync.added}, updated {lastSync.modified}, removed{" "}
@@ -318,7 +323,7 @@ export default function BankingScreen() {
         </View>
       ) : null}
 
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
+      <View style={[styles.section, { backgroundColor: colors.surface.white }]}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           Connected accounts
         </Text>
@@ -365,7 +370,7 @@ export default function BankingScreen() {
         )}
       </View>
 
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
+      <View style={[styles.section, { backgroundColor: colors.surface.white }]}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           Privacy note
         </Text>
@@ -375,7 +380,8 @@ export default function BankingScreen() {
           users who do not want a persistent bank connection.
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -505,12 +511,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
-    paddingBottom: 32,
-    gap: 14,
+    padding: 18,
+    paddingBottom: 110,
+    gap: 12,
   },
   heroCard: {
-    borderRadius: 20,
+    borderRadius: 28,
     padding: 18,
     gap: 16,
   },
@@ -591,8 +597,8 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   section: {
-    borderRadius: 18,
-    padding: 16,
+    borderRadius: 28,
+    padding: 18,
     gap: 14,
   },
   sectionTitle: {

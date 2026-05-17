@@ -2,17 +2,19 @@ import { useState } from "react";
 import {
   View,
   Text,
-  ScrollView,
-  StyleSheet,
   RefreshControl,
-  TouchableOpacity,
+  Pressable,
+  ScrollView,
+  SafeAreaView,
 } from "react-native";
 import { Link } from "expo-router";
 import { useTheme } from "@/lib/theme/provider";
 import { useTimedLoading } from "@/lib/hooks/use-timed-loading";
 import { trpc, type Transaction } from "@/lib/trpc/client";
 import { formatCurrency } from "@/lib/utils/format";
-import { Ionicons } from "@expo/vector-icons";
+import { GreetingHeader } from "@/components/greeting-header";
+import { BentoCard } from "@/components/bento-card";
+import { Mascot } from "@/components/mascot";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { BudgetProgress } from "@/components/dashboard/budget-progress";
 import { TransactionItem } from "@/components/transactions/transaction-item";
@@ -30,16 +32,24 @@ export default function DashboardScreen() {
   const budgetQuery = trpc.analytics.get503020.useQuery({ month, year });
   const transactionsQuery = trpc.transactions.list.useQuery({
     limit: 5,
-    filters: {
-      startDate: startOfMonth,
-      endDate: endOfMonth,
-    },
+    filters: { startDate: startOfMonth, endDate: endOfMonth },
   });
 
   const budget = budgetQuery.data;
   const transactions: Transaction[] = transactionsQuery.data?.data || [];
   const showBudgetSkeleton = useTimedLoading(budgetQuery.isLoading);
   const showTransactionsSkeleton = useTimedLoading(transactionsQuery.isLoading);
+
+  const netCashFlow =
+    (budget?.totalIncome ?? 0) - (budget?.totalExpenses ?? 0);
+  const monthLong = new Date(year, month - 1).toLocaleString("en-GB", {
+    month: "long",
+  });
+
+  const aheadCopy =
+    netCashFlow >= 0
+      ? `${formatCurrency(netCashFlow).replace(/\.\d+$/, "")} ahead this month`
+      : `${formatCurrency(Math.abs(netCashFlow)).replace(/\.\d+$/, "")} behind this month`;
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -48,266 +58,263 @@ export default function DashboardScreen() {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colors.primary}
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 18, paddingBottom: 110, gap: 12 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+      >
+        <GreetingHeader
+          mascot="wave2"
+          title="Hey, there!"
+          insight={budget ? aheadCopy : undefined}
         />
-      }
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={[styles.greeting, { color: colors.textMuted }]}>
-          Welcome back
-        </Text>
-        <Text style={[styles.title, { color: colors.text }]}>
-          Your Finance Overview
-        </Text>
-      </View>
 
-      {/* Stats Grid */}
-      <View style={styles.statsGrid}>
-        <StatCard
-          title="Income"
-          value={formatCurrency(budget?.totalIncome || 0)}
-          icon="wallet"
-          color="#22c55e"
-          isLoading={budgetQuery.isLoading}
-        />
-        <StatCard
-          title="Expenses"
-          value={formatCurrency(
-            (budget?.needs.actual || 0) + (budget?.wants.actual || 0)
-          )}
-          icon="trending-down"
-          color="#ef4444"
-          isLoading={budgetQuery.isLoading}
-        />
-        <StatCard
-          title="Savings"
-          value={formatCurrency(budget?.savings.actual || 0)}
-          icon="piggy-bank"
-          color="#10b981"
-          isLoading={budgetQuery.isLoading}
-        />
-        <StatCard
-          title="Savings Rate"
-          value={`${budget?.savingsRate?.toFixed(1) || 0}%`}
-          icon="percent"
-          color="#8b5cf6"
-          isLoading={budgetQuery.isLoading}
-        />
-      </View>
-
-      {/* Budget Progress */}
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            50/30/20 Budget
-          </Text>
-          <Link href="/(tabs)/budget" asChild>
-            <TouchableOpacity>
-              <Text style={[styles.seeAll, { color: colors.primary }]}>
-                See Details
-              </Text>
-            </TouchableOpacity>
-          </Link>
-        </View>
-        {showBudgetSkeleton ? (
-          <View style={styles.loadingPlaceholder}>
-            <View
-              style={[styles.skeleton, { backgroundColor: colors.border }]}
-            />
-            <View
-              style={[styles.skeleton, { backgroundColor: colors.border }]}
-            />
-            <View
-              style={[styles.skeleton, { backgroundColor: colors.border }]}
-            />
-          </View>
-        ) : budget ? (
-          <View style={styles.budgetBars}>
-            <BudgetProgress
-              label="Needs"
-              actual={budget.needs.actual}
-              target={budget.needs.target}
-              color="#3b82f6"
-            />
-            <BudgetProgress
-              label="Wants"
-              actual={budget.wants.actual}
-              target={budget.wants.target}
-              color="#ec4899"
-            />
-            <BudgetProgress
-              label="Savings"
-              actual={budget.savings.actual}
-              target={budget.savings.target}
-              color="#10b981"
-            />
-          </View>
-        ) : (
-          <View style={styles.emptyState}>
-            <Ionicons
-              name="bar-chart-outline"
-              size={48}
-              color={colors.textMuted}
-            />
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              No budget data yet
+        {/* Hero net-flow card */}
+        <BentoCard
+          surface="sky"
+          padded={false}
+          style={{
+            paddingVertical: 14,
+            paddingHorizontal: 18,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text
+              style={{ fontSize: 12, fontWeight: "600", color: colors.deep.sky }}
+            >
+              Net flow · {monthLong}
             </Text>
-            <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
-              Import transactions to populate your 50/30/20 overview.
+            <Text
+              style={{
+                fontSize: 42,
+                fontWeight: "800",
+                letterSpacing: -1,
+                marginTop: 4,
+                color: colors.ink,
+                lineHeight: 44,
+              }}
+            >
+              {netCashFlow >= 0 ? "+" : "−"}
+              {formatCurrency(Math.abs(netCashFlow)).replace(/\.\d+$/, "")}
+            </Text>
+            <Text style={{ fontSize: 11, color: colors.inkSoft, marginTop: 4 }}>
+              {netCashFlow >= 0
+                ? "Tracking ahead"
+                : "Spending exceeded income"}
             </Text>
           </View>
-        )}
-      </View>
+          <Mascot
+            name={netCashFlow >= 0 ? "thumbsup" : "concerned"}
+            size={76}
+            style={{ marginRight: -10 }}
+          />
+        </BentoCard>
 
-      {/* Recent Transactions */}
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Recent Transactions
-          </Text>
-          <Link href="/(tabs)/transactions" asChild>
-            <TouchableOpacity>
-              <Text style={[styles.seeAll, { color: colors.primary }]}>
-                See All
-              </Text>
-            </TouchableOpacity>
-          </Link>
+        {/* 2x2 stat grid */}
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 10,
+            justifyContent: "space-between",
+          }}
+        >
+          <StatCard
+            surface="sage"
+            mascot="coins"
+            title="Income"
+            value={formatCurrency(budget?.totalIncome ?? 0).replace(/\.\d+$/, "")}
+            meta={`${monthLong}`}
+            isLoading={budgetQuery.isLoading}
+          />
+          <StatCard
+            surface="peach"
+            mascot="receipt"
+            title="Expenses"
+            value={formatCurrency(budget?.totalExpenses ?? 0).replace(/\.\d+$/, "")}
+            meta="this month"
+            isLoading={budgetQuery.isLoading}
+          />
+          <StatCard
+            surface="lav"
+            mascot="piggy"
+            title="Savings"
+            value={formatCurrency(budget?.savings.actual ?? 0).replace(/\.\d+$/, "")}
+            meta="vs target"
+            isLoading={budgetQuery.isLoading}
+          />
+          <StatCard
+            surface="lemon"
+            mascot="star"
+            title="Rate"
+            value={`${(budget?.savingsRate ?? 0).toFixed(1)}%`}
+            meta="goal 20%"
+            isLoading={budgetQuery.isLoading}
+          />
         </View>
-        {showTransactionsSkeleton ? (
-          <View style={styles.loadingPlaceholder}>
-            {[1, 2, 3].map((i) => (
-              <View
-                key={i}
-                style={[
-                  styles.transactionSkeleton,
-                  { backgroundColor: colors.border },
-                ]}
+
+        {/* Budget */}
+        <BentoCard surface="lemon" padded={false} style={{ padding: 16 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              marginBottom: 12,
+            }}
+          >
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{ fontSize: 14, fontWeight: "700", color: colors.ink }}
+              >
+                50/30/20 Budget
+              </Text>
+              <Text style={{ fontSize: 11, color: colors.inkSoft, marginTop: 2 }}>
+                Spending vs. your goals
+              </Text>
+            </View>
+            <Mascot name="clipboard" size={44} />
+          </View>
+
+          {showBudgetSkeleton ? (
+            <View style={{ gap: 10 }}>
+              {[1, 2, 3].map((i) => (
+                <View
+                  key={i}
+                  style={{
+                    height: 28,
+                    borderRadius: 8,
+                    backgroundColor: "rgba(0,0,0,0.07)",
+                  }}
+                />
+              ))}
+            </View>
+          ) : budget ? (
+            <View style={{ gap: 10 }}>
+              <BudgetProgress
+                label="Needs"
+                actual={budget.needs.actual}
+                target={budget.needs.target}
+                color={colors.cat.blue}
               />
-            ))}
-          </View>
-        ) : transactions.length > 0 ? (
-          <View style={styles.transactionsList}>
-            {transactions.map((transaction: Transaction) => (
-              <TransactionItem key={transaction.id} transaction={transaction} />
-            ))}
-          </View>
-        ) : (
-          <View style={styles.emptyState}>
-            <Ionicons
-              name="receipt-outline"
-              size={48}
-              color={colors.textMuted}
-            />
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              No transactions yet
+              <BudgetProgress
+                label="Wants"
+                actual={budget.wants.actual}
+                target={budget.wants.target}
+                color={colors.cat.pink}
+              />
+              <BudgetProgress
+                label="Savings"
+                actual={budget.savings.actual}
+                target={budget.savings.target}
+                color={colors.cat.emerald}
+              />
+            </View>
+          ) : (
+            <View style={{ alignItems: "center", paddingVertical: 16 }}>
+              <Mascot name="csv" size={56} />
+              <Text
+                style={{
+                  color: colors.inkSoft,
+                  marginTop: 8,
+                  fontSize: 13,
+                  textAlign: "center",
+                }}
+              >
+                Import transactions to see your 50/30/20.
+              </Text>
+            </View>
+          )}
+        </BentoCard>
+
+        {/* Recent activity */}
+        <View style={{ gap: 6 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              paddingHorizontal: 4,
+              marginBottom: 4,
+            }}
+          >
+            <Text
+              style={{ fontSize: 14, fontWeight: "700", color: colors.ink }}
+            >
+              Recent activity
             </Text>
             <Link href="/(tabs)/transactions" asChild>
-              <TouchableOpacity
-                style={[
-                  styles.emptyButton,
-                  { backgroundColor: colors.primary },
-                ]}
-              >
-                <Text style={styles.emptyButtonText}>Import Transactions</Text>
-              </TouchableOpacity>
+              <Pressable>
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: colors.cat.emerald,
+                    fontWeight: "600",
+                  }}
+                >
+                  View all →
+                </Text>
+              </Pressable>
             </Link>
           </View>
-        )}
-      </View>
-    </ScrollView>
+
+          {showTransactionsSkeleton ? (
+            <View style={{ gap: 6 }}>
+              {[1, 2, 3].map((i) => (
+                <View
+                  key={i}
+                  style={{
+                    height: 56,
+                    borderRadius: 14,
+                    backgroundColor: colors.surface.white,
+                  }}
+                />
+              ))}
+            </View>
+          ) : transactions.length > 0 ? (
+            <View style={{ gap: 6 }}>
+              {transactions.map((transaction: Transaction) => (
+                <TransactionItem key={transaction.id} transaction={transaction} />
+              ))}
+            </View>
+          ) : (
+            <BentoCard surface="white">
+              <View style={{ alignItems: "center", paddingVertical: 20 }}>
+                <Mascot name="receipt" size={56} />
+                <Text
+                  style={{ color: colors.ink, marginTop: 8, fontWeight: "700" }}
+                >
+                  No transactions yet
+                </Text>
+                <Link href="/(tabs)/transactions" asChild>
+                  <Pressable
+                    style={{
+                      marginTop: 12,
+                      paddingHorizontal: 18,
+                      paddingVertical: 10,
+                      borderRadius: 14,
+                      backgroundColor: colors.ink,
+                    }}
+                  >
+                    <Text style={{ color: "#fff", fontWeight: "700" }}>
+                      Import transactions
+                    </Text>
+                  </Pressable>
+                </Link>
+              </View>
+            </BentoCard>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 32,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  greeting: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    marginBottom: 20,
-  },
-  section: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  seeAll: {
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  budgetBars: {
-    gap: 12,
-  },
-  loadingPlaceholder: {
-    gap: 12,
-  },
-  skeleton: {
-    height: 40,
-    borderRadius: 8,
-  },
-  transactionSkeleton: {
-    height: 64,
-    borderRadius: 12,
-  },
-  transactionsList: {
-    gap: 8,
-  },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: 32,
-  },
-  emptyText: {
-    fontSize: 16,
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 16,
-  },
-  emptyButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  emptyButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-});

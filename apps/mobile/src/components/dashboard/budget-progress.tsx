@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text } from "react-native";
 import { useTheme } from "@/lib/theme/provider";
 import { formatCurrency } from "@/lib/utils/format";
 
@@ -17,54 +17,50 @@ export function BudgetProgress({
 }: BudgetProgressProps) {
   const { colors } = useTheme();
   const percentage = target > 0 ? Math.min((actual / target) * 100, 100) : 0;
-  const isOver = actual > target;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-        <Text style={[styles.values, { color: colors.textMuted }]}>
+    <View style={{ gap: 6 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <View
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 4,
+              backgroundColor: color,
+            }}
+          />
+          <Text style={{ fontSize: 12, fontWeight: "600", color: colors.ink }}>
+            {label}
+          </Text>
+        </View>
+        <Text style={{ fontSize: 11, color: colors.inkSoft }}>
           {formatCurrency(actual)} / {formatCurrency(target)}
         </Text>
       </View>
-      <View style={[styles.track, { backgroundColor: colors.border }]}>
+      <View
+        style={{
+          height: 11,
+          borderRadius: 6,
+          backgroundColor: "rgba(0,0,0,0.07)",
+          overflow: "hidden",
+        }}
+      >
         <View
-          style={[
-            styles.fill,
-            {
-              width: `${percentage}%`,
-              backgroundColor: isOver ? "#ef4444" : color,
-            },
-          ]}
+          style={{
+            width: `${percentage}%`,
+            height: "100%",
+            borderRadius: 6,
+            backgroundColor: color,
+          }}
         />
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 8,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  values: {
-    fontSize: 13,
-  },
-  track: {
-    height: 8,
-    borderRadius: 4,
-    overflow: "hidden",
-  },
-  fill: {
-    height: "100%",
-    borderRadius: 4,
-  },
-});
