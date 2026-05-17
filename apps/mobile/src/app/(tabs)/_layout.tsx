@@ -87,6 +87,15 @@ function TabsNavigator() {
         }}
       />
       <Tabs.Screen
+        name="banking"
+        options={{
+          title: "Banking",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="business" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           title: "Settings",

@@ -1,8 +1,10 @@
 import { z } from "zod";
 
 export const createLinkTokenSchema = z.object({
-  /** Optional redirect URI for OAuth flows (required for UK banks) */
+  /** Optional redirect URI for iOS OAuth flows. Must be a registered Plaid redirect URI/universal link. */
   redirectUri: z.string().url().optional(),
+  /** Android package name for mobile OAuth flows. Must be registered in the Plaid Dashboard. */
+  androidPackageName: z.string().min(1).optional(),
 });
 
 export const exchangeTokenSchema = z.object({
