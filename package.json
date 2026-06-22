@@ -50,6 +50,8 @@
     "jsdom": "catalog:",
     "prettier": "catalog:",
     "prettier-plugin-tailwindcss": "catalog:",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "turbo": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
