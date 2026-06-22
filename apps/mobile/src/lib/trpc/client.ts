@@ -1,19 +1,17 @@
 import { createTRPCReact } from "@trpc/react-query";
-import type { AnyRouter } from "@trpc/server";
+import type { AppRouter } from "@finance/api-router";
+import type { inferRouterOutputs } from "@trpc/server";
 
-// Create the tRPC React client with a generic AnyRouter type
-// This is necessary because the mobile app doesn't have direct access to the server router types
-// The index signature allows dynamic router access (analytics, transactions, etc.)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type RouterProxy = Record<string, any>;
+export const trpc: ReturnType<typeof createTRPCReact<AppRouter>> =
+  createTRPCReact<AppRouter>();
 
-type TRPCClient = ReturnType<typeof createTRPCReact<AnyRouter>> & RouterProxy;
+type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export const trpc: TRPCClient = createTRPCReact<AnyRouter>() as TRPCClient;
+export type Transaction =
+  RouterOutputs["transactions"]["list"]["data"][number];
 
 // Re-export types for convenience
 export type {
-  Transaction,
   Budget503020,
   TrendData,
   CategoryData,

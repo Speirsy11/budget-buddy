@@ -87,7 +87,7 @@ export default function BankingScreen() {
         syncConnection(result.connectionId);
       }
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       setStatusMessage(error.message);
     },
   });
@@ -96,7 +96,7 @@ export default function BankingScreen() {
     onSuccess: async (result: { linkToken: string }) => {
       await openPlaidLink(result.linkToken);
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       setStatusMessage(error.message);
     },
   });
@@ -105,7 +105,7 @@ export default function BankingScreen() {
     onSuccess: async (result: { linkToken: string }) => {
       await openPlaidLink(result.linkToken, { updateMode: true });
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       setStatusMessage(error.message);
     },
   });
@@ -126,7 +126,7 @@ export default function BankingScreen() {
         utils.analytics.invalidate(),
       ]);
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       setSyncingConnectionId(null);
       setStatusMessage(error.message);
     },
@@ -141,7 +141,7 @@ export default function BankingScreen() {
       setStatusMessage("Bank connection removed.");
       await utils.banking.listConnections.invalidate();
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       setRemovingConnectionId(null);
       setStatusMessage(error.message);
     },

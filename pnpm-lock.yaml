@@ -363,6 +363,9 @@ importers:
       '@finance/api':
         specifier: workspace:*
         version: link:../../packages/shared/api
+      '@finance/api-router':
+        specifier: workspace:*
+        version: link:../../packages/compositions/api-router
       '@finance/transactions':
         specifier: workspace:*
         version: link:../../packages/features/transactions
@@ -508,6 +511,9 @@ importers:
       '@finance/api':
         specifier: workspace:*
         version: link:../../packages/shared/api
+      '@finance/api-router':
+        specifier: workspace:*
+        version: link:../../packages/compositions/api-router
       '@finance/auth':
         specifier: workspace:*
         version: link:../../packages/features/auth
@@ -590,6 +596,31 @@ importers:
       tailwindcss:
         specifier: 'catalog:'
         version: 3.4.19
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/compositions/api-router:
+    dependencies:
+      '@finance/analytics':
+        specifier: workspace:*
+        version: link:../../features/analytics
+      '@finance/api':
+        specifier: workspace:*
+        version: link:../../shared/api
+      '@finance/auth':
+        specifier: workspace:*
+        version: link:../../features/auth
+      '@finance/banking':
+        specifier: workspace:*
+        version: link:../../features/banking
+      '@finance/transactions':
+        specifier: workspace:*
+        version: link:../../features/transactions
+    devDependencies:
+      '@finance/config':
+        specifier: workspace:*
+        version: link:../../shared/config
       typescript:
         specifier: 'catalog:'
         version: 5.9.3

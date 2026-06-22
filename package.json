@@ -61,6 +61,7 @@
   },
   "workspaces": [
     "apps/*",
+    "packages/compositions/*",
     "packages/shared/*",
     "packages/features/*"
   ]

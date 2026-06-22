@@ -16,6 +16,7 @@
     "@clerk/nextjs": "catalog:",
     "@finance/analytics": "workspace:*",
     "@finance/api": "workspace:*",
+    "@finance/api-router": "workspace:*",
     "@finance/auth": "workspace:*",
     "@finance/banking": "workspace:*",
     "@finance/db": "workspace:*",

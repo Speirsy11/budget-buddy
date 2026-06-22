@@ -1,23 +1,6 @@
 // Router types for the mobile app
 // These types mirror the server router structure for type-safe API calls
 
-// Transaction types
-export interface Transaction {
-  id: string;
-  amount: number;
-  date: Date;
-  description: string;
-  merchant: string | null;
-  category: string | null;
-  budgetCategory: string | null;
-}
-
-export interface TransactionListResult {
-  data: Transaction[];
-  total: number;
-  hasMore: boolean;
-}
-
 // Budget types
 export interface BudgetCategory {
   target: number;

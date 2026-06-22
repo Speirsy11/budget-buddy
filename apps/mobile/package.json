@@ -23,6 +23,7 @@
     "@expo/metro-runtime": "^4.0.1",
     "@expo/vector-icons": "~14.0.4",
     "@finance/api": "workspace:*",
+    "@finance/api-router": "workspace:*",
     "@finance/transactions": "workspace:*",
     "@react-navigation/core": "^7.0.0",
     "@react-navigation/native": "^7.0.0",
