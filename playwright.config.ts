@@ -1,4 +1,24 @@
 import { defineConfig, devices } from "@playwright/test";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+const port = process.env.PLAYWRIGHT_PORT ?? "4173";
+const baseURL = `http://127.0.0.1:${port}`;
+const rootEnvPath = resolve(process.cwd(), ".env");
+const rootEnv = Object.fromEntries(
+  (existsSync(rootEnvPath) ? readFileSync(rootEnvPath, "utf8") : "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("#") && line.includes("="))
+    .map((line) => {
+      const separator = line.indexOf("=");
+      const key = line.slice(0, separator);
+      const value = line
+        .slice(separator + 1)
+        .replace(/^(['"])(.*)\1$/, "$2");
+      return [key, value];
+    })
+);
 
 export default defineConfig({
   testDir: "./e2e",
@@ -8,7 +28,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: "html",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL,
     trace: "on-first-retry",
   },
   projects: [
@@ -34,8 +54,12 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev --filter=@finance/web",
-    url: "http://localhost:3000",
+    command: `pnpm --filter=@finance/web exec next dev --port ${port}`,
+    url: baseURL,
+    env: {
+      ...process.env,
+      ...rootEnv,
+    },
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },
