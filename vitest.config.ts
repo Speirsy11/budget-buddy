@@ -8,7 +8,12 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     include: ["packages/**/*.test.{ts,tsx}", "apps/**/*.test.{ts,tsx}"],
-    exclude: ["**/node_modules/**", "**/dist/**"],
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      // DB-backed integration tests run via `pnpm test:integration`.
+      "**/*.integration.test.ts",
+    ],
     coverage: {
       reporter: ["text", "json", "html"],
       exclude: ["node_modules/", "dist/", "**/*.d.ts", "**/*.config.*"],

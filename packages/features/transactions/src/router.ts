@@ -66,10 +66,12 @@ export const transactionsRouter = router({
           .where(and(...conditions)),
       ]);
 
+      // Postgres returns count(*) as a string; coerce to match the number type.
+      const total = Number(countResult[0]?.count ?? 0);
       const result = {
         data,
-        total: countResult[0]?.count ?? 0,
-        hasMore: input.offset + data.length < (countResult[0]?.count ?? 0),
+        total,
+        hasMore: input.offset + data.length < total,
       };
 
       log.info(
