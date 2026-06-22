@@ -214,9 +214,17 @@ pnpm infra:down             # Stop all containers
 pnpm infra:debug            # Start with pgAdmin and Redis Commander
 
 # Database
-pnpm db:generate            # Generate Drizzle migrations
-pnpm db:push                # Push schema to database
+pnpm db:generate            # Generate a versioned SQL migration from the schema
+pnpm db:migrate             # Apply pending migrations (deploy/CI/prod path)
+pnpm db:push                # Push schema directly without a migration (fast local dev only)
 pnpm db:studio              # Open Drizzle Studio
+
+# Migration workflow:
+#   1. Edit schema in packages/shared/db/src/schema/*
+#   2. `pnpm db:generate` to create a migration in packages/shared/db/drizzle/
+#   3. Review the generated SQL, commit it
+#   4. `pnpm db:migrate` to apply it (run this on deploy; tracked in drizzle.__drizzle_migrations)
+# Use `db:push` only to iterate quickly in local dev — never as the production deploy path.
 
 # Cleaning
 pnpm clean                  # Clean all build artifacts
@@ -237,7 +245,8 @@ pnpm clean                  # Clean all build artifacts
 
 ### TODO
 
-- [ ] Set up PostgreSQL database and run migrations (run `pnpm infra:up` then `pnpm db:push`)
+- [ ] Set up PostgreSQL database and run migrations (run `pnpm infra:up` then `pnpm db:migrate`)
+- [ ] Wire `pnpm db:migrate` into the deployment pipeline (see P0 #3 deployment work)
 
 ### Recently Completed
 
