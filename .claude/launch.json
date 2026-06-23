@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev", "--filter=@finance/web"],
+      "port": 3000
+    },
+    {
+      "name": "marketing",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev", "--filter=@finance/marketing"],
+      "port": 3001
+    }
+  ]
+}
