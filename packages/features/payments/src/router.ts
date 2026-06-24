@@ -1,5 +1,5 @@
 import { protectedProcedure, router, TRPCError, z } from "@finance/api";
-import { and, db, desc, eq, subscriptions, users } from "@finance/db";
+import { db, desc, eq, subscriptions, users } from "@finance/db";
 import { logger } from "@finance/logger";
 import { createBillingPortalSession, createCheckoutSession } from "./checkout";
 
@@ -55,14 +55,15 @@ export const paymentsRouter = router({
         });
       }
 
-      const activeSubscription = await db.query.subscriptions.findFirst({
-        where: and(
-          eq(subscriptions.userId, ctx.userId),
-          eq(subscriptions.status, "active")
-        ),
+      const existingSubscription = await db.query.subscriptions.findFirst({
+        where: eq(subscriptions.userId, ctx.userId),
+        orderBy: [desc(subscriptions.createdAt)],
       });
 
-      if (activeSubscription) {
+      if (
+        existingSubscription?.status === "active" ||
+        existingSubscription?.status === "trialing"
+      ) {
         throw new TRPCError({
           code: "CONFLICT",
           message:
