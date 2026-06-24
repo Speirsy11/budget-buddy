@@ -13,6 +13,9 @@ export default defineConfig({
     globalSetup: ["./test/integration/global-setup.ts"],
     // Run integration files serially: they share one test database.
     fileParallelism: false,
+    // Database setup and sequential mutations can exceed Vitest's 5s default
+    // on shared CI runners.
+    testTimeout: 15_000,
     env: {
       DATABASE_URL: TEST_DATABASE_URL,
       // Use the deterministic keyword-based mock classifier instead of OpenAI.

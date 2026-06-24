@@ -56,7 +56,7 @@ jobs:
         run: pnpm typecheck
 
   test:
-    name: Test
+    name: Unit Tests and Coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -74,13 +74,111 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run tests
-        run: pnpm test:run
+      - name: Run tests with coverage thresholds
+        run: pnpm test:coverage
+
+  integration:
+    name: PostgreSQL Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: finance_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d finance_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run PostgreSQL integration tests
+        run: pnpm test:integration
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/finance_test
+
+  e2e:
+    name: Browser E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run desktop and mobile E2E tests
+        run: pnpm test:e2e --project=chromium --project="Mobile Chrome"
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_aW50ZW5zZS13YWxsYWJ5LTYxLmNsZXJrLmFjY291bnRzLmRldiQ' }}
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Existing dependency debt is reported without blocking unrelated work.
+      # Remove continue-on-error once the current critical advisories are fixed.
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level high
 
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, test]
+    needs: [lint, typecheck, test, integration, e2e]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
