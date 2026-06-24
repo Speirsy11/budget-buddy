@@ -31,7 +31,7 @@ export async function askAI(
   const result = await generateText({
     model,
     prompt,
-    maxTokens: options?.maxTokens ?? 1000,
+    maxOutputTokens: options?.maxTokens ?? 1000,
     temperature: options?.temperature ?? 0.7,
   });
 
@@ -79,7 +79,7 @@ export function streamText(
   return aiStreamText({
     model,
     prompt,
-    maxTokens: options?.maxTokens ?? 2000,
+    maxOutputTokens: options?.maxTokens ?? 2000,
     temperature: options?.temperature ?? 0.7,
   });
 }
