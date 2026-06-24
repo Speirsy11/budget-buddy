@@ -72,8 +72,7 @@ function BaseTRPCProvider({
   );
 
   const [trpcClient] = useState(() =>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (trpc as any).createClient({
+    trpc.createClient({
       links: [
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
@@ -89,13 +88,9 @@ function BaseTRPCProvider({
     })
   );
 
-  // Use explicit any to work around tRPC typing issues with untyped client
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const TRPCProviderComponent = (trpc as any).Provider;
-
   return (
-    <TRPCProviderComponent client={trpcClient} queryClient={queryClient}>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </TRPCProviderComponent>
+    </trpc.Provider>
   );
 }

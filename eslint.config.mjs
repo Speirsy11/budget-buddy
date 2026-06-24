@@ -94,6 +94,7 @@ export default tseslint.config(
       "**/.next/**",
       "**/.turbo/**",
       "**/coverage/**",
+      "**/next-env.d.ts",
       "**/*.config.js",
       "**/*.config.mjs",
       "**/drizzle/**",

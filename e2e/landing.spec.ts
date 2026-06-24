@@ -4,69 +4,59 @@ test.describe("Landing Page", () => {
   test("should display the hero section", async ({ page }) => {
     await page.goto("/");
 
-    // Check main heading
     await expect(
-      page.getByRole("heading", { name: /take control/i })
+      page.getByRole("heading", { name: /master your money/i })
     ).toBeVisible();
-
-    // Check CTA buttons
     await expect(
-      page.getByRole("link", { name: /get started/i })
+      page.getByRole("button", { name: /start free trial/i })
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: /sign in/i })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /watch demo/i })
+    ).toBeDisabled();
   });
 
   test("should display features section", async ({ page }) => {
     await page.goto("/");
 
-    // Scroll to features
-    await page
-      .getByRole("heading", { name: /features/i })
-      .scrollIntoViewIfNeeded();
-
-    // Check feature cards are visible
-    await expect(page.getByText(/ai categorization/i)).toBeVisible();
-    await expect(page.getByText(/50\/30\/20 budgeting/i)).toBeVisible();
-    await expect(page.getByText(/easy import/i)).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /everything you need/i })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "AI Classification" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "50/30/20 Budget" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Easy Import" })
+    ).toBeVisible();
   });
 
-  test("should navigate to sign up page", async ({ page }) => {
+  test("should offer authentication actions", async ({ page }) => {
     await page.goto("/");
 
-    await page
-      .getByRole("link", { name: /get started/i })
-      .first()
-      .click();
-
-    // Should navigate to sign up
-    await expect(page).toHaveURL(/sign-up/);
-  });
-
-  test("should navigate to sign in page", async ({ page }) => {
-    await page.goto("/");
-
-    await page.getByRole("link", { name: /sign in/i }).click();
-
-    // Should navigate to sign in
-    await expect(page).toHaveURL(/sign-in/);
+    await expect(
+      page.getByRole("button", { name: "Sign In" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Get Started" })
+    ).toBeVisible();
   });
 });
 
-test.describe("Navigation", () => {
-  test("should scroll to sections when clicking nav links", async ({
-    page,
-  }) => {
+test.describe("How it works", () => {
+  test("should explain the transaction-to-insight flow", async ({ page }) => {
     await page.goto("/");
 
-    // Click on Features link
-    await page
-      .getByRole("link", { name: /features/i })
-      .first()
-      .click();
-
-    // Features section should be in viewport
-    const featuresSection = page.locator("#features");
-    await expect(featuresSection).toBeInViewport();
+    await expect(
+      page.getByRole("heading", { name: "Upload Your Transactions" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "AI Categorizes Everything" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Get Actionable Insights" })
+    ).toBeVisible();
   });
 });
 
@@ -75,14 +65,11 @@ test.describe("Responsive Design", () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
 
-    // Main content should be visible
     await expect(
-      page.getByRole("heading", { name: /take control/i })
+      page.getByRole("heading", { name: /master your money/i })
     ).toBeVisible();
-
-    // CTA should be visible
     await expect(
-      page.getByRole("link", { name: /get started/i }).first()
+      page.getByRole("button", { name: /start free trial/i })
     ).toBeVisible();
   });
 });

@@ -25,12 +25,17 @@ Three-layer architecture with strict import boundaries:
 ```
 apps/                           # Compositions (can import all)
 ├── web/                        # Next.js Dashboard
-└── marketing/                  # Marketing/landing site
+├── marketing/                  # Marketing/landing site
+└── mobile/                     # Expo mobile app
+
+packages/compositions/
+└── api-router/                 # Root tRPC router and exported AppRouter type
 
 packages/features/              # Features (can import shared only)
 ├── auth/                       # Clerk integration
 ├── transactions/               # CSV parsing, AI classification, export
 ├── analytics/                  # 50/30/20 budgeting, charts
+├── banking/                    # Plaid/Open Banking integration
 └── payments/                   # Stripe integration
 
 packages/shared/                # Shared (can import shared only)
@@ -180,6 +185,9 @@ CLERK_SECRET_KEY=sk_test_...
 OPENAI_API_KEY=sk-...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRO_MONTHLY_PRICE_ID=price_...
+STRIPE_PRO_YEARLY_PRICE_ID=price_...
+APP_URL=http://localhost:3000
 RESEND_API_KEY=re_...
 ```
 
@@ -214,9 +222,17 @@ pnpm infra:down             # Stop all containers
 pnpm infra:debug            # Start with pgAdmin and Redis Commander
 
 # Database
-pnpm db:generate            # Generate Drizzle migrations
-pnpm db:push                # Push schema to database
+pnpm db:generate            # Generate a versioned SQL migration from the schema
+pnpm db:migrate             # Apply pending migrations (deploy/CI/prod path)
+pnpm db:push                # Push schema directly without a migration (fast local dev only)
 pnpm db:studio              # Open Drizzle Studio
+
+# Migration workflow:
+#   1. Edit schema in packages/shared/db/src/schema/*
+#   2. `pnpm db:generate` to create a migration in packages/shared/db/drizzle/
+#   3. Review the generated SQL, commit it
+#   4. `pnpm db:migrate` to apply it (run this on deploy; tracked in drizzle.__drizzle_migrations)
+# Use `db:push` only to iterate quickly in local dev — never as the production deploy path.
 
 # Cleaning
 pnpm clean                  # Clean all build artifacts
@@ -237,15 +253,16 @@ pnpm clean                  # Clean all build artifacts
 
 ### TODO
 
-- [ ] Set up PostgreSQL database and run migrations (run `pnpm infra:up` then `pnpm db:push`)
+- [ ] Set up PostgreSQL database and run migrations (run `pnpm infra:up` then `pnpm db:migrate`)
+- [ ] Wire `pnpm db:migrate` into the deployment pipeline (see P0 #3 deployment work)
 
 ### Recently Completed
 
-- [x] Add Vitest for unit testing (45 tests passing)
-- [x] Implement Stripe payments (checkout, webhooks, subscriptions, plans)
+- [x] Add Vitest unit/component coverage (94 tests passing)
+- [x] Implement reachable Stripe billing (checkout, portal, signed webhooks, subscription persistence, settings UI)
 - [x] Add marketing site (apps/marketing with hero, features, pricing, FAQ)
-- [x] Add E2E tests with Playwright (landing page tests)
-- [x] Set up CI/CD pipeline (GitHub Actions: lint, typecheck, test, build)
+- [x] Add E2E tests with Playwright (public landing and demo flows)
+- [x] Set up CI/CD pipeline (lint, typecheck, coverage, Postgres integration, E2E, audit, build)
 - [x] Add email notifications (Resend + React Email: welcome, budget alerts, weekly summary)
 - [x] Implement data export feature (CSV, JSON, full data export)
 - [x] Add Docker infrastructure (PostgreSQL, Redis via docker-compose)

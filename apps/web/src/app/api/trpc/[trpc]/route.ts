@@ -1,5 +1,5 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { appRouter } from "@/server/routers";
+import { appRouter } from "@finance/api-router";
 import { createContext } from "@/server/trpc";
 
 const handler = async (req: Request) => {

@@ -2,16 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import { useTheme } from "@/lib/theme/provider";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { Ionicons } from "@expo/vector-icons";
-
-interface Transaction {
-  id: string;
-  amount: number;
-  date: Date;
-  description: string;
-  merchant: string | null;
-  category: string | null;
-  budgetCategory: string | null;
-}
+import type { Transaction } from "@/lib/trpc/client";
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -22,13 +13,12 @@ interface TransactionItemProps {
 
 function categoryAccent(
   category: string | null,
-  budgetCategory: string | null,
+  necessityType: "need" | "want" | "savings" | null,
   cat: ReturnType<typeof useTheme>["colors"]["cat"]
 ): string {
-  const b = budgetCategory?.toLowerCase();
-  if (b === "savings") return cat.emerald;
-  if (b === "wants") return cat.pink;
-  if (b === "needs") return cat.blue;
+  if (necessityType === "savings") return cat.emerald;
+  if (necessityType === "want") return cat.pink;
+  if (necessityType === "need") return cat.blue;
 
   const c = category?.toLowerCase() ?? "";
   if (/transport|fuel|car/.test(c)) return cat.amber;
@@ -46,8 +36,8 @@ export function TransactionItem({
 }: TransactionItemProps) {
   const { colors, radius, shadow } = useTheme();
   const accent = categoryAccent(
-    transaction.category,
-    transaction.budgetCategory,
+    transaction.category?.name ?? null,
+    transaction.category?.necessityType ?? null,
     colors.cat
   );
   const isExpense = transaction.amount < 0;
@@ -93,7 +83,7 @@ export function TransactionItem({
             {transaction.merchant || transaction.description}
           </Text>
           <Text style={{ fontSize: 10, color: colors.muted, marginTop: 2 }}>
-            {transaction.category ?? "Uncategorised"} ·{" "}
+            {transaction.category?.name ?? "Uncategorised"} ·{" "}
             {formatDate(transaction.date)}
           </Text>
         </View>

@@ -15,7 +15,14 @@ import {
 import { useCurrentUser, UserButton } from "@finance/auth";
 import { useTheme } from "next-themes";
 import { trpc } from "@/trpc/client";
-import { Download, Trash2, Monitor, Moon } from "lucide-react";
+import {
+  Download,
+  Trash2,
+  Monitor,
+  Moon,
+  CreditCard,
+  ExternalLink,
+} from "lucide-react";
 import { Mascot } from "@finance/ui";
 import { Greeting } from "@/components/dashboard/greeting";
 
@@ -25,6 +32,21 @@ export default function SettingsPage() {
   const exportQuery = trpc.transactions.exportAll.useQuery(undefined, {
     enabled: false,
   });
+  const billingStatus = trpc.payments.status.useQuery();
+  const checkoutMutation = trpc.payments.createCheckout.useMutation();
+  const portalMutation = trpc.payments.createPortal.useMutation();
+
+  const openCheckout = async (planId: "pro" | "pro-yearly") => {
+    const session = await checkoutMutation.mutateAsync({ planId });
+
+    window.location.assign(session.url);
+  };
+
+  const openBillingPortal = async () => {
+    const session = await portalMutation.mutateAsync();
+
+    window.location.assign(session.url);
+  };
 
   const handleExport = async () => {
     const exportData = await exportQuery.refetch();
@@ -99,6 +121,78 @@ export default function SettingsPage() {
             Profile information is managed through your authentication provider.
             Click on your avatar to update.
           </p>
+        </CardContent>
+      </Card>
+
+      {/* Billing */}
+      <Card surface="sky">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <Mascot name="star" size={44} />
+            <div>
+              <CardTitle>Plan and billing</CardTitle>
+              <CardDescription>
+                Upgrade to automatic bank syncing and higher limits
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col justify-between gap-3 rounded-lg border p-4 sm:flex-row sm:items-center">
+            <div>
+              <p className="text-sm font-medium">
+                Current plan:{" "}
+                <span className="capitalize">
+                  {billingStatus.data?.planId ?? "free"}
+                </span>
+              </p>
+              <p className="text-muted-foreground text-xs">
+                {billingStatus.data?.cancelAtPeriodEnd
+                  ? "Your plan will end at the close of the current billing period."
+                  : billingStatus.data?.status === "active" ||
+                      billingStatus.data?.status === "trialing"
+                    ? `Subscription ${billingStatus.data.status}.`
+                    : "Upgrade when you are ready. Paid plans include a 14-day trial."}
+              </p>
+            </div>
+            {billingStatus.data?.canManageBilling ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openBillingPortal}
+                disabled={portalMutation.isPending}
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                {portalMutation.isPending ? "Opening…" : "Manage billing"}
+              </Button>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => openCheckout("pro")}
+                  disabled={checkoutMutation.isPending}
+                >
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Pro monthly — £7.99
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => openCheckout("pro-yearly")}
+                  disabled={checkoutMutation.isPending}
+                >
+                  Pro yearly — £79.99
+                </Button>
+              </div>
+            )}
+          </div>
+          {(checkoutMutation.error || portalMutation.error) && (
+            <p className="text-destructive text-sm" role="alert">
+              {checkoutMutation.error?.message ??
+                portalMutation.error?.message ??
+                "Billing is temporarily unavailable."}
+            </p>
+          )}
         </CardContent>
       </Card>
 

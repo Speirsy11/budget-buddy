@@ -15,7 +15,7 @@ export async function createCheckoutSession({
   planId,
   successUrl,
   cancelUrl,
-}: CreateCheckoutSessionParams) {
+}: CreateCheckoutSessionParams): Promise<{ sessionId: string; url: string }> {
   const stripe = getStripeClient();
   const plan = getPlanById(planId);
 
@@ -48,6 +48,10 @@ export async function createCheckoutSession({
       planId,
     },
   });
+
+  if (!session.url) {
+    throw new Error("Stripe returned a checkout session without a URL");
+  }
 
   return {
     sessionId: session.id,

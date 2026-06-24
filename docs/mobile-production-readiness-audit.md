@@ -2,6 +2,8 @@
 
 Date: 2026-05-17
 
+Last reconciled: 2026-06-24
+
 ## Scope
 
 This audit covers the current `apps/mobile` Expo app against the existing web dashboard in `apps/web`, plus the shared API/features packages that the mobile app depends on. It is intended to turn the current local simulator rescue work into a production-readiness backlog.
@@ -19,19 +21,19 @@ This audit covers the current `apps/mobile` Expo app against the existing web da
 
 ### Web/mobile feature parity snapshot
 
-| Capability                               | Web                                       | Mobile                                                                      | Gap                                                                |
-| ---------------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Dashboard overview                       | Present                                   | Present                                                                     | Likely styling/data parity only.                                   |
-| Analytics                                | Present                                   | Present                                                                     | Verify chart parity and empty/error states.                        |
-| Budget / 50-30-20                        | Present                                   | Present                                                                     | Verify editing UX and copy parity.                                 |
-| Transactions list/search/classify/delete | Present                                   | Present                                                                     | Mostly present; mobile needs stronger typed tRPC and UX hardening. |
-| CSV import                               | Present at `/dashboard/import`            | Missing                                                                     | Highest visible parity gap.                                        |
-| Bank-specific CSV guides                 | Present on web import page                | Missing                                                                     | Needed if mobile gets import.                                      |
-| Export data                              | Present in web settings                   | Mobile links user back to web                                               | Acceptable for v1 if intentional; document as web-only.            |
-| Theme settings                           | Present on web                            | Mobile has theme provider but no equivalent appearance controls in settings | Parity/design gap.                                                 |
-| Account deletion                         | Web has disabled “Contact support” action | Mobile does not show account deletion                                       | Minor parity gap.                                                  |
-| Open banking                             | Backend router exists and is Pro-gated    | No mobile UI found                                                          | Major product gap if Pro subscriptions launch with mobile.         |
-| Stripe checkout/billing portal           | Payments package exists                   | No exposed web route/API or mobile flow found                               | Revenue-path gap, not just mobile parity.                          |
+| Capability                               | Web                                           | Mobile                                                                      | Gap                                                        |
+| ---------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Dashboard overview                       | Present                                       | Present                                                                     | Likely styling/data parity only.                           |
+| Analytics                                | Present                                       | Present                                                                     | Verify chart parity and empty/error states.                |
+| Budget / 50-30-20                        | Present                                       | Present                                                                     | Verify editing UX and copy parity.                         |
+| Transactions list/search/classify/delete | Present                                       | Present                                                                     | Shared `AppRouter` typing now catches mobile API drift.    |
+| CSV import                               | Present at `/dashboard/import`                | Missing                                                                     | Highest visible parity gap.                                |
+| Bank-specific CSV guides                 | Present on web import page                    | Missing                                                                     | Needed if mobile gets import.                              |
+| Export data                              | Present in web settings                       | Mobile links user back to web                                               | Acceptable for v1 if intentional; document as web-only.    |
+| Theme settings                           | Present on web                                | Mobile has theme provider but no equivalent appearance controls in settings | Parity/design gap.                                         |
+| Account deletion                         | Web has disabled “Contact support” action     | Mobile does not show account deletion                                       | Minor parity gap.                                          |
+| Open banking                             | Backend router exists and is Pro-gated        | No mobile UI found                                                          | Major product gap if Pro subscriptions launch with mobile. |
+| Stripe checkout/billing portal           | Checkout, portal, signed webhook, settings UI | No in-app purchase flow                                                     | Web path complete; mobile policy decision remains.         |
 
 ## Production blockers / risks
 
@@ -47,7 +49,7 @@ Risk before this pass: a real mobile device could reach `/api/trpc` but still be
 2. Kept cookie/session auth as the fallback for web requests.
 3. Added Clerk user sync by user ID for verified bearer-token requests.
 
-Remaining: add an integration smoke test using a real Clerk development token or a Clerk-supported test token fixture; do not commit real tokens.
+Status: source implementation complete. Remaining release validation is an integration smoke test using a real Clerk development token or a Clerk-supported test token fixture; do not commit real tokens.
 
 ### P0 — mobile API base URL is not production-configured
 
@@ -95,15 +97,21 @@ Recommended mobile v1 options:
 - **Best v1:** add an Import tab/screen using `expo-document-picker`, parse CSV client-side or upload raw content to the existing import mutation, and reuse the web validation semantics.
 - **Implemented v1:** mobile Transactions now includes a clear “Import CSV on web” card using `EXPO_PUBLIC_WEB_URL`/`extra.webUrl`, with help text and a deep link to `/dashboard/import`.
 
-### P1 — payment/subscription UX is incomplete
+### P1 — web payment/subscription UX is complete; mobile policy remains
 
-The payments package supports Stripe checkout, subscriptions, and billing portal creation, but no web app route/API or mobile flow was found exposing checkout/billing management. Open banking is Pro-gated, so this blocks a coherent Pro/mobile story.
+2026-06-24 implementation update:
 
-Recommended fix:
+- Added authenticated monthly/yearly checkout and billing-portal tRPC procedures.
+- Added plan controls to web settings.
+- Added signed Stripe webhook processing and local subscription persistence.
+- Checkout identity and customer lookup are server-derived, and redirects are restricted to the configured application URL.
 
-1. Add web account/billing controls first.
-2. For mobile, use a policy-compliant subscription approach before shipping. If this is a consumer iOS app selling digital app features, Apple IAP may be required instead of Stripe checkout in-app.
-3. Make Pro-gated mobile screens explain the upgrade path without dead-ending.
+Remaining:
+
+1. Configure Stripe test keys, price IDs, webhook secret, and `APP_URL` in the target environment.
+2. Complete a Stripe test-mode checkout/webhook smoke test.
+3. For mobile, choose a policy-compliant subscription approach before shipping. If this is a consumer iOS app selling digital features, Apple IAP may be required instead of Stripe checkout in-app.
+4. Keep Pro-gated mobile screens informational until that policy decision is made.
 
 ### P1 — open banking has backend but no mobile UX
 
@@ -115,15 +123,9 @@ Recommended fix:
 2. If mobile supports it, add Plaid Link/Open Banking mobile dependency and a Pro upsell/locked state.
 3. If web-only, add clear mobile messaging and avoid showing unavailable Pro value props.
 
-### P2 — mobile tRPC typing is intentionally weak
+### Completed — mobile tRPC contract safety
 
-Mobile uses `AnyRouter` plus a `Record<string, any>` proxy because it does not directly consume server router types.
-
-Risk: mobile API drift will not be caught well by TypeScript.
-
-Recommended fix:
-
-- Export `AppRouter` from a shared package or create a lightweight API contract package consumable by mobile without importing web/server-only code.
+The root router now lives in `packages/compositions/api-router`, which exports `AppRouter`. Mobile consumes this type without importing the web app, restoring end-to-end tRPC inference.
 
 ### P2 — settings/preferences are mostly UI-only
 
@@ -141,8 +143,8 @@ See [`revenue-readiness-notes-2026-05-15.md`](revenue-readiness-notes-2026-05-15
 
 1. **Harden mobile auth/API config** — bearer token verification, production API URL, EAS profiles, and mock mode build guard are now in place; remaining work is an integration smoke test with a real Clerk dev token.
 2. **Add mobile import v1** — implemented explicit web handoff card; native document-picker import remains a later enhancement.
-3. **Make Pro story coherent** — billing management route on web, mobile-safe upgrade path, and clear open-banking locked/web-only states.
-4. **Improve mobile contract safety** — replace untyped tRPC client with shared router/contract types.
+3. **Validate the web Pro path** — run Stripe test-mode checkout, webhook, and billing-portal smoke tests with configured credentials.
+4. **Choose mobile billing policy** — decide App Store/IAP versus informational web upgrade handoff.
 5. **Polish parity/UX** — appearance settings, account deletion/contact support, empty/error/loading states, and analytics chart parity.
 
 ## Verification performed
@@ -158,3 +160,13 @@ See [`revenue-readiness-notes-2026-05-15.md`](revenue-readiness-notes-2026-05-15
 - `pnpm --filter @finance/marketing build` — passed on 2026-05-17.
 - Inspected app route trees for web and mobile.
 - Inspected mobile tRPC provider/client, web tRPC route/context, DB transaction/subscription schema, tier limits, banking router, payments checkout/subscription support, web import/settings pages, and mobile transactions/settings pages.
+
+## 2026-06-24 verification update
+
+- `pnpm typecheck` — 26/26 tasks passed.
+- `pnpm lint` — 26/26 tasks passed with zero warnings.
+- `pnpm test:coverage` — 94/94 tests passed; all 75% coverage thresholds passed.
+- `pnpm test:integration` — 11/11 PostgreSQL-backed tests passed.
+- Chromium desktop and Mobile Chrome E2E — 12/12 tests passed locally.
+- `pnpm build` — 14/14 tasks passed; web build includes `/api/stripe/webhook`.
+- Production dependency audit — zero critical, high, or moderate advisories; one upstream low-severity advisory has no patched release.

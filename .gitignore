@@ -6,6 +6,8 @@ node_modules
 dist
 .next
 .turbo
+playwright-report
+test-results
 out
 *.tsbuildinfo
 

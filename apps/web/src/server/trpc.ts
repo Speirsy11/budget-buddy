@@ -6,7 +6,7 @@ import {
   verifyToken,
 } from "@finance/auth/server";
 import type { TRPCContext, UserPlan } from "@finance/api";
-import { appRouter } from "./routers";
+import { appRouter } from "@finance/api-router";
 import { createCallerFactory } from "@finance/api";
 import { db, subscriptions, eq, and } from "@finance/db";
 import { logger } from "@finance/logger";
