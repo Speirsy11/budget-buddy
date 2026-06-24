@@ -25,12 +25,17 @@ Three-layer architecture with strict import boundaries:
 ```
 apps/                           # Compositions (can import all)
 ├── web/                        # Next.js Dashboard
-└── marketing/                  # Marketing/landing site
+├── marketing/                  # Marketing/landing site
+└── mobile/                     # Expo mobile app
+
+packages/compositions/
+└── api-router/                 # Root tRPC router and exported AppRouter type
 
 packages/features/              # Features (can import shared only)
 ├── auth/                       # Clerk integration
 ├── transactions/               # CSV parsing, AI classification, export
 ├── analytics/                  # 50/30/20 budgeting, charts
+├── banking/                    # Plaid/Open Banking integration
 └── payments/                   # Stripe integration
 
 packages/shared/                # Shared (can import shared only)
@@ -180,6 +185,9 @@ CLERK_SECRET_KEY=sk_test_...
 OPENAI_API_KEY=sk-...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRO_MONTHLY_PRICE_ID=price_...
+STRIPE_PRO_YEARLY_PRICE_ID=price_...
+APP_URL=http://localhost:3000
 RESEND_API_KEY=re_...
 ```
 
@@ -250,11 +258,11 @@ pnpm clean                  # Clean all build artifacts
 
 ### Recently Completed
 
-- [x] Add Vitest for unit testing (45 tests passing)
-- [x] Implement Stripe payments (checkout, webhooks, subscriptions, plans)
+- [x] Add Vitest unit/component coverage (94 tests passing)
+- [x] Implement reachable Stripe billing (checkout, portal, signed webhooks, subscription persistence, settings UI)
 - [x] Add marketing site (apps/marketing with hero, features, pricing, FAQ)
-- [x] Add E2E tests with Playwright (landing page tests)
-- [x] Set up CI/CD pipeline (GitHub Actions: lint, typecheck, test, build)
+- [x] Add E2E tests with Playwright (public landing and demo flows)
+- [x] Set up CI/CD pipeline (lint, typecheck, coverage, Postgres integration, E2E, audit, build)
 - [x] Add email notifications (Resend + React Email: welcome, budget alerts, weekly summary)
 - [x] Implement data export feature (CSV, JSON, full data export)
 - [x] Add Docker infrastructure (PostgreSQL, Redis via docker-compose)
