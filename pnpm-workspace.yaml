@@ -91,6 +91,7 @@ catalog:
 
   # Testing
   vitest: "^2.1.8"
+  "@vitest/coverage-v8": "^2.1.8"
   "@testing-library/react": "^16.1.0"
   "@testing-library/jest-dom": "^6.6.3"
   "@vitejs/plugin-react": "^4.3.4"
