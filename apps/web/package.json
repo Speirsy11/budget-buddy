@@ -21,6 +21,7 @@
     "@finance/banking": "workspace:*",
     "@finance/db": "workspace:*",
     "@finance/logger": "workspace:*",
+    "@finance/payments": "workspace:*",
     "@finance/transactions": "workspace:*",
     "@finance/ui": "workspace:*",
     "@tanstack/react-query": "catalog:",

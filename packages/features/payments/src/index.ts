@@ -35,3 +35,5 @@ export {
   type UserSubscription,
   type SubscriptionStatus,
 } from "./subscription";
+
+export { persistSubscription, markSubscriptionDeleted } from "./persistence";

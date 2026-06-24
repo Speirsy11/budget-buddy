@@ -19,6 +19,7 @@
     "@finance/api": "workspace:*",
     "@finance/auth": "workspace:*",
     "@finance/banking": "workspace:*",
+    "@finance/payments": "workspace:*",
     "@finance/transactions": "workspace:*"
   },
   "devDependencies": {

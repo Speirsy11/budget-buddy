@@ -19,6 +19,8 @@ export default defineConfig({
       include: [
         "packages/features/analytics/src/calculations.ts",
         "packages/features/banking/src/components/sync-status.tsx",
+        "packages/features/payments/src/checkout.ts",
+        "packages/features/payments/src/webhooks.ts",
         "packages/features/transactions/src/classifier.ts",
         "packages/features/transactions/src/csv-parser.ts",
         "packages/features/transactions/src/components/category-badge.tsx",

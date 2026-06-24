@@ -564,6 +564,9 @@ importers:
       '@finance/logger':
         specifier: workspace:*
         version: link:../../packages/shared/logger
+      '@finance/payments':
+        specifier: workspace:*
+        version: link:../../packages/features/payments
       '@finance/transactions':
         specifier: workspace:*
         version: link:../../packages/features/transactions
@@ -652,6 +655,9 @@ importers:
       '@finance/banking':
         specifier: workspace:*
         version: link:../../features/banking
+      '@finance/payments':
+        specifier: workspace:*
+        version: link:../../features/payments
       '@finance/transactions':
         specifier: workspace:*
         version: link:../../features/transactions
@@ -788,9 +794,15 @@ importers:
 
   packages/features/payments:
     dependencies:
+      '@finance/api':
+        specifier: workspace:*
+        version: link:../../shared/api
       '@finance/db':
         specifier: workspace:*
         version: link:../../shared/db
+      '@finance/logger':
+        specifier: workspace:*
+        version: link:../../shared/logger
       stripe:
         specifier: 'catalog:'
         version: 17.7.0

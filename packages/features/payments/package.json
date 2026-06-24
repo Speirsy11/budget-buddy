@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -16,6 +17,8 @@
   },
   "dependencies": {
     "@finance/db": "workspace:*",
+    "@finance/api": "workspace:*",
+    "@finance/logger": "workspace:*",
     "stripe": "catalog:",
     "zod": "catalog:"
   },
