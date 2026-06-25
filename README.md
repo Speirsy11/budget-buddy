@@ -18,6 +18,14 @@ pnpm db:push
 pnpm dev
 ```
 
+To populate a local database with repeatable demo data for a Clerk user:
+
+```sh
+pnpm db:seed -- --user-id=<your_clerk_user_id>
+```
+
+The seed command is idempotent for that user, so it can be rerun safely.
+
 Required services for the full product:
 
 - Postgres via `DATABASE_URL`
