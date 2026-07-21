@@ -298,7 +298,7 @@ export default function LandingPage() {
         <div className="container mx-auto">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex items-center gap-2">
-                <img src="/budgetbuddy-mark.svg" alt="" className="h-7 w-7" />
+              <img src="/budgetbuddy-mark.svg" alt="" className="h-7 w-7" />
               <span className="font-semibold">BudgetBuddy</span>
             </div>
             <p className="text-muted-foreground text-sm">

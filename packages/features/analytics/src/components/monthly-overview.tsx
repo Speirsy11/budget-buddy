@@ -86,7 +86,7 @@ export function MonthlyOverview({ data, className }: MonthlyOverviewProps) {
                     { month: "long", year: "numeric" }
                   );
                   return (
-                    <div className="bg-surface-white rounded-[14px] shadow-card border-0 px-4 py-3">
+                    <div className="bg-surface-white shadow-card rounded-[14px] border-0 px-4 py-3">
                       <p className="text-meta text-muted-ink mb-1.5">
                         {monthName}
                       </p>
@@ -125,6 +125,7 @@ export function MonthlyOverview({ data, className }: MonthlyOverviewProps) {
                   name={name}
                   fill={color}
                   radius={[4, 4, 0, 0]}
+                  isAnimationActive={false}
                 />
               ))}
             </BarChart>
