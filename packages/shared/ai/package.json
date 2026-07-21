@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@finance/config": "workspace:*",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

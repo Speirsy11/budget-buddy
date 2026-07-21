@@ -1,4 +1,6 @@
+// @boundaries-ignore shared eslint preset resolves plugins from the workspace root
 import js from "@eslint/js";
+// @boundaries-ignore shared eslint preset resolves plugins from the workspace root
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(

@@ -33,8 +33,10 @@
   },
   "devDependencies": {
     "@finance/config": "workspace:*",
+    "@testing-library/react": "catalog:",
     "@types/papaparse": "catalog:",
     "@types/react": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

@@ -16,14 +16,15 @@
     "clean": "rm -rf dist .turbo node_modules"
   },
   "dependencies": {
-    "@finance/db": "workspace:*",
     "@finance/api": "workspace:*",
+    "@finance/db": "workspace:*",
     "@finance/logger": "workspace:*",
     "@finance/ui": "workspace:*",
-    "plaid": "catalog:",
-    "react-plaid-link": "catalog:",
+    "date-fns": "catalog:",
     "drizzle-orm": "catalog:",
     "lucide-react": "catalog:",
+    "plaid": "catalog:",
+    "react-plaid-link": "catalog:",
     "zod": "catalog:"
   },
   "peerDependencies": {
@@ -31,7 +32,9 @@
   },
   "devDependencies": {
     "@finance/config": "workspace:*",
+    "@testing-library/react": "catalog:",
     "@types/react": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }
