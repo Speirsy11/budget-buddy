@@ -27,14 +27,19 @@ const TAB_CONFIG: Record<
   {
     icon: LucideIcon;
     surface: SurfaceKey;
+    label: string;
   }
 > = {
-  index: { icon: LayoutGrid, surface: "sage" },
-  transactions: { icon: ReceiptText, surface: "peach" },
-  budget: { icon: PieChart, surface: "sky" },
-  analytics: { icon: BarChart3, surface: "lav" },
-  banking: { icon: Landmark, surface: "lemon" },
-  settings: { icon: Settings, surface: "linen" },
+  index: { icon: LayoutGrid, surface: "sage", label: "Overview" },
+  transactions: {
+    icon: ReceiptText,
+    surface: "peach",
+    label: "Transactions",
+  },
+  budget: { icon: PieChart, surface: "sky", label: "Budget" },
+  analytics: { icon: BarChart3, surface: "lav", label: "Analytics" },
+  banking: { icon: Landmark, surface: "lemon", label: "Open Banking" },
+  settings: { icon: Settings, surface: "linen", label: "Settings" },
 };
 
 export function TabBar({ state, navigation }: BottomTabBarProps) {
@@ -84,6 +89,9 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
           <Pressable
             key={route.key}
             onPress={onPress}
+            accessibilityRole="tab"
+            accessibilityLabel={config.label}
+            accessibilityState={{ selected: isFocused }}
             style={{
               paddingHorizontal: 12,
               paddingVertical: 6,
