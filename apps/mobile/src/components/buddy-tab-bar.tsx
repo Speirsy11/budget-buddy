@@ -4,11 +4,20 @@ import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Mascot, type MascotName } from "./mascot";
 import { useTheme } from "@/lib/theme/provider";
 
-type TabKey = "index" | "transactions" | "budget" | "analytics" | "banking" | "settings";
+type TabKey =
+  | "index"
+  | "transactions"
+  | "budget"
+  | "analytics"
+  | "banking"
+  | "settings";
 
 const TAB_CONFIG: Record<
   TabKey,
-  { mascot: MascotName; surface: "sage" | "peach" | "sky" | "lav" | "lemon" | "linen" }
+  {
+    mascot: MascotName;
+    surface: "sage" | "peach" | "sky" | "lav" | "lemon" | "linen";
+  }
 > = {
   index: { mascot: "coins", surface: "sage" },
   transactions: { mascot: "receipt", surface: "peach" },

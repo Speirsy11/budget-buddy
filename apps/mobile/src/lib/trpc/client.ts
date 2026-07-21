@@ -7,8 +7,7 @@ export const trpc: ReturnType<typeof createTRPCReact<AppRouter>> =
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export type Transaction =
-  RouterOutputs["transactions"]["list"]["data"][number];
+export type Transaction = RouterOutputs["transactions"]["list"]["data"][number];
 
 // Re-export types for convenience
 export type {

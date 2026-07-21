@@ -21,10 +21,7 @@ export function Screen({ children, scroll = true, contentStyle }: ScreenProps) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
         <View
-          style={[
-            { flex: 1, padding: 18, paddingBottom: 100 },
-            contentStyle,
-          ]}
+          style={[{ flex: 1, padding: 18, paddingBottom: 100 }, contentStyle]}
         >
           {children}
         </View>

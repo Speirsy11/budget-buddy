@@ -10,12 +10,7 @@ describe("CategoryBadge", () => {
   });
 
   it("shows the category and its budget classification", () => {
-    render(
-      <CategoryBadge
-        category="Food & Groceries"
-        necessityType="need"
-      />
-    );
+    render(<CategoryBadge category="Food & Groceries" necessityType="need" />);
 
     expect(screen.getByText("Food & Groceries")).not.toBeNull();
     expect(screen.getByText("need")).not.toBeNull();

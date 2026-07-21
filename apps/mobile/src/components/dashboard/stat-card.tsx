@@ -2,7 +2,14 @@ import { View, Text, ActivityIndicator } from "react-native";
 import { useTheme } from "@/lib/theme/provider";
 import { Mascot, type MascotName } from "@/components/mascot";
 
-type SurfaceKey = "sage" | "peach" | "sky" | "lav" | "lemon" | "linen" | "white";
+type SurfaceKey =
+  | "sage"
+  | "peach"
+  | "sky"
+  | "lav"
+  | "lemon"
+  | "linen"
+  | "white";
 
 interface StatCardProps {
   title: string;

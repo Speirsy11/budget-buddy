@@ -40,8 +40,7 @@ export default function DashboardScreen() {
   const showBudgetSkeleton = useTimedLoading(budgetQuery.isLoading);
   const showTransactionsSkeleton = useTimedLoading(transactionsQuery.isLoading);
 
-  const netCashFlow =
-    (budget?.totalIncome ?? 0) - (budget?.totalExpenses ?? 0);
+  const netCashFlow = (budget?.totalIncome ?? 0) - (budget?.totalExpenses ?? 0);
   const monthLong = new Date(year, month - 1).toLocaleString("en-GB", {
     month: "long",
   });
@@ -89,7 +88,11 @@ export default function DashboardScreen() {
         >
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text
-              style={{ fontSize: 12, fontWeight: "600", color: colors.deep.sky }}
+              style={{
+                fontSize: 12,
+                fontWeight: "600",
+                color: colors.deep.sky,
+              }}
             >
               Net flow · {monthLong}
             </Text>
@@ -107,9 +110,7 @@ export default function DashboardScreen() {
               {formatCurrency(Math.abs(netCashFlow)).replace(/\.\d+$/, "")}
             </Text>
             <Text style={{ fontSize: 11, color: colors.inkSoft, marginTop: 4 }}>
-              {netCashFlow >= 0
-                ? "Tracking ahead"
-                : "Spending exceeded income"}
+              {netCashFlow >= 0 ? "Tracking ahead" : "Spending exceeded income"}
             </Text>
           </View>
           <Mascot
@@ -132,7 +133,10 @@ export default function DashboardScreen() {
             surface="sage"
             mascot="coins"
             title="Income"
-            value={formatCurrency(budget?.totalIncome ?? 0).replace(/\.\d+$/, "")}
+            value={formatCurrency(budget?.totalIncome ?? 0).replace(
+              /\.\d+$/,
+              ""
+            )}
             meta={`${monthLong}`}
             isLoading={budgetQuery.isLoading}
           />
@@ -140,7 +144,10 @@ export default function DashboardScreen() {
             surface="peach"
             mascot="receipt"
             title="Expenses"
-            value={formatCurrency(budget?.totalExpenses ?? 0).replace(/\.\d+$/, "")}
+            value={formatCurrency(budget?.totalExpenses ?? 0).replace(
+              /\.\d+$/,
+              ""
+            )}
             meta="this month"
             isLoading={budgetQuery.isLoading}
           />
@@ -148,7 +155,10 @@ export default function DashboardScreen() {
             surface="lav"
             mascot="piggy"
             title="Savings"
-            value={formatCurrency(budget?.savings.actual ?? 0).replace(/\.\d+$/, "")}
+            value={formatCurrency(budget?.savings.actual ?? 0).replace(
+              /\.\d+$/,
+              ""
+            )}
             meta="vs target"
             isLoading={budgetQuery.isLoading}
           />
@@ -178,7 +188,9 @@ export default function DashboardScreen() {
               >
                 50/30/20 Budget
               </Text>
-              <Text style={{ fontSize: 11, color: colors.inkSoft, marginTop: 2 }}>
+              <Text
+                style={{ fontSize: 11, color: colors.inkSoft, marginTop: 2 }}
+              >
                 Spending vs. your goals
               </Text>
             </View>
@@ -283,7 +295,10 @@ export default function DashboardScreen() {
           ) : transactions.length > 0 ? (
             <View style={{ gap: 6 }}>
               {transactions.map((transaction: Transaction) => (
-                <TransactionItem key={transaction.id} transaction={transaction} />
+                <TransactionItem
+                  key={transaction.id}
+                  transaction={transaction}
+                />
               ))}
             </View>
           ) : (

@@ -35,9 +35,7 @@ test.describe("Landing Page", () => {
   test("should offer authentication actions", async ({ page }) => {
     await page.goto("/");
 
-    await expect(
-      page.getByRole("button", { name: "Sign In" })
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Sign In" })).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Get Started" })
     ).toBeVisible();

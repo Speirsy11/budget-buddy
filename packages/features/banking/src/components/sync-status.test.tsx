@@ -22,9 +22,7 @@ describe("SyncStatus", () => {
   });
 
   it("summarizes changed transactions after a successful sync", () => {
-    render(
-      <SyncStatus status="success" added={2} modified={1} removed={3} />
-    );
+    render(<SyncStatus status="success" added={2} modified={1} removed={3} />);
 
     expect(screen.getByText("Sync complete.")).not.toBeNull();
     expect(screen.getByText("+2 new")).not.toBeNull();

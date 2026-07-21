@@ -63,7 +63,8 @@ export function GreetingHeader({
           <Text
             style={{
               fontSize: 12,
-              color: insightTone === "emerald" ? colors.cat.emerald : colors.muted,
+              color:
+                insightTone === "emerald" ? colors.cat.emerald : colors.muted,
               fontWeight: "600",
               marginTop: 2,
             }}

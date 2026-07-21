@@ -60,12 +60,10 @@ export function TransactionRow({
       className={cn(
         "flex items-center px-1 py-2",
         divider && "border-t border-black/[0.05]",
-        onClick && "hover:bg-black/[0.03] cursor-pointer rounded-md"
+        onClick && "cursor-pointer rounded-md hover:bg-black/[0.03]"
       )}
     >
-      <span
-        className={cn("mr-3.5 h-2 w-2 shrink-0 rounded-full", dotClass)}
-      />
+      <span className={cn("mr-3.5 h-2 w-2 shrink-0 rounded-full", dotClass)} />
       <div className="min-w-0 flex-1">
         <div className="text-ink truncate text-sm font-semibold">
           {merchant}

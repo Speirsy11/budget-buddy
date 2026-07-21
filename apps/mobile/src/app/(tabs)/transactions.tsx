@@ -174,10 +174,7 @@ export default function TransactionsScreen() {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View
-          style={[
-            styles.searchBar,
-            { backgroundColor: colors.surface.white },
-          ]}
+          style={[styles.searchBar, { backgroundColor: colors.surface.white }]}
         >
           <Ionicons name="search" size={20} color={colors.muted} />
           <TextInput

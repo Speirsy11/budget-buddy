@@ -101,132 +101,148 @@ export default function BudgetScreen() {
           />
         </View>
 
-      {/* Budget Gauges */}
-      <View style={[styles.section, { backgroundColor: colors.surface.lemon }]}>
-        <Text style={[styles.sectionTitle, { color: colors.ink }]}>
-          50/30/20 Budget
-        </Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.inkSoft }]}>
-          Track your spending against recommended allocations
-        </Text>
+        {/* Budget Gauges */}
+        <View
+          style={[styles.section, { backgroundColor: colors.surface.lemon }]}
+        >
+          <Text style={[styles.sectionTitle, { color: colors.ink }]}>
+            50/30/20 Budget
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.inkSoft }]}>
+            Track your spending against recommended allocations
+          </Text>
 
-        {showBudgetSkeleton ? (
-          <View style={styles.loadingPlaceholder}>
-            <View
-              style={[styles.gaugeSkeleton, { backgroundColor: colors.border }]}
-            />
-            <View
-              style={[styles.gaugeSkeleton, { backgroundColor: colors.border }]}
-            />
-            <View
-              style={[styles.gaugeSkeleton, { backgroundColor: colors.border }]}
-            />
-          </View>
-        ) : budget ? (
-          <View style={styles.gaugesContainer}>
-            <BudgetGauge
-              label="Needs"
-              percentage={50}
-              actual={budget.needs.actual}
-              target={budget.needs.target}
-              status={budget.needs.status}
-              color="#3b82f6"
-            />
-            <BudgetGauge
-              label="Wants"
-              percentage={30}
-              actual={budget.wants.actual}
-              target={budget.wants.target}
-              status={budget.wants.status}
-              color="#ec4899"
-            />
-            <BudgetGauge
-              label="Savings"
-              percentage={20}
-              actual={budget.savings.actual}
-              target={budget.savings.target}
-              status={budget.savings.status}
-              color="#10b981"
-            />
-          </View>
-        ) : (
-          <View style={styles.emptyState}>
-            <Mascot name="bars" size={56} />
-            <Text style={[styles.emptyText, { color: colors.inkSoft }]}>
-              No budget data for this month
-            </Text>
-          </View>
-        )}
-      </View>
-
-      {/* Income Summary */}
-      {budget && (
-        <View style={[styles.incomeCard, { backgroundColor: colors.surface.linen }]}>
-          <View style={styles.incomeRow}>
-            <Text style={[styles.incomeLabel, { color: colors.inkSoft }]}>
-              Monthly Income
-            </Text>
-            <Text style={[styles.incomeValue, { color: colors.cat.emerald }]}>
-              {formatCurrency(budget.totalIncome)}
-            </Text>
-          </View>
-          <View style={styles.incomeRow}>
-            <Text style={[styles.incomeLabel, { color: colors.inkSoft }]}>
-              Total Spent
-            </Text>
-            <Text style={[styles.incomeValue, { color: colors.ink }]}>
-              {formatCurrency(budget.needs.actual + budget.wants.actual)}
-            </Text>
-          </View>
-          <View style={styles.incomeRow}>
-            <Text style={[styles.incomeLabel, { color: colors.inkSoft }]}>
-              Savings Rate
-            </Text>
-            <Text
-              style={[
-                styles.incomeValue,
-                {
-                  color:
-                    budget.savingsRate >= 20
-                      ? colors.cat.emerald
-                      : colors.cat.amber,
-                },
-              ]}
-            >
-              {budget.savingsRate.toFixed(1)}%
-            </Text>
-          </View>
-        </View>
-      )}
-
-      {/* Category Breakdown */}
-      <View style={[styles.section, { backgroundColor: colors.surface.lav }]}>
-        <Text style={[styles.sectionTitle, { color: colors.ink }]}>
-          Spending by Category
-        </Text>
-        {showCategorySkeleton ? (
-          <View style={styles.loadingPlaceholder}>
-            {[1, 2, 3, 4].map((i) => (
+          {showBudgetSkeleton ? (
+            <View style={styles.loadingPlaceholder}>
               <View
-                key={i}
                 style={[
-                  styles.categorySkeleton,
+                  styles.gaugeSkeleton,
                   { backgroundColor: colors.border },
                 ]}
               />
-            ))}
-          </View>
-        ) : categories.length > 0 ? (
-          <CategoryBreakdownList categories={categories} />
-        ) : (
-          <View style={styles.emptyState}>
-            <Mascot name="pie" size={56} />
-            <Text style={[styles.emptyText, { color: colors.inkSoft }]}>
-              No spending data for this month
-            </Text>
+              <View
+                style={[
+                  styles.gaugeSkeleton,
+                  { backgroundColor: colors.border },
+                ]}
+              />
+              <View
+                style={[
+                  styles.gaugeSkeleton,
+                  { backgroundColor: colors.border },
+                ]}
+              />
+            </View>
+          ) : budget ? (
+            <View style={styles.gaugesContainer}>
+              <BudgetGauge
+                label="Needs"
+                percentage={50}
+                actual={budget.needs.actual}
+                target={budget.needs.target}
+                status={budget.needs.status}
+                color="#3b82f6"
+              />
+              <BudgetGauge
+                label="Wants"
+                percentage={30}
+                actual={budget.wants.actual}
+                target={budget.wants.target}
+                status={budget.wants.status}
+                color="#ec4899"
+              />
+              <BudgetGauge
+                label="Savings"
+                percentage={20}
+                actual={budget.savings.actual}
+                target={budget.savings.target}
+                status={budget.savings.status}
+                color="#10b981"
+              />
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <Mascot name="bars" size={56} />
+              <Text style={[styles.emptyText, { color: colors.inkSoft }]}>
+                No budget data for this month
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Income Summary */}
+        {budget && (
+          <View
+            style={[
+              styles.incomeCard,
+              { backgroundColor: colors.surface.linen },
+            ]}
+          >
+            <View style={styles.incomeRow}>
+              <Text style={[styles.incomeLabel, { color: colors.inkSoft }]}>
+                Monthly Income
+              </Text>
+              <Text style={[styles.incomeValue, { color: colors.cat.emerald }]}>
+                {formatCurrency(budget.totalIncome)}
+              </Text>
+            </View>
+            <View style={styles.incomeRow}>
+              <Text style={[styles.incomeLabel, { color: colors.inkSoft }]}>
+                Total Spent
+              </Text>
+              <Text style={[styles.incomeValue, { color: colors.ink }]}>
+                {formatCurrency(budget.needs.actual + budget.wants.actual)}
+              </Text>
+            </View>
+            <View style={styles.incomeRow}>
+              <Text style={[styles.incomeLabel, { color: colors.inkSoft }]}>
+                Savings Rate
+              </Text>
+              <Text
+                style={[
+                  styles.incomeValue,
+                  {
+                    color:
+                      budget.savingsRate >= 20
+                        ? colors.cat.emerald
+                        : colors.cat.amber,
+                  },
+                ]}
+              >
+                {budget.savingsRate.toFixed(1)}%
+              </Text>
+            </View>
           </View>
         )}
-      </View>
+
+        {/* Category Breakdown */}
+        <View style={[styles.section, { backgroundColor: colors.surface.lav }]}>
+          <Text style={[styles.sectionTitle, { color: colors.ink }]}>
+            Spending by Category
+          </Text>
+          {showCategorySkeleton ? (
+            <View style={styles.loadingPlaceholder}>
+              {[1, 2, 3, 4].map((i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.categorySkeleton,
+                    { backgroundColor: colors.border },
+                  ]}
+                />
+              ))}
+            </View>
+          ) : categories.length > 0 ? (
+            <CategoryBreakdownList categories={categories} />
+          ) : (
+            <View style={styles.emptyState}>
+              <Mascot name="pie" size={56} />
+              <Text style={[styles.emptyText, { color: colors.inkSoft }]}>
+                No spending data for this month
+              </Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

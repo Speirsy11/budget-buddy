@@ -19,7 +19,7 @@ export function DashboardHeader() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-ink hover:bg-black/[0.04] shrink-0 lg:hidden"
+            className="text-ink shrink-0 hover:bg-black/[0.04] lg:hidden"
             onClick={() => setMobileOpen(true)}
           >
             <Menu className="h-5 w-5" />
@@ -32,7 +32,7 @@ export function DashboardHeader() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-ink-soft hover:text-ink hover:bg-black/[0.04] relative h-9 w-9 rounded-chip"
+              className="text-ink-soft hover:text-ink rounded-chip relative h-9 w-9 hover:bg-black/[0.04]"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
               <Sun className="h-[1.15rem] w-[1.15rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -43,7 +43,7 @@ export function DashboardHeader() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-ink-soft hover:text-ink hover:bg-black/[0.04] relative h-9 w-9 rounded-chip"
+              className="text-ink-soft hover:text-ink rounded-chip relative h-9 w-9 hover:bg-black/[0.04]"
             >
               <Bell className="h-[1.15rem] w-[1.15rem]" />
               <span className="sr-only">Notifications</span>
