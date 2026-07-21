@@ -67,8 +67,8 @@ export default function LandingPage() {
             </span>
           </h1>
           <p className="text-muted-foreground mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-            Your friendly AI buddy automatically categorizes transactions, sets
-            personalized budget goals, and helps you build better money habits.
+            BudgetBuddy automatically categorises your transactions, tracks a
+            50/30/20 budget, and helps you build better money habits.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <SignedOut>
@@ -145,7 +145,7 @@ export default function LandingPage() {
                 icon: PieChart,
                 title: "50/30/20 Budget",
                 description:
-                  "Your AI buddy learns your spending habits and helps you set achievable, personalized budget goals.",
+                  "See needs, wants, and savings at a glance, with targets that adapt to your income.",
                 color: "text-blue-600 dark:text-blue-400",
                 bgColor: "bg-blue-500/10",
               },

@@ -294,7 +294,7 @@ export default function BudgetPage() {
           <h4 className="text-ink mb-1 text-lg font-bold">50% Needs</h4>
           <p className="text-deep-sky text-sm leading-snug">
             Housing, utilities, groceries, healthcare, and minimum debt
-            payments. Buddy tracks these automatically.
+            payments. Tracked automatically from your transactions.
           </p>
         </Card>
 
@@ -316,8 +316,8 @@ export default function BudgetPage() {
           />
           <h4 className="text-ink mb-1 text-lg font-bold">20% Savings</h4>
           <p className="text-deep-sage text-sm leading-snug">
-            Savings, investments, and extra debt payments. Buddy cheers you on
-            as you build wealth.
+            Savings, investments, and extra debt payments that build long-term
+            wealth.
           </p>
         </Card>
       </div>

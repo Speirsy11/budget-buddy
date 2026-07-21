@@ -77,7 +77,7 @@ export default function SettingsPage() {
         title={<>Settings</>}
         insight={
           <span className="text-muted-ink text-base font-medium">
-            Make Buddy yours
+            Make it yours
           </span>
         }
       />

@@ -132,7 +132,7 @@ export default function ImportPage() {
           <IconChip icon={Sparkles} surface="lav" size="lg" className="mb-2" />
           <h3 className="text-ink mb-1 font-bold">AI classification</h3>
           <p className="text-deep-lav text-sm leading-snug">
-            Buddy reads each transaction and picks the right 50/30/20 bucket.
+            Each transaction is read and sorted into the right 50/30/20 bucket.
           </p>
         </Card>
 
