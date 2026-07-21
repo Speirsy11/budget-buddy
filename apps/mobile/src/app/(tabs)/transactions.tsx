@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
+// @boundaries-ignore declared workspace dependency resolved via subpath export
 import { parseCSV } from "@finance/transactions/csv-parser";
 import { useTheme } from "@/lib/theme/provider";
 import { useTimedLoading } from "@/lib/hooks/use-timed-loading";
@@ -20,7 +21,12 @@ import { trpc, type Transaction } from "@/lib/trpc/client";
 import { Ionicons } from "@expo/vector-icons";
 import { TransactionItem } from "@/components/transactions/transaction-item";
 import { GreetingHeader } from "@/components/greeting-header";
-import { Mascot } from "@/components/mascot";
+import { IconChip } from "@/components/icon-chip";
+import {
+  CheckCircle2,
+  FileSpreadsheet,
+  ReceiptText,
+} from "lucide-react-native";
 
 const MAX_CSV_SIZE_BYTES = 5 * 1024 * 1024;
 
@@ -161,7 +167,6 @@ export default function TransactionsScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <View style={{ paddingHorizontal: 18, paddingTop: 8 }}>
         <GreetingHeader
-          mascot="receiptman"
           title="Your transactions"
           insight={
             transactions.length > 0
@@ -220,7 +225,7 @@ export default function TransactionsScreen() {
                 { backgroundColor: colors.surface.lemon },
               ]}
             >
-              <Mascot name="csv" size={48} />
+              <IconChip icon={FileSpreadsheet} surface="white" size="lg" />
               <View style={styles.importCopy}>
                 <Text style={[styles.importTitle, { color: colors.ink }]}>
                   Import CSV
@@ -256,7 +261,7 @@ export default function TransactionsScreen() {
                   { backgroundColor: colors.surface.sage },
                 ]}
               >
-                <Mascot name="thumbs2" size={32} />
+                <IconChip icon={CheckCircle2} surface="white" size="md" />
                 <Text style={[styles.importNoticeText, { color: colors.ink }]}>
                   {importSummary}
                 </Text>
@@ -279,7 +284,7 @@ export default function TransactionsScreen() {
             </View>
           ) : (
             <View style={styles.emptyState}>
-              <Mascot name="receipt" size={72} />
+              <IconChip icon={ReceiptText} surface="linen" size="lg" />
               <Text style={[styles.emptyTitle, { color: colors.ink }]}>
                 No transactions
               </Text>

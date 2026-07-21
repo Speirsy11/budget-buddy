@@ -13,7 +13,8 @@ import { useAuth, useUser } from "@clerk/clerk-expo";
 import { useTheme } from "@/lib/theme/provider";
 import { Ionicons } from "@expo/vector-icons";
 import { isMockAuthMode, mockUser } from "@/lib/auth/mock-mode";
-import { Mascot } from "@/components/mascot";
+import { FileSpreadsheet, Landmark, LogOut, User } from "lucide-react-native";
+import { IconChip } from "@/components/icon-chip";
 import { GreetingHeader } from "@/components/greeting-header";
 
 type SettingsUser = {
@@ -76,7 +77,6 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
         contentContainerStyle={styles.content}
       >
         <GreetingHeader
-          mascot="peaceful"
           title="Settings"
           insight="Make Buddy yours"
           insightTone="muted"
@@ -91,7 +91,7 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
             Profile
           </Text>
           <View style={styles.profileRow}>
-            <Mascot name="wave" size={56} />
+            <IconChip icon={User} surface="white" size="lg" />
             <View style={styles.profileInfo}>
               <Text style={[styles.profileName, { color: colors.ink }]}>
                 {user?.fullName || "User"}
@@ -185,7 +185,7 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
             onPress={() => router.push("/(tabs)/banking" as never)}
           >
             <View style={styles.settingInfo}>
-              <Mascot name="bank" size={28} />
+              <Landmark size={20} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingLabel, { color: colors.ink }]}>
                   Open Banking
@@ -212,7 +212,7 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
             }}
           >
             <View style={styles.settingInfo}>
-              <Mascot name="csv" size={28} />
+              <FileSpreadsheet size={20} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingLabel, { color: colors.ink }]}>
                   Export Data
@@ -271,7 +271,7 @@ function SettingsContent({ user, signOut }: SettingsContentProps) {
           ]}
           onPress={handleSignOut}
         >
-          <Mascot name="concerned" size={24} />
+          <LogOut size={20} color={colors.deep.peach} />
           <Text style={[styles.signOutText, { color: colors.deep.peach }]}>
             Sign Out
           </Text>

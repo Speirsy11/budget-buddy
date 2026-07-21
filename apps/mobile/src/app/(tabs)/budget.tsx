@@ -15,7 +15,8 @@ import { BudgetGauge } from "@/components/budget/budget-gauge";
 import { CategoryBreakdownList } from "@/components/budget/category-breakdown";
 import { GreetingHeader } from "@/components/greeting-header";
 import { MonthPicker } from "@/components/month-picker";
-import { Mascot } from "@/components/mascot";
+import { IconChip } from "@/components/icon-chip";
+import { BarChart3, PieChart } from "lucide-react-native";
 
 export default function BudgetScreen() {
   const { colors } = useTheme();
@@ -81,7 +82,6 @@ export default function BudgetScreen() {
         }
       >
         <GreetingHeader
-          mascot="clipboardman"
           title="Your budget"
           insight={monthName}
           insightTone="muted"
@@ -162,7 +162,7 @@ export default function BudgetScreen() {
             </View>
           ) : (
             <View style={styles.emptyState}>
-              <Mascot name="bars" size={56} />
+              <IconChip icon={BarChart3} surface="white" size="lg" />
               <Text style={[styles.emptyText, { color: colors.inkSoft }]}>
                 No budget data for this month
               </Text>
@@ -236,7 +236,7 @@ export default function BudgetScreen() {
             <CategoryBreakdownList categories={categories} />
           ) : (
             <View style={styles.emptyState}>
-              <Mascot name="pie" size={56} />
+              <IconChip icon={PieChart} surface="white" size="lg" />
               <Text style={[styles.emptyText, { color: colors.inkSoft }]}>
                 No spending data for this month
               </Text>

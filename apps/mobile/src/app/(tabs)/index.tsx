@@ -14,8 +14,18 @@ import { trpc, type Transaction } from "@/lib/trpc/client";
 import { formatCurrency } from "@/lib/utils/format";
 import { GreetingHeader } from "@/components/greeting-header";
 import { BentoCard } from "@/components/bento-card";
-import { Mascot } from "@/components/mascot";
+import { IconChip } from "@/components/icon-chip";
 import { StatCard } from "@/components/dashboard/stat-card";
+import {
+  ClipboardList,
+  Coins,
+  FileSpreadsheet,
+  PiggyBank,
+  ReceiptText,
+  Star,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react-native";
 import { BudgetProgress } from "@/components/dashboard/budget-progress";
 import { TransactionItem } from "@/components/transactions/transaction-item";
 
@@ -70,7 +80,6 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         <GreetingHeader
-          mascot="wave2"
           title="Hey, there!"
           insight={budget ? aheadCopy : undefined}
         />
@@ -113,9 +122,10 @@ export default function DashboardScreen() {
               {netCashFlow >= 0 ? "Tracking ahead" : "Spending exceeded income"}
             </Text>
           </View>
-          <Mascot
-            name={netCashFlow >= 0 ? "thumbsup" : "concerned"}
-            size={76}
+          <IconChip
+            icon={netCashFlow >= 0 ? TrendingUp : TrendingDown}
+            surface="white"
+            size="lg"
             style={{ marginRight: -10 }}
           />
         </BentoCard>
@@ -131,7 +141,7 @@ export default function DashboardScreen() {
         >
           <StatCard
             surface="sage"
-            mascot="coins"
+            icon={Coins}
             title="Income"
             value={formatCurrency(budget?.totalIncome ?? 0).replace(
               /\.\d+$/,
@@ -142,7 +152,7 @@ export default function DashboardScreen() {
           />
           <StatCard
             surface="peach"
-            mascot="receipt"
+            icon={ReceiptText}
             title="Expenses"
             value={formatCurrency(budget?.totalExpenses ?? 0).replace(
               /\.\d+$/,
@@ -153,7 +163,7 @@ export default function DashboardScreen() {
           />
           <StatCard
             surface="lav"
-            mascot="piggy"
+            icon={PiggyBank}
             title="Savings"
             value={formatCurrency(budget?.savings.actual ?? 0).replace(
               /\.\d+$/,
@@ -164,7 +174,7 @@ export default function DashboardScreen() {
           />
           <StatCard
             surface="lemon"
-            mascot="star"
+            icon={Star}
             title="Rate"
             value={`${(budget?.savingsRate ?? 0).toFixed(1)}%`}
             meta="goal 20%"
@@ -194,7 +204,7 @@ export default function DashboardScreen() {
                 Spending vs. your goals
               </Text>
             </View>
-            <Mascot name="clipboard" size={44} />
+            <IconChip icon={ClipboardList} surface="white" size="lg" />
           </View>
 
           {showBudgetSkeleton ? (
@@ -233,7 +243,7 @@ export default function DashboardScreen() {
             </View>
           ) : (
             <View style={{ alignItems: "center", paddingVertical: 16 }}>
-              <Mascot name="csv" size={56} />
+              <IconChip icon={FileSpreadsheet} surface="white" size="lg" />
               <Text
                 style={{
                   color: colors.inkSoft,
@@ -304,7 +314,7 @@ export default function DashboardScreen() {
           ) : (
             <BentoCard surface="white">
               <View style={{ alignItems: "center", paddingVertical: 20 }}>
-                <Mascot name="receipt" size={56} />
+                <IconChip icon={ReceiptText} surface="linen" size="lg" />
                 <Text
                   style={{ color: colors.ink, marginTop: 8, fontWeight: "700" }}
                 >

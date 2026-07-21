@@ -3,7 +3,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useTheme } from "@/lib/theme/provider";
 import { isMockAuthMode } from "@/lib/auth/mock-mode";
-import { BuddyTabBar } from "@/components/buddy-tab-bar";
+import { TabBar } from "@/components/tab-bar";
 
 export default function TabsLayout() {
   if (isMockAuthMode) {
@@ -36,7 +36,7 @@ function TabsNavigator() {
 
   return (
     <Tabs
-      tabBar={(props) => <BuddyTabBar {...props} />}
+      tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: colors.bg },

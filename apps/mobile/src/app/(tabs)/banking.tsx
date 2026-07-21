@@ -11,7 +11,8 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Mascot } from "@/components/mascot";
+import { ShieldCheck } from "lucide-react-native";
+import { IconChip } from "@/components/icon-chip";
 import { GreetingHeader } from "@/components/greeting-header";
 import {
   create,
@@ -236,7 +237,6 @@ export default function BankingScreen() {
         contentContainerStyle={styles.content}
       >
         <GreetingHeader
-          mascot="pointer"
           title="Connect your bank"
           insight="UK Open Banking via Plaid"
           insightTone="muted"
@@ -245,7 +245,7 @@ export default function BankingScreen() {
           style={[styles.heroCard, { backgroundColor: colors.surface.sage }]}
         >
           <View style={styles.heroHeader}>
-            <Mascot name="shield" size={56} />
+            <IconChip icon={ShieldCheck} surface="white" size="lg" />
             <View style={styles.heroCopy}>
               <Text style={[styles.heroTitle, { color: colors.ink }]}>
                 Privacy first

@@ -138,7 +138,6 @@ export default function AnalyticsScreen() {
         }
       >
         <GreetingHeader
-          mascot="chartman"
           title="Analytics"
           insight={`Past ${months} months`}
           insightTone="muted"
