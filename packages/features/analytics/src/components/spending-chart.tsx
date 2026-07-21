@@ -113,6 +113,7 @@ export function SpendingChart({
               <Area
                 type="monotone"
                 dataKey="amount"
+                isAnimationActive={false}
                 stroke={EMERALD}
                 strokeWidth={2.5}
                 strokeLinecap="round"
