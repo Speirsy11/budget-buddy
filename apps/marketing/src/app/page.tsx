@@ -43,15 +43,15 @@ const features = [
   },
   {
     icon: BarChart3,
-    title: "Web + mobile rhythm",
+    title: "Web and mobile",
     description:
-      "Import on web, then check budgets, transactions, and insights from mobile.",
+      "Import on the web, then check budgets, transactions, and insights from your phone.",
   },
   {
     icon: Shield,
-    title: "Trust-first roadmap",
+    title: "Private by design",
     description:
-      "Open Banking stays optional until pricing, consent, and data controls are right.",
+      "Your data stays yours. Bank connections are always opt-in, never a requirement.",
   },
 ];
 
@@ -122,9 +122,9 @@ export default function HomePage() {
                 first.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-                BudgetBuddy turns UK bank CSV exports into a friendly 50/30/20
-                budget, transaction search, and mobile spending check. Open
-                Banking can come later — trust comes first.
+                BudgetBuddy turns UK bank CSV exports into a clear 50/30/20
+                budget, searchable transactions, and spending insights on web
+                and mobile. Connect your bank later — only if you want to.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href={`${appUrl}/sign-up`}>
@@ -176,11 +176,11 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl">
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                A safer wedge for personal finance
+                Everything you need to know where your money goes
               </h2>
               <p className="mt-4 text-slate-300">
-                Useful now with CSVs, ready to grow into deeper automation when
-                the trust layer is mature.
+                Import a CSV and get a working budget in minutes — no bank
+                credentials required.
               </p>
             </div>
             <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -217,8 +217,8 @@ export default function HomePage() {
               ],
               [
                 "3",
-                "Upgrade only when useful",
-                "Paid/open-banking paths stay separate until the value is proven.",
+                "Stay on top",
+                "Set 50/30/20 targets and watch your spending trends month over month.",
               ],
             ].map(([step, title, copy]) => (
               <div
@@ -241,11 +241,11 @@ export default function HomePage() {
         >
           <div className="mx-auto max-w-4xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Simple pricing hypothesis
+              Simple pricing
             </h2>
             <p className="mt-4 text-slate-300">
-              Keep the free CSV wedge useful. Add paid features only when trust,
-              billing, and provider economics are clear.
+              Start free with CSV import and budgeting. Upgrade when you want
+              more from your data.
             </p>
             <div className="mt-10 grid gap-6 md:grid-cols-2">
               {PRICING_PLANS.filter((p) => p.id !== "pro-yearly").map(
@@ -284,11 +284,11 @@ export default function HomePage() {
             </h2>
             <FAQ
               question="Does BudgetBuddy require Open Banking?"
-              answer="No. The recommended first wedge is CSV import, so users can get value without connecting a persistent bank feed."
+              answer="No. You can start with CSV exports from your bank and get full budgeting and insights without ever connecting a live bank feed."
             />
             <FAQ
               question="Can I use it on mobile?"
-              answer="Yes — mobile is for reviewing transactions, budgets, and analytics. CSV import starts on web while the native mobile import path is validated."
+              answer="Yes — review transactions, budgets, and analytics from the mobile app. CSV import happens on the web."
             />
             <FAQ
               question="Is this financial advice?"

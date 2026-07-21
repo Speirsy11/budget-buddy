@@ -4,9 +4,9 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "BudgetBuddy - AI-Powered Personal Finance",
+  title: "BudgetBuddy — AI-Powered Personal Finance",
   description:
-    "Your friendly AI finance buddy that categorizes transactions, sets personalized budget goals, and gives you helpful insights.",
+    "Turn bank CSV exports into a clear 50/30/20 budget with AI transaction categorisation and spending insights.",
   keywords: [
     "personal finance",
     "budgeting",
@@ -16,8 +16,9 @@ export const metadata: Metadata = {
     "money management",
   ],
   authors: [{ name: "BudgetBuddy" }],
+  icons: { icon: "/budgetbuddy-mark.svg" },
   openGraph: {
-    title: "BudgetBuddy - AI-Powered Personal Finance",
+    title: "BudgetBuddy — AI-Powered Personal Finance",
     description:
       "Take control of your finances with AI-powered transaction categorization and smart budgeting.",
     type: "website",
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "BudgetBuddy - AI-Powered Personal Finance",
+    title: "BudgetBuddy — AI-Powered Personal Finance",
     description:
       "Take control of your finances with AI-powered transaction categorization and smart budgeting.",
   },
