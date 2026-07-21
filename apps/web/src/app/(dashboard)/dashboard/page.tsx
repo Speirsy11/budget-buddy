@@ -66,7 +66,17 @@ export default function DashboardPage() {
   };
 
   const budgetQuery = trpc.analytics.get503020.useQuery({ month, year });
-  const transactionsQuery = trpc.transactions.list.useQuery({ limit: 5 });
+  const monthRange = useMemo(
+    () => ({
+      startDate: new Date(year, month - 1, 1),
+      endDate: new Date(year, month, 0, 23, 59, 59),
+    }),
+    [month, year]
+  );
+  const transactionsQuery = trpc.transactions.list.useQuery({
+    filters: monthRange,
+    limit: 5,
+  });
   const trendsQuery = trpc.analytics.getSpendingTrends.useQuery({
     startDate: thirtyDaysAgo,
     endDate: today,
