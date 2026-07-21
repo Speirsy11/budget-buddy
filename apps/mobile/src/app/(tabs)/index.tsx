@@ -10,10 +10,12 @@ import {
 import { Link } from "expo-router";
 import { useTheme } from "@/lib/theme/provider";
 import { useTimedLoading } from "@/lib/hooks/use-timed-loading";
+import { useMonthCursor } from "@/lib/hooks/use-month-cursor";
 import { trpc, type Transaction } from "@/lib/trpc/client";
 import { formatCurrency } from "@/lib/utils/format";
 import { GreetingHeader } from "@/components/greeting-header";
 import { BentoCard } from "@/components/bento-card";
+import { MonthPicker } from "@/components/month-picker";
 import { IconChip } from "@/components/icon-chip";
 import { StatCard } from "@/components/dashboard/stat-card";
 import {
@@ -31,18 +33,13 @@ import { TransactionItem } from "@/components/transactions/transaction-item";
 
 export default function DashboardScreen() {
   const { colors } = useTheme();
-  const now = new Date();
-  const [month] = useState(now.getMonth() + 1);
-  const [year] = useState(now.getFullYear());
+  const { month, year, range, goToPrevMonth, goToNextMonth } = useMonthCursor();
   const [refreshing, setRefreshing] = useState(false);
-
-  const startOfMonth = new Date(year, month - 1, 1);
-  const endOfMonth = new Date(year, month, 0, 23, 59, 59);
 
   const budgetQuery = trpc.analytics.get503020.useQuery({ month, year });
   const transactionsQuery = trpc.transactions.list.useQuery({
     limit: 5,
-    filters: { startDate: startOfMonth, endDate: endOfMonth },
+    filters: range,
   });
 
   const budget = budgetQuery.data;
@@ -83,6 +80,20 @@ export default function DashboardScreen() {
           title="Hey, there!"
           insight={budget ? aheadCopy : undefined}
         />
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginBottom: 2,
+          }}
+        >
+          <MonthPicker
+            month={month}
+            year={year}
+            onPrev={goToPrevMonth}
+            onNext={goToNextMonth}
+          />
+        </View>
 
         {/* Hero net-flow card */}
         <BentoCard

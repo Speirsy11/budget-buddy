@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useTheme } from "@/lib/theme/provider";
 import { useTimedLoading } from "@/lib/hooks/use-timed-loading";
+import { useMonthCursor } from "@/lib/hooks/use-month-cursor";
 import { trpc, type CategoryData } from "@/lib/trpc/client";
 import { formatCurrency } from "@/lib/utils/format";
 import { BudgetGauge } from "@/components/budget/budget-gauge";
@@ -20,19 +21,11 @@ import { BarChart3, PieChart } from "lucide-react-native";
 
 export default function BudgetScreen() {
   const { colors } = useTheme();
-  const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear());
+  const { month, year, range, goToPrevMonth, goToNextMonth } = useMonthCursor();
   const [refreshing, setRefreshing] = useState(false);
 
-  const startOfMonth = new Date(year, month - 1, 1);
-  const endOfMonth = new Date(year, month, 0, 23, 59, 59);
-
   const budgetQuery = trpc.analytics.get503020.useQuery({ month, year });
-  const categoryQuery = trpc.analytics.getCategoryBreakdown.useQuery({
-    startDate: startOfMonth,
-    endDate: endOfMonth,
-  });
+  const categoryQuery = trpc.analytics.getCategoryBreakdown.useQuery(range);
 
   const budget = budgetQuery.data;
   const categories: CategoryData[] = categoryQuery.data || [];
@@ -43,24 +36,6 @@ export default function BudgetScreen() {
     month: "long",
     year: "numeric",
   });
-
-  const handlePrevMonth = () => {
-    if (month === 1) {
-      setMonth(12);
-      setYear(year - 1);
-    } else {
-      setMonth(month - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (month === 12) {
-      setMonth(1);
-      setYear(year + 1);
-    } else {
-      setMonth(month + 1);
-    }
-  };
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -96,8 +71,8 @@ export default function BudgetScreen() {
           <MonthPicker
             month={month}
             year={year}
-            onPrev={handlePrevMonth}
-            onNext={handleNextMonth}
+            onPrev={goToPrevMonth}
+            onNext={goToNextMonth}
           />
         </View>
 
