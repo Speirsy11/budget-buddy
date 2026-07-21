@@ -12,6 +12,15 @@ export function formatCurrency(amount: number, currency = "GBP"): string {
   }).format(amount);
 }
 
+export function formatCurrencyWhole(amount: number, currency = "GBP"): string {
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
   return new Intl.DateTimeFormat("en-GB", {
