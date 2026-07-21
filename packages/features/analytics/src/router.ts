@@ -86,12 +86,10 @@ export const analyticsRouter = router({
         "get503020: fetched transactions for period"
       );
 
-      // Calculate income from positive transactions
       const income = monthTransactions
         .filter((t) => t.amount > 0)
         .reduce((sum, t) => sum + t.amount, 0);
 
-      // Get user's custom allocation if exists
       const allocation = await db.query.budgetAllocations.findFirst({
         where: and(
           eq(budgetAllocations.userId, ctx.userId),
@@ -242,7 +240,6 @@ export const analyticsRouter = router({
         "updateAllocation: updating budget allocation"
       );
 
-      // Validate percentages sum to 100
       const total =
         input.needsPercent + input.wantsPercent + input.savingsPercent;
       if (Math.abs(total - 100) > 0.01) {
@@ -343,7 +340,6 @@ export const analyticsRouter = router({
         ),
       });
 
-      // Group by month
       const monthlyData = new Map<
         string,
         { income: number; expenses: number }

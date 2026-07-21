@@ -1,7 +1,5 @@
-// Utils
 export * from "./lib/utils";
 
-// Components
 export * from "./components/avatar";
 export * from "./components/badge";
 export * from "./components/button";

@@ -4,16 +4,10 @@ import { logger } from "@finance/logger";
 
 const log = logger.child({ module: "ai-mock" });
 
-/**
- * Check if mock functionality is enabled via environment variable
- */
 export function isMockEnabled(): boolean {
   return process.env.MOCK_FUNCTIONALITY === "true";
 }
 
-/**
- * Mock response for askAI - returns a generic helpful response
- */
 export async function mockAskAI(prompt: string): Promise<string> {
   log.debug({ promptLength: prompt.length }, "Mock askAI called");
 
@@ -24,7 +18,6 @@ export async function mockAskAI(prompt: string): Promise<string> {
 }
 
 /**
- * Mock response for generateStructuredOutput
  * Attempts to return sensible mock data based on the schema
  */
 export async function mockGenerateStructuredOutput<T extends z.ZodTypeAny>(
@@ -38,10 +31,8 @@ export async function mockGenerateStructuredOutput<T extends z.ZodTypeAny>(
 
   await delay(100);
 
-  // Try to infer what kind of response is expected from the prompt
   const promptLower = prompt.toLowerCase();
 
-  // Check if this is a transaction classification request
   if (
     promptLower.includes("classify") &&
     (promptLower.includes("transaction") ||
@@ -66,7 +57,6 @@ export async function mockGenerateStructuredOutput<T extends z.ZodTypeAny>(
       );
     }
 
-    // Single transaction classification
     const mockClassification = generateMockClassification(prompt);
     const result = schema.safeParse(mockClassification);
     if (result.success) {
@@ -78,14 +68,10 @@ export async function mockGenerateStructuredOutput<T extends z.ZodTypeAny>(
     );
   }
 
-  // Fallback: generate a generic mock based on schema shape
   log.debug("Falling back to generic mock schema generation");
   return generateMockFromSchema(schema);
 }
 
-/**
- * Mock stream that yields a simple message
- */
 export function mockStreamText(_prompt: string) {
   log.debug("Mock streamText called");
 
@@ -104,9 +90,6 @@ export function mockStreamText(_prompt: string) {
   };
 }
 
-/**
- * Mock transaction classification with intelligent category detection
- */
 export async function mockClassifyTransaction(
   transaction: TransactionInput
 ): Promise<ClassificationResult> {
@@ -120,7 +103,6 @@ export async function mockClassifyTransaction(
   const description = transaction.description.toLowerCase();
   const amount = transaction.amount;
 
-  // Keyword-based classification for realistic mock responses
   const classification = detectCategory(description, amount);
 
   return {
@@ -438,7 +420,6 @@ function detectCategory(description: string, amount: number): CategoryMatch {
 }
 
 function extractMerchant(description: string): string | undefined {
-  // Common merchant patterns to extract
   const merchants = [
     "Tesco",
     "Sainsbury",
@@ -470,7 +451,6 @@ function extractMerchant(description: string): string | undefined {
 }
 
 function generateMockClassification(prompt: string): object {
-  // Extract transaction details from prompt
   const descMatch = prompt.match(/description:\s*"?([^"\n]+)"?/i);
   const amountMatch = prompt.match(/amount:\s*£?([\d.]+)/i);
 
@@ -488,7 +468,6 @@ function generateMockClassification(prompt: string): object {
 }
 
 function generateMockBatchClassification(prompt: string): object {
-  // Extract numbered transactions from prompt
   const lines = prompt.split("\n");
   const results: Array<{
     index: number;
@@ -515,7 +494,6 @@ function generateMockBatchClassification(prompt: string): object {
     }
   }
 
-  // If no results were parsed, generate placeholder results
   // Count how many transactions based on numbered lines
   if (results.length === 0) {
     const countMatch = prompt.match(/(\d+)\.\s*description:/gi);
@@ -539,8 +517,6 @@ function generateMockBatchClassification(prompt: string): object {
 }
 
 function generateMockFromSchema<T extends z.ZodTypeAny>(schema: T): z.infer<T> {
-  // Basic mock generation for unknown schemas
-  // This is a simple implementation that handles common types
   const def = schema._def as { typeName: string };
 
   if (def.typeName === "ZodObject") {
@@ -557,7 +533,6 @@ function generateMockFromSchema<T extends z.ZodTypeAny>(schema: T): z.infer<T> {
     return Object.fromEntries(entries) as z.infer<T>;
   }
 
-  // Fallback for non-object schemas
   return generateMockValue(schema) as z.infer<T>;
 }
 

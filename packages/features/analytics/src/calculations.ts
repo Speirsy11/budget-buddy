@@ -36,7 +36,6 @@ export interface TransactionForAnalysis {
 }
 
 /**
- * Calculate 50/30/20 budget breakdown
  * 50% Needs - Essential expenses (housing, utilities, groceries, healthcare)
  * 30% Wants - Discretionary spending (entertainment, dining out, shopping)
  * 20% Savings - Savings and debt repayment
@@ -52,7 +51,6 @@ export function calculate503020(
   const wantsTarget = income * (ratios.wants / 100);
   const savingsTarget = income * (ratios.savings / 100);
 
-  // Calculate actual spending by category
   let needsActual = 0;
   let wantsActual = 0;
   let savingsActual = 0;
@@ -62,7 +60,6 @@ export function calculate503020(
     const amount = Math.abs(t.amount);
 
     if (t.necessityScore !== null && t.necessityScore !== undefined) {
-      // Use necessity score if available
       if (t.necessityScore >= 0.7) {
         needsActual += amount;
       } else if (t.necessityScore <= 0.3) {
@@ -71,7 +68,6 @@ export function calculate503020(
         wantsActual += amount;
       }
     } else if (t.aiClassified) {
-      // Fallback to category-based classification
       const needCategories = [
         "Housing",
         "Healthcare",
@@ -89,7 +85,6 @@ export function calculate503020(
         wantsActual += amount;
       }
     } else {
-      // Default to wants if no classification
       wantsActual += amount;
     }
   }
@@ -232,9 +227,6 @@ export function calculateCategoryTotals(
     .sort((a, b) => b.total - a.total);
 }
 
-/**
- * Format a number as currency (USD)
- */
 export function formatCurrency(amount: number): string {
   const isNegative = amount < 0;
   const absAmount = Math.abs(amount);
@@ -247,9 +239,6 @@ export function formatCurrency(amount: number): string {
   return isNegative ? `-${formatted}` : formatted;
 }
 
-/**
- * Calculate percentage change between two values
- */
 export function getPercentageChange(previous: number, current: number): number {
   if (previous === 0) return 0;
   return ((current - previous) / previous) * 100;

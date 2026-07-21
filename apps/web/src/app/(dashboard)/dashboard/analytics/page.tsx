@@ -59,7 +59,6 @@ export default function AnalyticsPage() {
   const categories = categoryQuery.data || [];
   const monthlyData = comparisonQuery.data || [];
 
-  // Calculate insights
   const totalSpent = categories.reduce((sum, c) => sum + c.total, 0);
   const avgMonthlySpend = monthlyData.length
     ? monthlyData.reduce((sum, m) => sum + m.expenses, 0) / monthlyData.length

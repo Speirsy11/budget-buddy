@@ -1,7 +1,5 @@
-// Client
 export { resend, getResendClient, FROM_EMAIL } from "./client";
 
-// Email Sending Functions
 export {
   sendWelcomeEmail,
   sendBudgetAlertEmail,

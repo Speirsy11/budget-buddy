@@ -118,7 +118,6 @@ export function detectCSVFormat(headers: string[]): CSVFormat | null {
     }
   }
 
-  // Try to detect generic format
   const hasDate = normalizedHeaders.some((h) => h.includes("date"));
   const hasDescription = normalizedHeaders.some(
     (h) => h.includes("description") || h.includes("memo") || h.includes("name")
@@ -176,7 +175,6 @@ function parseDate(dateStr: string): Date | null {
     }
   }
 
-  // Try native Date parsing as fallback
   const date = new Date(dateStr);
   if (!isNaN(date.getTime())) {
     return date;

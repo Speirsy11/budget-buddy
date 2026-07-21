@@ -16,7 +16,6 @@ mkdirSync(OUT, { recursive: true });
 const WEB_URL = "http://localhost:3000";
 const MARKETING_URL = "http://localhost:3001";
 
-// Viewport presets
 const DESKTOP = { width: 1440, height: 900 };
 const LAPTOP = { width: 1280, height: 800 };
 const MOBILE = { width: 390, height: 844 }; // iPhone 15 Pro
@@ -36,7 +35,6 @@ async function waitForLoad(page) {
   await page.waitForTimeout(800);
   // Dismiss Clerk dev banner if present
   await page.evaluate(() => {
-    // Remove Clerk dev mode overlay iframes/divs
     document
       .querySelectorAll(
         '[id*="clerk"], [class*="clerk-development"], iframe[src*="clerk"]'
@@ -62,36 +60,30 @@ async function run() {
   {
     const page = await browser.newPage();
 
-    // Desktop hero (above fold)
     await page.setViewportSize(DESKTOP);
     await page.goto(MARKETING_URL, { waitUntil: "networkidle" });
     await page.waitForTimeout(500);
     await shot(page, "01-marketing-desktop-hero");
 
-    // Desktop full page
     await shot(page, "02-marketing-desktop-full", { fullPage: true });
 
-    // Features section
     await page.evaluate(() =>
       document.querySelector("#features")?.scrollIntoView()
     );
     await page.waitForTimeout(300);
     await shot(page, "03-marketing-desktop-features");
 
-    // Pricing section
     await page.evaluate(() =>
       document.querySelector("#pricing")?.scrollIntoView()
     );
     await page.waitForTimeout(300);
     await shot(page, "04-marketing-desktop-pricing");
 
-    // Mobile viewport - hero
     await page.setViewportSize(MOBILE);
     await page.goto(MARKETING_URL, { waitUntil: "networkidle" });
     await page.waitForTimeout(500);
     await shot(page, "05-marketing-mobile-hero");
 
-    // Mobile full page
     await shot(page, "06-marketing-mobile-full", { fullPage: true });
 
     await page.close();
@@ -112,10 +104,8 @@ async function run() {
     await page.goto(`${WEB_URL}/demo`, { waitUntil: "networkidle" });
     await waitForLoad(page);
 
-    // Full dashboard viewport
     await shot(page, "07-dashboard-desktop-light");
 
-    // Stat cards closeup
     const statsEl = await page.$(".grid.gap-4.sm\\:grid-cols-2");
     if (statsEl) {
       const box = await statsEl.boundingBox();
@@ -126,22 +116,18 @@ async function run() {
       }
     }
 
-    // Scroll to budget + chart section and capture
     await page.evaluate(() => window.scrollBy(0, 400));
     await page.waitForTimeout(400);
     await shot(page, "09-dashboard-budget-chart-light");
 
-    // Scroll to transactions
     await page.evaluate(() => window.scrollBy(0, 400));
     await page.waitForTimeout(300);
     await shot(page, "10-dashboard-transactions-light");
 
-    // Full page scroll
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(200);
     await shot(page, "11-dashboard-desktop-light-full", { fullPage: true });
 
-    // Laptop viewport
     await page.setViewportSize(LAPTOP);
     await page.goto(`${WEB_URL}/demo`, { waitUntil: "networkidle" });
     await waitForLoad(page);
@@ -167,7 +153,6 @@ async function run() {
     // Click the dark mode toggle to ensure dark is applied
     const themeToggle = await page.$('button:has(.lucide-moon), button:has(.lucide-sun)');
     if (themeToggle) {
-      // Check if we're already in dark mode by looking at html class
       const isDark = await page.evaluate(() =>
         document.documentElement.classList.contains("dark")
       );
@@ -207,11 +192,9 @@ async function run() {
     await page.waitForTimeout(300);
     await shot(page, "17-dashboard-mobile-light-transactions");
 
-    // Full page mobile
     await page.evaluate(() => window.scrollTo(0, 0));
     await shot(page, "18-dashboard-mobile-light-full", { fullPage: true });
 
-    // Dark mobile
     await page.addInitScript(() => {
       localStorage.setItem("theme", "dark");
     });
@@ -251,12 +234,10 @@ async function run() {
     await page.goto(`${WEB_URL}/demo`, { waitUntil: "networkidle" });
     await waitForLoad(page);
 
-    // Crop just the sidebar
     await shot(page, "22-sidebar-expanded-light", {
       clip: { x: 0, y: 0, width: 264, height: 900 },
     });
 
-    // Dark sidebar
     await page.addInitScript(() => localStorage.setItem("theme", "dark"));
     await page.goto(`${WEB_URL}/demo`, { waitUntil: "networkidle" });
     await waitForLoad(page);
@@ -277,13 +258,10 @@ async function run() {
     await page.goto(`${WEB_URL}/demo`, { waitUntil: "networkidle" });
     await waitForLoad(page);
 
-    // Budget gauge card
     const cards = await page.$$(".space-y-6 > div");
-    // Scroll to budget section
     await page.evaluate(() => window.scrollBy(0, 380));
     await page.waitForTimeout(400);
 
-    // Capture the two-column grid
     const twoColGrid = await page.$(".grid.gap-6.lg\\:grid-cols-2");
     if (twoColGrid) {
       const box = await twoColGrid.boundingBox();

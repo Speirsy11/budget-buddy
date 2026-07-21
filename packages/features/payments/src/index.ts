@@ -1,7 +1,5 @@
-// Stripe Client
 export { stripe, getStripeClient } from "./stripe-client";
 
-// Plans & Pricing
 export {
   PRICING_PLANS,
   getPlanById,
@@ -9,14 +7,12 @@ export {
   type PricingPlan,
 } from "./plans";
 
-// Checkout
 export {
   createCheckoutSession,
   createBillingPortalSession,
   type CreateCheckoutSessionParams,
 } from "./checkout";
 
-// Webhooks
 export {
   constructWebhookEvent,
   handleWebhookEvent,
@@ -25,7 +21,6 @@ export {
   type WebhookEventType,
 } from "./webhooks";
 
-// Subscriptions
 export {
   getSubscription,
   cancelSubscription,

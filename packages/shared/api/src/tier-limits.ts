@@ -3,11 +3,8 @@ import type { RateLimitConfig } from "./rate-limit";
 export type UserPlan = "free" | "pro" | "pro-yearly";
 
 export interface TierConfig {
-  /** AI classification rate limit */
   ai: RateLimitConfig;
-  /** CSV upload rate limit */
   upload: RateLimitConfig;
-  /** Whether open banking is available */
   openBankingEnabled: boolean;
   /** Max bank connections allowed (0 = not available) */
   maxBankConnections: number;
@@ -16,8 +13,6 @@ export interface TierConfig {
 }
 
 /**
- * Rate limits and feature gates per subscription tier.
- *
  * Free tier: lower AI limits, CSV only, no open banking
  * Pro tiers: higher AI limits, open banking, unlimited transactions
  */
@@ -69,9 +64,6 @@ export const tierRateLimits: Record<UserPlan, TierConfig> = {
   },
 };
 
-/**
- * Get the tier config for a given plan, defaulting to free
- */
 export function getTierConfig(plan?: UserPlan): TierConfig {
   return tierRateLimits[plan ?? "free"];
 }

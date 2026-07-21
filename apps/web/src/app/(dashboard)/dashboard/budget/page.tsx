@@ -26,7 +26,6 @@ export default function BudgetPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [hasAutoDetected, setHasAutoDetected] = useState(false);
 
-  // Auto-detect date range from transactions
   const dateRangeQuery = trpc.analytics.getDateRange.useQuery();
 
   // Update to the most recent transaction month when data loads
@@ -63,7 +62,6 @@ export default function BudgetPage() {
   const budget = budgetQuery.data;
   const categories = categoryQuery.data || [];
 
-  // Derive target allocation percentages from budget targets and income
   const savedNeedsPercent =
     budget && budget.totalIncome > 0
       ? Math.round((budget.needs.target / budget.totalIncome) * 100)

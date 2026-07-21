@@ -1,4 +1,3 @@
-// Schema
 export { transactionSchema, type TransactionFormData } from "./schema";
 
 // Utils (client-safe)
@@ -20,7 +19,6 @@ export {
   type ExportOptions,
 } from "./export";
 
-// Components
 export { TransactionTable } from "./components/transaction-table";
 export { TransactionUploader } from "./components/transaction-uploader";
 export { TransactionCard } from "./components/transaction-card";

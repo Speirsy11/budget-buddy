@@ -21,7 +21,6 @@ export async function syncUser(clerkUser: ClerkUser) {
   });
 
   if (existingUser) {
-    // Update existing user
     await db
       .update(users)
       .set({
@@ -33,7 +32,6 @@ export async function syncUser(clerkUser: ClerkUser) {
       })
       .where(eq(users.id, clerkUser.id));
   } else {
-    // Create new user
     await db.insert(users).values({
       id: clerkUser.id,
       email: primaryEmail,
