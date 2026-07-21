@@ -3,8 +3,19 @@
 import { useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn, Mascot, formatCurrency, type MascotName } from "@finance/ui";
-import { X } from "lucide-react";
+import { cn, IconChip, formatCurrency } from "@finance/ui";
+import {
+  BarChart3,
+  FileSpreadsheet,
+  Landmark,
+  LayoutGrid,
+  PiggyBank,
+  PieChart,
+  ReceiptText,
+  Settings,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { trpc } from "@/trpc/client";
 
 type SurfaceKey = "sage" | "peach" | "sky" | "lav" | "lemon" | "linen";
@@ -12,35 +23,35 @@ type SurfaceKey = "sage" | "peach" | "sky" | "lav" | "lemon" | "linen";
 interface NavItem {
   name: string;
   href: string;
-  mascot: MascotName;
+  icon: LucideIcon;
   surface: SurfaceKey;
 }
 
 const navigation: NavItem[] = [
-  { name: "Overview", href: "/dashboard", mascot: "coins", surface: "sage" },
+  { name: "Overview", href: "/dashboard", icon: LayoutGrid, surface: "sage" },
   {
     name: "Transactions",
     href: "/dashboard/transactions",
-    mascot: "receipt",
+    icon: ReceiptText,
     surface: "peach",
   },
-  { name: "Budget", href: "/dashboard/budget", mascot: "pie", surface: "sky" },
+  { name: "Budget", href: "/dashboard/budget", icon: PieChart, surface: "sky" },
   {
     name: "Analytics",
     href: "/dashboard/analytics",
-    mascot: "bars",
+    icon: BarChart3,
     surface: "lav",
   },
   {
     name: "Import",
     href: "/dashboard/import",
-    mascot: "csv",
+    icon: FileSpreadsheet,
     surface: "lemon",
   },
   {
     name: "Open Banking",
     href: "/dashboard/open-banking",
-    mascot: "bank",
+    icon: Landmark,
     surface: "linen",
   },
 ];
@@ -49,7 +60,7 @@ const secondaryNavigation: NavItem[] = [
   {
     name: "Settings",
     href: "/dashboard/settings",
-    mascot: "shield",
+    icon: Settings,
     surface: "linen",
   },
 ];
@@ -63,9 +74,21 @@ const surfaceBg: Record<SurfaceKey, string> = {
   linen: "bg-surface-linen",
 };
 
+const deepTextClass: Record<SurfaceKey, string> = {
+  sage: "text-deep-sage",
+  peach: "text-deep-peach",
+  sky: "text-deep-sky",
+  lav: "text-deep-lav",
+  lemon: "text-deep-lemon",
+  linen: "text-ink-soft",
+};
+
 function MonthLabel() {
   const now = new Date();
-  const month = now.toLocaleString("en-GB", { month: "short", year: "2-digit" });
+  const month = now.toLocaleString("en-GB", {
+    month: "short",
+    year: "2-digit",
+  });
   return <span>Personal · {month}</span>;
 }
 
@@ -83,31 +106,24 @@ function NavLink({
       href={item.href}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 rounded-pill px-2.5 py-2 text-sm transition-all",
+        "rounded-pill flex items-center gap-3 px-2.5 py-2 text-sm transition-all",
         active
           ? "bg-white/[0.07] font-semibold text-white"
           : "font-medium text-[#C8C2B5] hover:bg-white/[0.04] hover:text-white"
       )}
     >
-      <span
+      <IconChip
+        icon={item.icon}
+        surface={item.surface}
+        size="sm"
         className={cn(
-          "flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-chip",
-          surfaceBg[item.surface],
           active
             ? "shadow-[0_0_0_2px_rgba(255,255,255,0.18)]"
             : "shadow-[inset_0_-2px_0_rgba(0,0,0,0.06)]"
         )}
-      >
-        <Mascot
-          name={item.mascot}
-          size={26}
-          className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]"
-        />
-      </span>
+      />
       <span className="flex-1 truncate">{item.name}</span>
-      {active && (
-        <span className="bg-surface-peach h-1.5 w-1.5 rounded-full" />
-      )}
+      {active && <span className="bg-surface-peach h-1.5 w-1.5 rounded-full" />}
     </Link>
   );
 }
@@ -124,11 +140,6 @@ function SavingsGoalCard() {
 
   return (
     <div className="relative mt-auto overflow-hidden rounded-[18px] bg-white/[0.04] p-3.5">
-      <Mascot
-        name="star"
-        size={64}
-        className="absolute -right-3.5 -top-2.5 opacity-85"
-      />
       <div className="text-[11px] text-[#A39C8E]">Monthly savings goal</div>
       <div className="mt-1 flex items-baseline gap-1.5">
         <div className="text-xl font-extrabold text-white">
@@ -156,8 +167,8 @@ function SavingsGoalCard() {
 function BrandBlock() {
   return (
     <div className="flex items-center gap-3 px-1.5 pb-5">
-      <div className="bg-surface-sage relative grid h-14 w-14 shrink-0 place-items-end overflow-hidden rounded-[18px] shadow-[0_4px_14px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.4)]">
-        <Mascot name="wave" size={64} className="-mb-2" />
+      <div className="bg-surface-sage text-deep-sage grid h-11 w-11 shrink-0 place-items-center rounded-[14px] shadow-[0_4px_14px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.4)]">
+        <PiggyBank size={24} strokeWidth={2.25} aria-hidden="true" />
       </div>
       <div className="min-w-0">
         <div className="truncate text-[17px] font-bold tracking-tight text-white">
@@ -200,7 +211,7 @@ export function DashboardSidebar() {
         <SavingsGoalCard />
       </aside>
 
-      {/* Mobile bottom navigation — dark pill with claymation icons */}
+      {/* Mobile bottom navigation */}
       <nav className="fixed inset-x-3 bottom-3 z-50 lg:hidden">
         <div className="bg-sidebar shadow-card flex items-center justify-around rounded-[22px] px-2 py-2">
           {navigation.slice(0, 5).map((item) => {
@@ -210,11 +221,18 @@ export function DashboardSidebar() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center justify-center rounded-pill px-3 py-1.5 transition-all",
+                  "rounded-pill flex items-center justify-center px-3 py-1.5 transition-all",
                   active && surfaceBg[item.surface]
                 )}
               >
-                <Mascot name={item.mascot} size={28} />
+                <item.icon
+                  size={20}
+                  strokeWidth={2.25}
+                  aria-hidden="true"
+                  className={cn(
+                    active ? deepTextClass[item.surface] : "text-[#C8C2B5]"
+                  )}
+                />
                 <span className="sr-only">{item.name}</span>
               </Link>
             );
@@ -270,7 +288,7 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
           <button
             type="button"
             onClick={onClose}
-            className="text-sidebar-muted hover:text-sidebar -mt-3 rounded-chip p-1.5"
+            className="text-sidebar-muted hover:text-sidebar rounded-chip -mt-3 p-1.5"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />

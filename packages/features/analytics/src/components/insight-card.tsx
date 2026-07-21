@@ -1,13 +1,15 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  Mascot,
-  cn,
-  type MascotName,
-} from "@finance/ui";
+import { Card, CardContent, IconChip, cn } from "@finance/ui";
 import type { CardSurface } from "@finance/ui";
+import {
+  AlertTriangle,
+  Info,
+  Lightbulb,
+  TrendingDown,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react";
 
 type InsightType = "positive" | "negative" | "warning" | "neutral" | "tip";
 
@@ -17,39 +19,17 @@ interface InsightCardProps {
   description: string;
   value?: string;
   className?: string;
-  /** Override the auto-selected mascot for this insight. */
-  mascot?: MascotName;
 }
 
 const typeConfig: Record<
   InsightType,
-  { mascot: MascotName; surface: CardSurface; deep: string }
+  { icon: LucideIcon; surface: CardSurface; deep: string }
 > = {
-  positive: {
-    mascot: "thumbs2",
-    surface: "sage",
-    deep: "text-deep-sage",
-  },
-  negative: {
-    mascot: "concerned",
-    surface: "peach",
-    deep: "text-deep-peach",
-  },
-  warning: {
-    mascot: "concerned",
-    surface: "lemon",
-    deep: "text-deep-lemon",
-  },
-  neutral: {
-    mascot: "peaceful",
-    surface: "sky",
-    deep: "text-deep-sky",
-  },
-  tip: {
-    mascot: "pointer",
-    surface: "lav",
-    deep: "text-deep-lav",
-  },
+  positive: { icon: TrendingUp, surface: "sage", deep: "text-deep-sage" },
+  negative: { icon: TrendingDown, surface: "peach", deep: "text-deep-peach" },
+  warning: { icon: AlertTriangle, surface: "lemon", deep: "text-deep-lemon" },
+  neutral: { icon: Info, surface: "sky", deep: "text-deep-sky" },
+  tip: { icon: Lightbulb, surface: "lav", deep: "text-deep-lav" },
 };
 
 export function InsightCard({
@@ -58,21 +38,18 @@ export function InsightCard({
   description,
   value,
   className,
-  mascot,
 }: InsightCardProps) {
   // eslint-disable-next-line security/detect-object-injection -- key from InsightType union
   const config = typeConfig[type];
-  const pickedMascot = mascot ?? config.mascot;
 
   return (
-    <Card
-      surface={config.surface}
-      className={cn("overflow-hidden", className)}
-    >
+    <Card surface={config.surface} className={cn("overflow-hidden", className)}>
       <CardContent className="flex items-start gap-3 p-5">
-        <div className="shrink-0">
-          <Mascot name={pickedMascot} size={56} />
-        </div>
+        <IconChip
+          icon={config.icon}
+          surface={config.surface}
+          className="bg-white/60"
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <p className="text-ink text-base font-bold">{title}</p>

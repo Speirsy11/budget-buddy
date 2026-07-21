@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Card,
-  Mascot,
-  cn,
-  formatCurrency,
-} from "@finance/ui";
+import { Card, cn, formatCurrency } from "@finance/ui";
 import type { BudgetBreakdown } from "../calculations";
 
 interface BudgetGaugeProps {
@@ -17,22 +12,21 @@ interface BudgetGaugeProps {
   title?: string;
   /** Description shown under the title. */
   description?: string;
-  /** Show the clipboard mascot in the top-right (overview card). */
-  showMascot?: boolean;
 }
 
 type Bucket = "needs" | "wants" | "savings";
 
-const BUCKETS: Array<{ key: Bucket; label: string; dot: string; bar: string }> = [
-  { key: "needs", label: "Needs", dot: "bg-cat-blue", bar: "bg-cat-blue" },
-  { key: "wants", label: "Wants", dot: "bg-cat-pink", bar: "bg-cat-pink" },
-  {
-    key: "savings",
-    label: "Savings",
-    dot: "bg-cat-emerald",
-    bar: "bg-cat-emerald",
-  },
-];
+const BUCKETS: Array<{ key: Bucket; label: string; dot: string; bar: string }> =
+  [
+    { key: "needs", label: "Needs", dot: "bg-cat-blue", bar: "bg-cat-blue" },
+    { key: "wants", label: "Wants", dot: "bg-cat-pink", bar: "bg-cat-pink" },
+    {
+      key: "savings",
+      label: "Savings",
+      dot: "bg-cat-emerald",
+      bar: "bg-cat-emerald",
+    },
+  ];
 
 export function BudgetGauge({
   breakdown,
@@ -40,36 +34,38 @@ export function BudgetGauge({
   surface = "lemon",
   title = "50/30/20 Budget",
   description = "Spending vs. your goals",
-  showMascot = true,
 }: BudgetGaugeProps) {
   return (
     <Card surface={surface} className={cn("flex flex-col p-5", className)}>
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-base font-bold text-ink">{title}</div>
-          <div className="text-meta text-ink-soft mt-0.5">{description}</div>
-        </div>
-        {showMascot && <Mascot name="clipboard" size={50} className="-mr-1" />}
+      <div>
+        <div className="text-ink text-base font-bold">{title}</div>
+        <div className="text-meta text-ink-soft mt-0.5">{description}</div>
       </div>
 
       <div className="mt-3.5 flex flex-1 flex-col gap-3">
         {BUCKETS.map(({ key, label, dot, bar }) => {
           // eslint-disable-next-line security/detect-object-injection -- bucket key is from hardcoded array
           const d = breakdown[key];
-          const pct = d.target > 0 ? Math.min(100, (d.actual / d.target) * 100) : 0;
+          const pct =
+            d.target > 0 ? Math.min(100, (d.actual / d.target) * 100) : 0;
 
           return (
             <div key={key}>
               <div className="mb-1.5 flex items-baseline justify-between">
                 <div className="flex items-center gap-2">
                   <span className={cn("h-2.5 w-2.5 rounded-full", dot)} />
-                  <span className="text-sm font-semibold text-ink">{label}</span>
+                  <span className="text-ink text-sm font-semibold">
+                    {label}
+                  </span>
                 </div>
                 <div className="text-meta tabular text-ink-soft">
-                  <span className="font-semibold text-ink">
+                  <span className="text-ink font-semibold">
                     {formatCurrency(d.actual)}
                   </span>
-                  <span className="text-muted-ink"> / {formatCurrency(d.target)}</span>
+                  <span className="text-muted-ink">
+                    {" "}
+                    / {formatCurrency(d.target)}
+                  </span>
                 </div>
               </div>
               <div className="h-4 overflow-hidden rounded-[8px] bg-black/[0.07]">

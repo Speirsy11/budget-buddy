@@ -2,7 +2,6 @@ import Link from "next/link";
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@finance/auth";
 import { Button } from "@finance/ui";
 import {
-  Smile,
   PieChart,
   Upload,
   Shield,
@@ -20,9 +19,7 @@ export default function LandingPage() {
       <nav className="bg-background/80 fixed top-0 z-50 w-full border-b backdrop-blur-lg">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md shadow-blue-600/20">
-              <Smile className="h-5 w-5 text-white" />
-            </div>
+            <img src="/budgetbuddy-mark.svg" alt="" className="h-9 w-9" />
             <span className="text-xl font-bold tracking-tight">
               BudgetBuddy
             </span>
@@ -265,8 +262,7 @@ export default function LandingPage() {
                 Ready to Transform Your Finances?
               </h2>
               <p className="mb-8 text-lg text-blue-100">
-                Join thousands of users who have taken control of their money
-                with BudgetBuddy.
+                Import your first CSV and see where your money goes in minutes.
               </p>
               <SignedOut>
                 <SignUpButton>
@@ -302,9 +298,7 @@ export default function LandingPage() {
         <div className="container mx-auto">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-blue-600 to-indigo-600">
-                <Smile className="h-4 w-4 text-white" />
-              </div>
+                <img src="/budgetbuddy-mark.svg" alt="" className="h-7 w-7" />
               <span className="font-semibold">BudgetBuddy</span>
             </div>
             <p className="text-muted-foreground text-sm">

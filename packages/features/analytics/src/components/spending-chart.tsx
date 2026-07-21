@@ -6,7 +6,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Mascot,
   cn,
   formatCurrency,
 } from "@finance/ui";
@@ -25,7 +24,7 @@ interface SpendingChartProps {
   title?: string;
   description?: string;
   className?: string;
-  /** Render the inline mascot + avg/day stat block in the header (overview screen). */
+  /** Render the avg/day stat block in the header (overview screen). */
   showAvg?: boolean;
 }
 
@@ -62,9 +61,8 @@ export function SpendingChart({
         </div>
         {showAvg && (
           <div className="flex items-center gap-2.5">
-            <Mascot name="bars" size={42} />
             <div className="text-right">
-              <div className="tabular text-[22px] font-extrabold leading-none text-ink">
+              <div className="tabular text-ink text-[22px] font-extrabold leading-none">
                 {formatCurrency(avg)}
               </div>
               <div className="text-meta text-muted-ink mt-0.5">avg / day</div>
@@ -103,7 +101,7 @@ export function SpendingChart({
                         <p className="text-meta text-muted-ink">
                           {formatDate(payload[0].payload.date)}
                         </p>
-                        <p className="tabular text-sm font-extrabold text-ink">
+                        <p className="tabular text-ink text-sm font-extrabold">
                           {formatCurrency(payload[0].value as number)}
                         </p>
                       </div>
@@ -132,7 +130,15 @@ export function SpendingChart({
                     index === undefined ||
                     index % 6 !== 0
                   ) {
-                    return <Dot cx={0} cy={0} r={0} fill="transparent" />;
+                    return (
+                      <Dot
+                        key={props.key ?? index}
+                        cx={0}
+                        cy={0}
+                        r={0}
+                        fill="transparent"
+                      />
+                    );
                   }
                   return (
                     <circle

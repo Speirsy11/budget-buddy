@@ -1,18 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardDescription,
-  CardTitle,
-  Mascot,
-} from "@finance/ui";
+import { Card, CardDescription, CardTitle, IconChip } from "@finance/ui";
 import {
   TransactionUploader,
   type ParsedTransaction,
 } from "@finance/transactions";
 import { trpc } from "@/trpc/client";
-import { CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  FileSpreadsheet,
+  Landmark,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import Link from "next/link";
 import { Greeting } from "@/components/dashboard/greeting";
 
@@ -80,7 +83,6 @@ export default function ImportPage() {
   return (
     <div className="flex flex-col gap-3.5">
       <Greeting
-        mascot="pointer"
         title={<>Bring your money in</>}
         insight={
           <span className="text-muted-ink text-base font-medium">
@@ -96,7 +98,6 @@ export default function ImportPage() {
       {lastImportCount !== null && (
         <Card surface="sage" className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
-            <Mascot name="thumbs2" size={44} />
             <p className="text-ink font-semibold">
               Successfully imported {lastImportCount} transactions
             </p>
@@ -114,8 +115,13 @@ export default function ImportPage() {
       {/* Info Cards */}
       <div className="grid gap-3.5 md:grid-cols-3">
         <Card surface="lemon" className="p-5">
-          <Mascot name="csv" size={48} className="-mt-1 mb-2" />
-          <h3 className="mb-1 font-bold text-ink">Supported formats</h3>
+          <IconChip
+            icon={FileSpreadsheet}
+            surface="lemon"
+            size="lg"
+            className="mb-2"
+          />
+          <h3 className="text-ink mb-1 font-bold">Supported formats</h3>
           <p className="text-deep-lemon text-sm leading-snug">
             Monzo, Starling, Revolut, Barclays, HSBC, NatWest, Lloyds,
             Santander, Halifax, Nationwide.
@@ -123,16 +129,21 @@ export default function ImportPage() {
         </Card>
 
         <Card surface="lav" className="p-5">
-          <Mascot name="clipboardman" size={56} className="-mt-1 mb-1" />
-          <h3 className="mb-1 font-bold text-ink">AI classification</h3>
+          <IconChip icon={Sparkles} surface="lav" size="lg" className="mb-2" />
+          <h3 className="text-ink mb-1 font-bold">AI classification</h3>
           <p className="text-deep-lav text-sm leading-snug">
             Buddy reads each transaction and picks the right 50/30/20 bucket.
           </p>
         </Card>
 
         <Card surface="sage" className="p-5">
-          <Mascot name="shield" size={48} className="-mt-1 mb-2" />
-          <h3 className="mb-1 font-bold text-ink">Your data is safe</h3>
+          <IconChip
+            icon={ShieldCheck}
+            surface="sage"
+            size="lg"
+            className="mb-2"
+          />
+          <h3 className="text-ink mb-1 font-bold">Your data is safe</h3>
           <p className="text-deep-sage text-sm leading-snug">
             Files are parsed locally. Only the extracted data goes to our
             servers — encrypted in transit and at rest.
@@ -143,7 +154,7 @@ export default function ImportPage() {
       {/* Bank Export Guides */}
       <Card surface="linen" className="p-6">
         <div className="mb-3 flex items-center gap-3">
-          <Mascot name="bank" size={44} />
+          <IconChip icon={Landmark} surface="linen" />
           <div>
             <CardTitle>How to export from your bank</CardTitle>
             <CardDescription className="mt-0.5">
@@ -161,7 +172,7 @@ export default function ImportPage() {
               >
                 <button
                   type="button"
-                  className="hover:bg-black/[0.03] flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-ink transition-colors"
+                  className="text-ink flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold transition-colors hover:bg-black/[0.03]"
                   aria-expanded={isExpanded}
                   onClick={() =>
                     setExpandedGuide(isExpanded ? null : guide.name)

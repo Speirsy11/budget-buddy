@@ -22,8 +22,12 @@ import {
   Moon,
   CreditCard,
   ExternalLink,
+  UserRound,
+  Palette,
+  Bell,
+  FileSpreadsheet,
 } from "lucide-react";
-import { Mascot } from "@finance/ui";
+import { IconChip } from "@finance/ui";
 import { Greeting } from "@/components/dashboard/greeting";
 
 export default function SettingsPage() {
@@ -70,7 +74,6 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-3.5">
       <Greeting
-        mascot="peaceful"
         title={<>Settings</>}
         insight={
           <span className="text-muted-ink text-base font-medium">
@@ -83,7 +86,7 @@ export default function SettingsPage() {
       <Card surface="sage">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <Mascot name="wave" size={44} />
+            <IconChip icon={UserRound} surface="sage" />
             <div>
               <CardTitle>Profile</CardTitle>
               <CardDescription>Your personal information</CardDescription>
@@ -128,7 +131,7 @@ export default function SettingsPage() {
       <Card surface="sky">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <Mascot name="star" size={44} />
+            <IconChip icon={CreditCard} surface="sky" />
             <div>
               <CardTitle>Plan and billing</CardTitle>
               <CardDescription>
@@ -200,7 +203,7 @@ export default function SettingsPage() {
       <Card surface="lemon">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <Mascot name="star" size={44} />
+            <IconChip icon={Palette} surface="lemon" />
             <div>
               <CardTitle>Appearance</CardTitle>
               <CardDescription>Customise how the app looks</CardDescription>
@@ -249,7 +252,7 @@ export default function SettingsPage() {
       <Card surface="sky">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <Mascot name="pointer" size={44} />
+            <IconChip icon={Bell} surface="sky" />
             <div>
               <CardTitle>Notifications</CardTitle>
               <CardDescription>
@@ -293,7 +296,7 @@ export default function SettingsPage() {
       <Card surface="linen">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <Mascot name="csv" size={44} />
+            <IconChip icon={FileSpreadsheet} surface="linen" />
             <div>
               <CardTitle>Data management</CardTitle>
               <CardDescription>Export or delete your data</CardDescription>

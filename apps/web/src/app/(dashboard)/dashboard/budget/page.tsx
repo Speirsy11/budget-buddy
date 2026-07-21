@@ -13,9 +13,9 @@ import {
   Skeleton,
 } from "@finance/ui";
 import { BudgetGauge, CategoryBreakdown } from "@finance/analytics";
-import { Mascot } from "@finance/ui";
+import { IconChip } from "@finance/ui";
 import { trpc } from "@/trpc/client";
-import { Settings } from "lucide-react";
+import { Coins, PiggyBank, Settings, Wallet } from "lucide-react";
 import { Greeting } from "@/components/dashboard/greeting";
 import { MonthPicker } from "@/components/dashboard/month-picker";
 
@@ -103,7 +103,6 @@ export default function BudgetPage() {
   return (
     <div className="flex flex-col gap-3.5">
       <Greeting
-        mascot="clipboardman"
         title={<>Your budget</>}
         insight={
           <span className="text-muted-ink text-base font-medium">
@@ -291,8 +290,8 @@ export default function BudgetPage() {
       {/* Budget Education */}
       <div className="grid gap-3.5 sm:grid-cols-3">
         <Card surface="sky" className="p-5">
-          <Mascot name="wallet" size={48} className="-mt-1 mb-2" />
-          <h4 className="mb-1 text-lg font-bold text-ink">50% Needs</h4>
+          <IconChip icon={Wallet} surface="sky" size="lg" className="mb-2" />
+          <h4 className="text-ink mb-1 text-lg font-bold">50% Needs</h4>
           <p className="text-deep-sky text-sm leading-snug">
             Housing, utilities, groceries, healthcare, and minimum debt
             payments. Buddy tracks these automatically.
@@ -300,8 +299,8 @@ export default function BudgetPage() {
         </Card>
 
         <Card surface="peach" className="p-5">
-          <Mascot name="coin" size={48} className="-mt-1 mb-2" />
-          <h4 className="mb-1 text-lg font-bold text-ink">30% Wants</h4>
+          <IconChip icon={Coins} surface="peach" size="lg" className="mb-2" />
+          <h4 className="text-ink mb-1 text-lg font-bold">30% Wants</h4>
           <p className="text-deep-peach text-sm leading-snug">
             Entertainment, dining out, shopping, and subscriptions. Enjoy life
             while staying on track.
@@ -309,8 +308,13 @@ export default function BudgetPage() {
         </Card>
 
         <Card surface="sage" className="p-5">
-          <Mascot name="piggy" size={48} className="-mt-1 mb-2" />
-          <h4 className="mb-1 text-lg font-bold text-ink">20% Savings</h4>
+          <IconChip
+            icon={PiggyBank}
+            surface="sage"
+            size="lg"
+            className="mb-2"
+          />
+          <h4 className="text-ink mb-1 text-lg font-bold">20% Savings</h4>
           <p className="text-deep-sage text-sm leading-snug">
             Savings, investments, and extra debt payments. Buddy cheers you on
             as you build wealth.
