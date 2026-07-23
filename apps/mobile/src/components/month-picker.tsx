@@ -9,9 +9,20 @@ interface MonthPickerProps {
 }
 
 const monthShort = (m: number) =>
-  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][
-    m - 1
-  ] ?? "";
+  [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ][m - 1] ?? "";
 
 export function MonthPicker({ month, year, onPrev, onNext }: MonthPickerProps) {
   const { colors, radius, shadow } = useTheme();

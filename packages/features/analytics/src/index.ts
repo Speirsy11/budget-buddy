@@ -10,7 +10,6 @@ export {
   type SpendingTrend,
 } from "./calculations";
 
-// Components
 export { BudgetGauge } from "./components/budget-gauge";
 export { SpendingChart } from "./components/spending-chart";
 export { CategoryBreakdown } from "./components/category-breakdown";

@@ -1,7 +1,8 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { Mascot, type MascotName, cn } from "@finance/ui";
+import type { LucideIcon } from "lucide-react";
+import { IconChip, cn } from "@finance/ui";
 import type { CardSurface } from "@finance/ui";
 
 const deepText: Record<CardSurface, string> = {
@@ -27,8 +28,7 @@ const surfaceBg: Record<CardSurface, string> = {
 interface StatCardProps {
   surface: CardSurface;
   label: string;
-  mascot?: MascotName;
-  mascotSize?: number;
+  icon?: LucideIcon;
   value: ReactNode;
   /** Faded decimals appended after the main value (e.g. ".00"). */
   decimals?: string;
@@ -39,8 +39,7 @@ interface StatCardProps {
 export function StatCard({
   surface,
   label,
-  mascot,
-  mascotSize = 56,
+  icon,
   value,
   decimals,
   meta,
@@ -55,11 +54,12 @@ export function StatCard({
         className
       )}
     >
-      {mascot && (
-        <Mascot
-          name={mascot}
-          size={mascotSize}
-          className="absolute right-2.5 top-2 z-0"
+      {icon && (
+        <IconChip
+          icon={icon}
+          surface="white"
+          size="sm"
+          className="absolute right-3.5 top-3.5 z-0 bg-white/60"
         />
       )}
       <div
@@ -71,7 +71,7 @@ export function StatCard({
       >
         {label}
       </div>
-      <div className="text-stat tabular relative z-10 mt-2 text-ink">
+      <div className="text-stat tabular text-ink relative z-10 mt-2">
         {value}
         {decimals && (
           <span

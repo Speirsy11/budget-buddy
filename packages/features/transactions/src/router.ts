@@ -199,7 +199,6 @@ export const transactionsRouter = router({
         merchant: t.merchant,
       }));
 
-      // Auto-classify if requested
       if (input.autoClassify) {
         log.debug(
           { userId: ctx.userId, count: input.transactions.length },

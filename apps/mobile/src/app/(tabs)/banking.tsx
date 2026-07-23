@@ -11,7 +11,8 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Mascot } from "@/components/mascot";
+import { ShieldCheck } from "lucide-react-native";
+import { IconChip } from "@/components/icon-chip";
 import { GreetingHeader } from "@/components/greeting-header";
 import {
   create,
@@ -231,16 +232,20 @@ export default function BankingScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+      >
         <GreetingHeader
-          mascot="pointer"
           title="Connect your bank"
           insight="UK Open Banking via Plaid"
           insightTone="muted"
         />
-        <View style={[styles.heroCard, { backgroundColor: colors.surface.sage }]}>
+        <View
+          style={[styles.heroCard, { backgroundColor: colors.surface.sage }]}
+        >
           <View style={styles.heroHeader}>
-            <Mascot name="shield" size={56} />
+            <IconChip icon={ShieldCheck} surface="white" size="lg" />
             <View style={styles.heroCopy}>
               <Text style={[styles.heroTitle, { color: colors.ink }]}>
                 Privacy first
@@ -252,134 +257,146 @@ export default function BankingScreen() {
             </View>
           </View>
 
-        <View style={styles.statusGrid}>
-          <StatusPill
-            label={configured ? "Plaid configured" : "Needs Plaid env"}
-            tone={configured ? "success" : "warning"}
-          />
-          <StatusPill
-            label={openBankingEnabled ? "Plan enabled" : "Pro required"}
-            tone={openBankingEnabled ? "success" : "warning"}
-          />
-          <StatusPill
-            label={`${connections.length} connected`}
-            tone="neutral"
-          />
-        </View>
-
-        {!configured ? (
-          <WarningBox text="Add PLAID_CLIENT_ID, PLAID_SECRET, and PLAID_ENV to the API environment before connecting accounts." />
-        ) : null}
-        {!openBankingEnabled ? (
-          <WarningBox text="Open Banking is currently Pro-gated by the API. Use a Pro/trial dev user to test the live flow." />
-        ) : null}
-
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel="Connect bank account"
-          style={[
-            styles.primaryButton,
-            {
-              backgroundColor:
-                configured && openBankingEnabled && !isPreparingLink
-                  ? colors.primary
-                  : colors.border,
-            },
-          ]}
-          disabled={!configured || !openBankingEnabled || isPreparingLink}
-          onPress={handleConnect}
-        >
-          {isPreparingLink ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Ionicons name="link" size={18} color="#fff" />
-          )}
-          <Text style={styles.primaryButtonText}>
-            {isPreparingLink ? "Preparing secure link…" : "Connect bank"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {statusMessage ? (
-        <View style={[styles.notice, { backgroundColor: colors.surface.linen }]}>
-          <Ionicons
-            name="information-circle"
-            size={20}
-            color={colors.primary}
-          />
-          <Text style={[styles.noticeText, { color: colors.text }]}>
-            {statusMessage}
-          </Text>
-        </View>
-      ) : null}
-
-      {lastSync ? (
-        <View style={[styles.notice, { backgroundColor: colors.surface.linen }]}>
-          <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-          <Text style={[styles.noticeText, { color: colors.text }]}>
-            Added {lastSync.added}, updated {lastSync.modified}, removed{" "}
-            {lastSync.removed}.
-          </Text>
-        </View>
-      ) : null}
-
-      <View style={[styles.section, { backgroundColor: colors.surface.white }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Connected accounts
-        </Text>
-        {connectionsQuery.isLoading ? (
-          <View style={styles.loadingRow}>
-            <ActivityIndicator size="small" color={colors.primary} />
-            <Text style={[styles.mutedText, { color: colors.textMuted }]}>
-              Loading connections…
-            </Text>
+          <View style={styles.statusGrid}>
+            <StatusPill
+              label={configured ? "Plaid configured" : "Needs Plaid env"}
+              tone={configured ? "success" : "warning"}
+            />
+            <StatusPill
+              label={openBankingEnabled ? "Plan enabled" : "Pro required"}
+              tone={openBankingEnabled ? "success" : "warning"}
+            />
+            <StatusPill
+              label={`${connections.length} connected`}
+              tone="neutral"
+            />
           </View>
-        ) : connectionsQuery.error ? (
-          <Text style={[styles.errorText, { color: colors.error }]}>
-            {connectionsQuery.error.message}
-          </Text>
-        ) : connections.length === 0 ? (
-          <View style={styles.emptyState}>
+
+          {!configured ? (
+            <WarningBox text="Add PLAID_CLIENT_ID, PLAID_SECRET, and PLAID_ENV to the API environment before connecting accounts." />
+          ) : null}
+          {!openBankingEnabled ? (
+            <WarningBox text="Open Banking is currently Pro-gated by the API. Use a Pro/trial dev user to test the live flow." />
+          ) : null}
+
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Connect bank account"
+            style={[
+              styles.primaryButton,
+              {
+                backgroundColor:
+                  configured && openBankingEnabled && !isPreparingLink
+                    ? colors.primary
+                    : colors.border,
+              },
+            ]}
+            disabled={!configured || !openBankingEnabled || isPreparingLink}
+            onPress={handleConnect}
+          >
+            {isPreparingLink ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Ionicons name="link" size={18} color="#fff" />
+            )}
+            <Text style={styles.primaryButtonText}>
+              {isPreparingLink ? "Preparing secure link…" : "Connect bank"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {statusMessage ? (
+          <View
+            style={[styles.notice, { backgroundColor: colors.surface.linen }]}
+          >
             <Ionicons
-              name="business-outline"
-              size={44}
-              color={colors.textMuted}
+              name="information-circle"
+              size={20}
+              color={colors.primary}
             />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              No banks connected
-            </Text>
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              Connect a bank account or keep using CSV import if you prefer not
-              to grant ongoing access.
+            <Text style={[styles.noticeText, { color: colors.text }]}>
+              {statusMessage}
             </Text>
           </View>
-        ) : (
-          connections.map((connection) => (
-            <ConnectionCard
-              key={connection.id}
-              connection={connection}
-              syncing={syncingConnectionId === connection.id}
-              removing={removingConnectionId === connection.id}
-              onSync={() => syncConnection(connection.id)}
-              onReauth={() =>
-                createUpdateLinkToken.mutate({ connectionId: connection.id })
-              }
-              onRemove={() => handleRemove(connection.id)}
-            />
-          ))
-        )}
-      </View>
+        ) : null}
 
-      <View style={[styles.section, { backgroundColor: colors.surface.white }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Privacy note
-        </Text>
-        <Text style={[styles.privacyText, { color: colors.textMuted }]}>
-          Open Banking is optional. Plaid handles bank consent, BudgetBuddy
-          stores server-side access tokens, and CSV import remains available for
-          users who do not want a persistent bank connection.
-        </Text>
-      </View>
+        {lastSync ? (
+          <View
+            style={[styles.notice, { backgroundColor: colors.surface.linen }]}
+          >
+            <Ionicons
+              name="checkmark-circle"
+              size={20}
+              color={colors.success}
+            />
+            <Text style={[styles.noticeText, { color: colors.text }]}>
+              Added {lastSync.added}, updated {lastSync.modified}, removed{" "}
+              {lastSync.removed}.
+            </Text>
+          </View>
+        ) : null}
+
+        <View
+          style={[styles.section, { backgroundColor: colors.surface.white }]}
+        >
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Connected accounts
+          </Text>
+          {connectionsQuery.isLoading ? (
+            <View style={styles.loadingRow}>
+              <ActivityIndicator size="small" color={colors.primary} />
+              <Text style={[styles.mutedText, { color: colors.textMuted }]}>
+                Loading connections…
+              </Text>
+            </View>
+          ) : connectionsQuery.error ? (
+            <Text style={[styles.errorText, { color: colors.error }]}>
+              {connectionsQuery.error.message}
+            </Text>
+          ) : connections.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons
+                name="business-outline"
+                size={44}
+                color={colors.textMuted}
+              />
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                No banks connected
+              </Text>
+              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                Connect a bank account or keep using CSV import if you prefer
+                not to grant ongoing access.
+              </Text>
+            </View>
+          ) : (
+            connections.map((connection) => (
+              <ConnectionCard
+                key={connection.id}
+                connection={connection}
+                syncing={syncingConnectionId === connection.id}
+                removing={removingConnectionId === connection.id}
+                onSync={() => syncConnection(connection.id)}
+                onReauth={() =>
+                  createUpdateLinkToken.mutate({ connectionId: connection.id })
+                }
+                onRemove={() => handleRemove(connection.id)}
+              />
+            ))
+          )}
+        </View>
+
+        <View
+          style={[styles.section, { backgroundColor: colors.surface.white }]}
+        >
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Privacy note
+          </Text>
+          <Text style={[styles.privacyText, { color: colors.textMuted }]}>
+            Open Banking is optional. Plaid handles bank consent, BudgetBuddy
+            stores server-side access tokens, and CSV import remains available
+            for users who do not want a persistent bank connection.
+          </Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

@@ -89,7 +89,6 @@ export const bankingRouter = router({
         "Exchanging Plaid public token"
       );
 
-      // Check connection limit based on plan
       const tierConfig = getTierConfig(ctx.userPlan as UserPlan | undefined);
       const existingConnections = await db.query.bankConnections.findMany({
         where: eq(bankConnections.userId, ctx.userId),
@@ -110,7 +109,6 @@ export const bankingRouter = router({
       const accessToken = exchangeResponse.data.access_token;
       const itemId = exchangeResponse.data.item_id;
 
-      // Get account info
       const accountsResponse = await plaid.accountsGet({
         access_token: accessToken,
       });
@@ -155,9 +153,6 @@ export const bankingRouter = router({
       };
     }),
 
-  /**
-   * List all bank connections for the current user.
-   */
   listConnections: protectedProcedure.query(async ({ ctx }) => {
     log.debug({ userId: ctx.userId }, "Listing bank connections");
 
@@ -178,9 +173,6 @@ export const bankingRouter = router({
     return connections;
   }),
 
-  /**
-   * Get the status of a specific bank connection.
-   */
   getConnectionStatus: protectedProcedure
     .input(connectionIdSchema)
     .query(async ({ ctx, input }) => {
@@ -206,7 +198,6 @@ export const bankingRouter = router({
         });
       }
 
-      // Check if consent is expiring soon (within 7 days)
       const now = new Date();
       const sevenDaysFromNow = new Date(
         now.getTime() + 7 * 24 * 60 * 60 * 1000
@@ -246,7 +237,6 @@ export const bankingRouter = router({
         });
       }
 
-      // Revoke access at Plaid
       try {
         const plaid = getPlaidClient();
         await plaid.itemRemove({
@@ -259,7 +249,6 @@ export const bankingRouter = router({
         );
       }
 
-      // Delete the connection from our database
       await db
         .delete(bankConnections)
         .where(eq(bankConnections.id, input.connectionId));
@@ -272,18 +261,12 @@ export const bankingRouter = router({
       return { success: true };
     }),
 
-  /**
-   * Sync transactions for a specific bank connection.
-   */
   syncTransactions: proProcedure
     .input(syncTransactionsSchema)
     .mutation(async ({ ctx, input }) => {
       return syncTransactions(input.connectionId, ctx.userId);
     }),
 
-  /**
-   * Sync all active bank connections for the current user.
-   */
   syncAll: proProcedure.mutation(async ({ ctx }) => {
     const timer = createTimer();
     log.info({ userId: ctx.userId }, "Syncing all bank connections");
@@ -310,7 +293,6 @@ export const bankingRouter = router({
           "Failed to sync connection"
         );
 
-        // Mark connection as errored
         await db
           .update(bankConnections)
           .set({ status: "error", updatedAt: new Date() })

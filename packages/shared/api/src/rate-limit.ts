@@ -5,13 +5,7 @@ import { getRedisClient } from "./redis";
 const log = logger.child({ module: "rate-limit" });
 
 export interface RateLimitConfig {
-  /**
-   * Maximum number of requests allowed in the window
-   */
   limit: number;
-  /**
-   * Time window in seconds
-   */
   windowSeconds: number;
   /**
    * Prefix for the Redis key (helps organize different rate limits)
@@ -28,9 +22,6 @@ export interface RateLimitResult {
 // In-memory fallback for when Redis is not available
 const memoryStore = new Map<string, { count: number; resetAt: number }>();
 
-/**
- * Check and update rate limit for a given identifier
- */
 export async function checkRateLimit(
   identifier: string,
   config: RateLimitConfig
@@ -47,7 +38,6 @@ export async function checkRateLimit(
     return checkRateLimitRedis(redis, key, limit, windowSeconds, windowEnd);
   }
 
-  // Fallback to in-memory rate limiting
   return checkRateLimitMemory(key, limit, windowEnd);
 }
 
@@ -101,7 +91,6 @@ function checkRateLimitMemory(
   const now = Date.now();
   const entry = memoryStore.get(key);
 
-  // Clean up expired entries periodically
   if (memoryStore.size > 10000) {
     for (const [k, v] of memoryStore.entries()) {
       if (v.resetAt * 1000 < now) {
@@ -124,9 +113,6 @@ function checkRateLimitMemory(
   return { success, remaining, reset: windowEnd };
 }
 
-/**
- * Create a rate limit error with standard headers
- */
 export function createRateLimitError(result: RateLimitResult): TRPCError {
   return new TRPCError({
     code: "TOO_MANY_REQUESTS",
@@ -134,11 +120,7 @@ export function createRateLimitError(result: RateLimitResult): TRPCError {
   });
 }
 
-/**
- * Default rate limit configurations for different use cases
- */
 export const rateLimits = {
-  // Standard API calls: 100 requests per minute
   standard: {
     limit: 100,
     windowSeconds: 60,
@@ -156,13 +138,11 @@ export const rateLimits = {
     windowSeconds: 60,
     prefix: "api:ai",
   },
-  // File uploads: 5 per minute
   upload: {
     limit: 5,
     windowSeconds: 60,
     prefix: "api:upload",
   },
-  // Auth operations: 5 per 15 minutes
   auth: {
     limit: 5,
     windowSeconds: 900,

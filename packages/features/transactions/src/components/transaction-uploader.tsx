@@ -10,6 +10,7 @@ import {
   Button,
   Progress,
   cn,
+  formatDate,
 } from "@finance/ui";
 import {
   Upload,
@@ -222,7 +223,7 @@ export function TransactionUploader({
                   <tbody>
                     {parseResult.data.slice(0, 5).map((t, i) => (
                       <tr key={i} className="border-t">
-                        <td className="p-2">{t.date.toLocaleDateString()}</td>
+                        <td className="p-2">{formatDate(t.date)}</td>
                         <td className="max-w-[200px] truncate p-2">
                           {t.description}
                         </td>

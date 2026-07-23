@@ -1,12 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import {
-  Card,
-  Skeleton,
-  formatCurrency,
-  Mascot,
-} from "@finance/ui";
+import { Card, Skeleton, formatCurrency, IconChip } from "@finance/ui";
+import { Coins, Receipt, PiggyBank, FileSpreadsheet } from "lucide-react";
 import { BudgetGauge, SpendingChart } from "@finance/analytics";
 import { TransactionRow } from "@finance/transactions";
 import { trpc } from "@/trpc/client";
@@ -70,7 +66,17 @@ export default function DashboardPage() {
   };
 
   const budgetQuery = trpc.analytics.get503020.useQuery({ month, year });
-  const transactionsQuery = trpc.transactions.list.useQuery({ limit: 5 });
+  const monthRange = useMemo(
+    () => ({
+      startDate: new Date(year, month - 1, 1),
+      endDate: new Date(year, month, 0, 23, 59, 59),
+    }),
+    [month, year]
+  );
+  const transactionsQuery = trpc.transactions.list.useQuery({
+    filters: monthRange,
+    limit: 5,
+  });
   const trendsQuery = trpc.analytics.getSpendingTrends.useQuery({
     startDate: thirtyDaysAgo,
     endDate: today,
@@ -109,7 +115,6 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-3.5">
       <Greeting
-        mascot="wave2"
         insight={
           budget ? (
             <>
@@ -136,7 +141,7 @@ export default function DashboardPage() {
           <StatCard
             surface="sage"
             label="Income"
-            mascot="coins"
+            icon={Coins}
             value={income.intPart}
             decimals={income.decPart}
             meta={`${monthLong}`}
@@ -148,7 +153,7 @@ export default function DashboardPage() {
           <StatCard
             surface="peach"
             label="Expenses"
-            mascot="receipt"
+            icon={Receipt}
             value={expenses.intPart}
             decimals={expenses.decPart}
             meta={`${transactionCount} transactions tracked`}
@@ -188,11 +193,6 @@ export default function DashboardPage() {
               color="#1E3A8A"
             />
           </div>
-          <Mascot
-            name={netCashFlow >= 0 ? "thumbsup" : "concerned"}
-            size={108}
-            className="-mr-2 hidden shrink-0 md:block"
-          />
         </Card>
       </section>
 
@@ -204,17 +204,19 @@ export default function DashboardPage() {
             <div className="text-deep-lav text-xs font-semibold">
               Savings rate
             </div>
-            <Mascot name="piggy" size={56} className="-mr-1.5 -mt-1" />
+            <IconChip icon={PiggyBank} surface="lav" className="bg-white/60" />
           </div>
           {budgetQuery.isLoading ? (
             <Skeleton className="mt-2 h-14 w-32" />
           ) : (
-            <div className="tabular mt-2 text-[60px] font-extrabold leading-none tracking-tight text-ink">
+            <div className="tabular text-ink mt-2 text-[60px] font-extrabold leading-none tracking-tight">
               {savingsRate.toFixed(1)}
               <span className="text-deep-lav text-[28px]">%</span>
             </div>
           )}
-          <div className="text-meta text-ink-soft mt-1.5">of monthly income</div>
+          <div className="text-meta text-ink-soft mt-1.5">
+            of monthly income
+          </div>
           <div className="mt-auto pt-3.5">
             <div className="text-deep-lav mb-1.5 flex justify-between text-[10px]">
               <span>0%</span>
@@ -228,7 +230,7 @@ export default function DashboardPage() {
                   width: `${Math.min(100, Math.max(0, (savingsRate / 50) * 100))}%`,
                 }}
               />
-              <div className="bg-deep-lav absolute -top-0.5 h-4 w-[2.5px] left-[40%]" />
+              <div className="bg-deep-lav absolute -top-0.5 left-[40%] h-4 w-[2.5px]" />
             </div>
             <div className="text-meta text-ink-soft mt-2 italic">
               {savingsRate >= 20
@@ -271,13 +273,13 @@ export default function DashboardPage() {
         ) : (
           <Card surface="white" className="flex flex-col p-5">
             <div>
-              <div className="text-base font-bold text-ink">Daily spending</div>
+              <div className="text-ink text-base font-bold">Daily spending</div>
               <div className="text-meta text-ink-soft mt-0.5">
                 Import to see your trends
               </div>
             </div>
             <div className="flex flex-1 flex-col items-center justify-center gap-2 py-8">
-              <Mascot name="csv" size={64} />
+              <IconChip icon={FileSpreadsheet} surface="lemon" size="lg" />
               <p className="text-meta text-ink-soft max-w-[220px] text-center">
                 Bring your transactions in to chart your spending.
               </p>
@@ -289,7 +291,7 @@ export default function DashboardPage() {
       {/* Recent activity */}
       <Card surface="linen" className="px-6 py-4">
         <div className="flex items-baseline justify-between">
-          <div className="text-base font-bold text-ink">Recent activity</div>
+          <div className="text-ink text-base font-bold">Recent activity</div>
           <Link
             href="/dashboard/transactions"
             className="text-cat-emerald text-sm font-semibold hover:underline"
@@ -317,14 +319,14 @@ export default function DashboardPage() {
             ))
           ) : (
             <div className="flex flex-col items-center gap-2 py-10 text-center">
-              <Mascot name="csv" size={72} />
+              <IconChip icon={FileSpreadsheet} surface="linen" size="lg" />
               <h3 className="text-ink font-semibold">No transactions yet</h3>
               <p className="text-ink-soft max-w-sm text-sm">
                 Import your bank statement to get started.
               </p>
               <Link
                 href="/dashboard/import"
-                className="bg-ink mt-2 inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-semibold text-white"
+                className="bg-ink rounded-pill mt-2 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white"
               >
                 Import transactions
               </Link>

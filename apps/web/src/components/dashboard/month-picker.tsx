@@ -8,9 +8,20 @@ interface MonthPickerProps {
 }
 
 const monthShort = (m: number) =>
-  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][
-    m - 1
-  ];
+  [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ][m - 1];
 
 export function MonthPicker({ month, year, onPrev, onNext }: MonthPickerProps) {
   const prevMonth = month === 1 ? 12 : month - 1;
@@ -21,7 +32,7 @@ export function MonthPicker({ month, year, onPrev, onNext }: MonthPickerProps) {
       <button
         type="button"
         onClick={onPrev}
-        className="shadow-btn bg-surface-white text-ink hover:brightness-[0.97] rounded-pill px-3 py-2 text-sm font-semibold transition"
+        className="shadow-btn bg-surface-white text-ink rounded-pill px-3 py-2 text-sm font-semibold transition hover:brightness-[0.97]"
         aria-label={`Previous month (${monthShort(prevMonth)})`}
       >
         ◀ {monthShort(prevMonth)}
@@ -32,7 +43,7 @@ export function MonthPicker({ month, year, onPrev, onNext }: MonthPickerProps) {
       <button
         type="button"
         onClick={onNext}
-        className="shadow-btn bg-surface-white text-ink hover:brightness-[0.97] rounded-pill px-3 py-2 text-sm font-semibold transition"
+        className="shadow-btn bg-surface-white text-ink rounded-pill px-3 py-2 text-sm font-semibold transition hover:brightness-[0.97]"
         aria-label={`Next month (${monthShort(nextMonth)})`}
       >
         {monthShort(nextMonth)} ▶

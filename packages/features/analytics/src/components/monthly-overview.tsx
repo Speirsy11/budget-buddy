@@ -1,6 +1,14 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, cn } from "@finance/ui";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  cn,
+  formatCurrency,
+  formatCurrencyWhole,
+} from "@finance/ui";
 import {
   BarChart,
   Bar,
@@ -25,28 +33,27 @@ interface MonthlyOverviewProps {
   className?: string;
 }
 
-export function MonthlyOverview({ data, className }: MonthlyOverviewProps) {
-  const formatMonth = (month: string) => {
-    const [year, monthNum] = month.split("-");
-    const date = new Date(parseInt(year), parseInt(monthNum) - 1);
-    return date.toLocaleDateString("en-US", { month: "short" });
-  };
+const SERIES = [
+  { key: "income", name: "Income", color: "#10B981" },
+  { key: "expenses", name: "Expenses", color: "#EC4899" },
+  { key: "savings", name: "Savings", color: "#3B82F6" },
+] as const;
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
+function monthDate(month: string) {
+  const [year, monthNum] = month.split("-");
+  return new Date(parseInt(year), parseInt(monthNum) - 1);
+}
+
+export function MonthlyOverview({ data, className }: MonthlyOverviewProps) {
+  const formatMonth = (month: string) =>
+    monthDate(month).toLocaleDateString("en-GB", { month: "short" });
 
   return (
-    <Card className={cn(className)}>
-      <CardHeader>
-        <CardTitle>Monthly Overview</CardTitle>
+    <Card surface="white" className={cn("p-5", className)}>
+      <CardHeader className="p-0">
+        <CardTitle className="text-base font-bold">Monthly Overview</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="mt-3 p-0">
         <div className="h-[350px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -63,7 +70,7 @@ export function MonthlyOverview({ data, className }: MonthlyOverviewProps) {
                 axisLine={false}
               />
               <YAxis
-                tickFormatter={formatCurrency}
+                tickFormatter={(value: number) => formatCurrencyWhole(value)}
                 tick={{ fontSize: 12 }}
                 className="text-muted-foreground"
                 tickLine={false}
@@ -71,43 +78,39 @@ export function MonthlyOverview({ data, className }: MonthlyOverviewProps) {
                 width={80}
               />
               <Tooltip
+                cursor={{ fill: "rgba(0,0,0,0.04)" }}
                 content={({ active, payload, label }) => {
-                  if (active && payload?.length) {
-                    const [year, monthNum] = label.split("-");
-                    const date = new Date(
-                      parseInt(year),
-                      parseInt(monthNum) - 1
-                    );
-                    const monthName = date.toLocaleDateString("en-US", {
-                      month: "long",
-                      year: "numeric",
-                    });
-                    return (
-                      <div className="bg-background rounded-lg border p-4 shadow-lg">
-                        <p className="mb-2 font-medium">{monthName}</p>
-                        {payload.map((entry, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between gap-4"
-                          >
-                            <div className="flex items-center gap-2">
-                              <div
-                                className="h-3 w-3 rounded-full"
-                                style={{ backgroundColor: entry.color }}
-                              />
-                              <span className="text-sm capitalize">
-                                {entry.name}
-                              </span>
-                            </div>
-                            <span className="font-semibold tabular-nums">
-                              {formatCurrency(entry.value as number)}
+                  if (!active || !payload?.length) return null;
+                  const monthName = monthDate(label).toLocaleDateString(
+                    "en-GB",
+                    { month: "long", year: "numeric" }
+                  );
+                  return (
+                    <div className="bg-surface-white shadow-card rounded-[14px] border-0 px-4 py-3">
+                      <p className="text-meta text-muted-ink mb-1.5">
+                        {monthName}
+                      </p>
+                      {payload.map((entry) => (
+                        <div
+                          key={entry.name}
+                          className="flex items-center justify-between gap-6"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="h-2.5 w-2.5 rounded-full"
+                              style={{ backgroundColor: entry.color }}
+                            />
+                            <span className="text-ink-soft text-sm">
+                              {entry.name}
                             </span>
                           </div>
-                        ))}
-                      </div>
-                    );
-                  }
-                  return null;
+                          <span className="tabular text-ink text-sm font-bold">
+                            {formatCurrency(entry.value as number)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  );
                 }}
               />
               <Legend
@@ -115,24 +118,16 @@ export function MonthlyOverview({ data, className }: MonthlyOverviewProps) {
                 iconSize={8}
                 wrapperStyle={{ paddingTop: 20 }}
               />
-              <Bar
-                dataKey="income"
-                name="Income"
-                fill="hsl(142, 76%, 36%)"
-                radius={[4, 4, 0, 0]}
-              />
-              <Bar
-                dataKey="expenses"
-                name="Expenses"
-                fill="hsl(0, 84%, 60%)"
-                radius={[4, 4, 0, 0]}
-              />
-              <Bar
-                dataKey="savings"
-                name="Savings"
-                fill="hsl(220, 70%, 50%)"
-                radius={[4, 4, 0, 0]}
-              />
+              {SERIES.map(({ key, name, color }) => (
+                <Bar
+                  key={key}
+                  dataKey={key}
+                  name={name}
+                  fill={color}
+                  radius={[4, 4, 0, 0]}
+                  isAnimationActive={false}
+                />
+              ))}
             </BarChart>
           </ResponsiveContainer>
         </div>

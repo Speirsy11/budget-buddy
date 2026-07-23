@@ -1,4 +1,3 @@
-// Schema
 export {
   createLinkTokenSchema,
   exchangeTokenSchema,
@@ -9,7 +8,6 @@ export {
 // Mappers (client-safe)
 export { mapPlaidCategory } from "./mappers";
 
-// Components
 export { ConnectBank } from "./components/connect-bank";
 export type {
   ConnectBankProps,

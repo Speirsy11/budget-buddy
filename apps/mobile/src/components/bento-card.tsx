@@ -1,7 +1,19 @@
-import { View, type ViewProps, type StyleProp, type ViewStyle } from "react-native";
+import {
+  View,
+  type ViewProps,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import { useTheme } from "@/lib/theme/provider";
 
-type SurfaceKey = "sage" | "peach" | "sky" | "lav" | "lemon" | "linen" | "white";
+type SurfaceKey =
+  | "sage"
+  | "peach"
+  | "sky"
+  | "lav"
+  | "lemon"
+  | "linen"
+  | "white";
 
 interface BentoCardProps extends ViewProps {
   surface?: SurfaceKey;

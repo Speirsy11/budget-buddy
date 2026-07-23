@@ -55,7 +55,6 @@ export async function syncTransactions(
   const allModified: PlaidTransaction[] = [];
   const allRemoved: RemovedTransaction[] = [];
 
-  // Paginate through all available updates
   while (hasMore) {
     const response = await plaid.transactionsSync({
       access_token: connection.plaidAccessToken,
@@ -112,10 +111,7 @@ export async function syncTransactions(
     const existing =
       externalIds.length > 0
         ? await db.query.transactions.findMany({
-            where: and(
-              eq(transactions.userId, userId)
-              // Check for existing external IDs to avoid duplicates
-            ),
+            where: and(eq(transactions.userId, userId)),
             columns: { externalId: true },
           })
         : [];
@@ -173,7 +169,6 @@ export async function syncTransactions(
     }
   }
 
-  // Update the connection's cursor and last synced timestamp
   await db
     .update(bankConnections)
     .set({

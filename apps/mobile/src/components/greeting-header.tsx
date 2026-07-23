@@ -1,14 +1,11 @@
 import { View, Text } from "react-native";
-import { Mascot, type MascotName } from "./mascot";
 import { useTheme } from "@/lib/theme/provider";
 
 interface GreetingHeaderProps {
-  mascot?: MascotName;
   title: string;
   insight?: string;
   insightTone?: "emerald" | "muted";
   trailing?: React.ReactNode;
-  size?: number;
 }
 
 const days = [
@@ -22,12 +19,10 @@ const days = [
 ];
 
 export function GreetingHeader({
-  mascot = "wave2",
   title,
   insight,
   insightTone = "emerald",
   trailing,
-  size = 68,
 }: GreetingHeaderProps) {
   const { colors } = useTheme();
   const today = new Date();
@@ -45,7 +40,6 @@ export function GreetingHeader({
         paddingTop: 4,
       }}
     >
-      <Mascot name={mascot} size={size} />
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={{ fontSize: 11, color: colors.muted }}>{eyebrow}</Text>
         <Text
@@ -63,7 +57,8 @@ export function GreetingHeader({
           <Text
             style={{
               fontSize: 12,
-              color: insightTone === "emerald" ? colors.cat.emerald : colors.muted,
+              color:
+                insightTone === "emerald" ? colors.cat.emerald : colors.muted,
               fontWeight: "600",
               marginTop: 2,
             }}

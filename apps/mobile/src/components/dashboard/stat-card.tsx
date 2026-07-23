@@ -1,13 +1,21 @@
 import { View, Text, ActivityIndicator } from "react-native";
+import type { LucideIcon } from "lucide-react-native";
 import { useTheme } from "@/lib/theme/provider";
-import { Mascot, type MascotName } from "@/components/mascot";
+import { IconChip } from "@/components/icon-chip";
 
-type SurfaceKey = "sage" | "peach" | "sky" | "lav" | "lemon" | "linen" | "white";
+type SurfaceKey =
+  | "sage"
+  | "peach"
+  | "sky"
+  | "lav"
+  | "lemon"
+  | "linen"
+  | "white";
 
 interface StatCardProps {
   title: string;
   value: string;
-  mascot: MascotName;
+  icon: LucideIcon;
   surface: SurfaceKey;
   meta?: string;
   isLoading?: boolean;
@@ -16,7 +24,7 @@ interface StatCardProps {
 export function StatCard({
   title,
   value,
-  mascot,
+  icon,
   surface,
   meta,
   isLoading,
@@ -54,9 +62,10 @@ export function StatCard({
         <Text style={{ fontSize: 11, fontWeight: "600", color: deep }}>
           {title}
         </Text>
-        <Mascot
-          name={mascot}
-          size={36}
+        <IconChip
+          icon={icon}
+          surface="white"
+          size="sm"
           style={{ marginTop: -4, marginRight: -6 }}
         />
       </View>

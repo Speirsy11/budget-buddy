@@ -2,8 +2,6 @@ import type { Transaction as PlaidTransaction } from "plaid";
 import type { NewTransaction } from "@finance/db";
 
 /**
- * Map a Plaid transaction to the app's transaction format.
- *
  * Plaid amounts are positive for debits (money leaving the account)
  * and negative for credits (money entering the account).
  * Our app uses the opposite convention: positive = income, negative = expense.
@@ -13,7 +11,6 @@ export function mapPlaidTransaction(
   userId: string,
   bankConnectionId: string
 ): NewTransaction {
-  // Invert amount: Plaid positive = debit (our negative), Plaid negative = credit (our positive)
   const amount = -plaidTx.amount;
 
   const merchant =
@@ -35,7 +32,6 @@ export function mapPlaidTransaction(
 }
 
 /**
- * Map Plaid's personal finance category to our AI category system.
  * Returns a rough mapping that can reduce the need for AI classification calls.
  */
 export function mapPlaidCategory(

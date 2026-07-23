@@ -25,10 +25,12 @@ import {
   AlertTriangle,
   CheckCircle2,
   ExternalLink,
+  Landmark,
   Lock,
   RefreshCw,
+  ShieldCheck,
 } from "lucide-react";
-import { Mascot } from "@finance/ui";
+import { IconChip } from "@finance/ui";
 import { Greeting } from "@/components/dashboard/greeting";
 
 type SyncState = {
@@ -216,7 +218,6 @@ export default function OpenBankingPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-3.5">
       <Greeting
-        mascot="pointer"
         title={<>Connect your bank</>}
         insight={
           <span className="text-muted-ink text-base font-medium">
@@ -246,7 +247,7 @@ export default function OpenBankingPage() {
       />
 
       <Card surface="sage" className="flex items-start gap-4 p-5">
-        <Mascot name="shield" size={64} />
+        <IconChip icon={ShieldCheck} surface="sage" size="lg" />
         <div>
           <div className="text-ink text-base font-bold">Privacy first</div>
           <p className="text-deep-sage text-sm leading-snug">
@@ -297,7 +298,7 @@ export default function OpenBankingPage() {
           <CardHeader className="pb-2">
             <CardDescription>Connected banks</CardDescription>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Mascot name="bank" size={32} />
+              <IconChip icon={Landmark} size="sm" />
               {connectionCount}
             </CardTitle>
           </CardHeader>
@@ -364,7 +365,7 @@ export default function OpenBankingPage() {
                 {createLinkToken.isPending ? (
                   <RefreshCw className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Mascot name="bank" size={20} />
+                  <Landmark className="h-4 w-4" />
                 )}
                 Prepare secure bank link
               </Button>

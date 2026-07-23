@@ -19,9 +19,6 @@ export interface ExportOptions {
   includeCategories?: boolean;
 }
 
-/**
- * Export transactions to CSV format
- */
 export function exportToCSV(transactions: ExportableTransaction[]): string {
   const headers = [
     "Date",
@@ -51,9 +48,6 @@ export function exportToCSV(transactions: ExportableTransaction[]): string {
   return csvContent;
 }
 
-/**
- * Export transactions to JSON format
- */
 export function exportToJSON(
   transactions: ExportableTransaction[],
   pretty = true
@@ -78,9 +72,6 @@ export function exportToJSON(
     : JSON.stringify(exportData);
 }
 
-/**
- * Export budget data to JSON format
- */
 export function exportBudgetData(data: {
   income: number;
   budgets: { category: string; amount: number }[];
@@ -100,9 +91,6 @@ export function exportBudgetData(data: {
   return JSON.stringify(exportData, null, 2);
 }
 
-/**
- * Generate a full data export including all user data
- */
 export function generateFullExport(data: {
   user: {
     id: string;
@@ -149,9 +137,6 @@ export function generateFullExport(data: {
   return JSON.stringify(exportData, null, 2);
 }
 
-/**
- * Escape a value for CSV format
- */
 function escapeCSV(value: string): string {
   if (value.includes(",") || value.includes('"') || value.includes("\n")) {
     return `"${value.replace(/"/g, '""')}"`;
@@ -159,9 +144,6 @@ function escapeCSV(value: string): string {
   return value;
 }
 
-/**
- * Create a downloadable blob from export data
- */
 export function createExportBlob(
   data: string,
   format: "csv" | "json"

@@ -31,6 +31,7 @@
   "devDependencies": {
     "@finance/config": "workspace:*",
     "@types/react": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

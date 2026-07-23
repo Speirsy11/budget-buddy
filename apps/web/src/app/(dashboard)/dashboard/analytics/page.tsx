@@ -19,7 +19,14 @@ import {
   MonthlyOverview,
   InsightCard,
 } from "@finance/analytics";
-import { Mascot } from "@finance/ui";
+import { IconChip } from "@finance/ui";
+import {
+  BarChart3,
+  Coins,
+  PiggyBank,
+  Receipt,
+  type LucideIcon,
+} from "lucide-react";
 import { trpc } from "@/trpc/client";
 import { Greeting } from "@/components/dashboard/greeting";
 
@@ -52,7 +59,6 @@ export default function AnalyticsPage() {
   const categories = categoryQuery.data || [];
   const monthlyData = comparisonQuery.data || [];
 
-  // Calculate insights
   const totalSpent = categories.reduce((sum, c) => sum + c.total, 0);
   const avgMonthlySpend = monthlyData.length
     ? monthlyData.reduce((sum, m) => sum + m.expenses, 0) / monthlyData.length
@@ -114,7 +120,6 @@ export default function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-3.5">
       <Greeting
-        mascot="chartman"
         title={<>Analytics</>}
         insight={
           <span className="text-muted-ink text-base font-medium">
@@ -235,19 +240,19 @@ export default function AnalyticsPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <SummaryTile
             surface="peach"
-            mascot="receipt"
+            icon={Receipt}
             label="Total spent"
             value={formatCurrency(totalSpent)}
           />
           <SummaryTile
             surface="sky"
-            mascot="bars"
+            icon={BarChart3}
             label="Avg. monthly"
             value={formatCurrency(avgMonthlySpend)}
           />
           <SummaryTile
             surface="sage"
-            mascot="coins"
+            icon={Coins}
             label="Total income"
             value={formatCurrency(
               monthlyData.reduce((sum, m) => sum + m.income, 0)
@@ -256,7 +261,7 @@ export default function AnalyticsPage() {
           />
           <SummaryTile
             surface="lav"
-            mascot="piggy"
+            icon={PiggyBank}
             label="Net savings"
             value={formatCurrency(
               monthlyData.reduce((sum, m) => sum + m.savings, 0)
@@ -270,23 +275,25 @@ export default function AnalyticsPage() {
 
 function SummaryTile({
   surface,
-  mascot,
+  icon,
   label,
   value,
   valueClass,
 }: {
   surface: "peach" | "sky" | "sage" | "lav";
-  mascot: "receipt" | "bars" | "coins" | "piggy";
+  icon: LucideIcon;
   label: string;
   value: string;
   valueClass?: string;
 }) {
   return (
     <Card surface={surface} className="flex items-center gap-3 p-4">
-      <Mascot name={mascot} size={44} />
+      <IconChip icon={icon} surface={surface} className="bg-white/60" />
       <div className="min-w-0">
         <p className="text-meta text-ink-soft">{label}</p>
-        <p className={`tabular text-lg font-extrabold text-ink ${valueClass ?? ""}`}>
+        <p
+          className={`tabular text-ink text-lg font-extrabold ${valueClass ?? ""}`}
+        >
           {value}
         </p>
       </div>

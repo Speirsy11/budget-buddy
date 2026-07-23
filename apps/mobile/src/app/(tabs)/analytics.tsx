@@ -138,79 +138,87 @@ export default function AnalyticsScreen() {
         }
       >
         <GreetingHeader
-          mascot="chartman"
           title="Analytics"
           insight={`Past ${months} months`}
           insightTone="muted"
         />
         <View style={{ height: 12 }} />
         {/* Period Selector */}
-        <View style={[styles.periodSelector, { backgroundColor: colors.surface.white }]}>
-        {periodOptions.map((option) => (
-          <TouchableOpacity
-            key={option.value}
-            style={[
-              styles.periodButton,
-              months === option.value && { backgroundColor: colors.ink },
-            ]}
-            onPress={() => setMonths(option.value)}
-          >
-            <Text
+        <View
+          style={[
+            styles.periodSelector,
+            { backgroundColor: colors.surface.white },
+          ]}
+        >
+          {periodOptions.map((option) => (
+            <TouchableOpacity
+              key={option.value}
               style={[
-                styles.periodText,
-                { color: months === option.value ? "#fff" : colors.ink },
+                styles.periodButton,
+                months === option.value && { backgroundColor: colors.ink },
               ]}
+              onPress={() => setMonths(option.value)}
             >
-              {option.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+              <Text
+                style={[
+                  styles.periodText,
+                  { color: months === option.value ? "#fff" : colors.ink },
+                ]}
+              >
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      {/* Insights */}
-      <View style={styles.insightsContainer}>
-        {insights.map((insight, i) => (
-          <InsightCard key={i} {...insight} />
-        ))}
-      </View>
+        {/* Insights */}
+        <View style={styles.insightsContainer}>
+          {insights.map((insight, i) => (
+            <InsightCard key={i} {...insight} />
+          ))}
+        </View>
 
-      {/* Monthly Comparison */}
-      <View style={[styles.section, { backgroundColor: colors.surface.white }]}>
-        <Text style={[styles.sectionTitle, { color: colors.ink }]}>
-          Monthly Overview
-        </Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.inkSoft }]}>
-          Income vs Expenses comparison
-        </Text>
-        {monthlyData.length > 0 ? (
-          <MonthlyComparisonChart data={monthlyData} />
-        ) : (
-          <View style={styles.chartPlaceholder}>
-            <Text style={[styles.placeholderText, { color: colors.inkSoft }]}>
-              Not enough data
-            </Text>
-          </View>
-        )}
-      </View>
+        {/* Monthly Comparison */}
+        <View
+          style={[styles.section, { backgroundColor: colors.surface.white }]}
+        >
+          <Text style={[styles.sectionTitle, { color: colors.ink }]}>
+            Monthly Overview
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.inkSoft }]}>
+            Income vs Expenses comparison
+          </Text>
+          {monthlyData.length > 0 ? (
+            <MonthlyComparisonChart data={monthlyData} />
+          ) : (
+            <View style={styles.chartPlaceholder}>
+              <Text style={[styles.placeholderText, { color: colors.inkSoft }]}>
+                Not enough data
+              </Text>
+            </View>
+          )}
+        </View>
 
-      {/* Spending Trends */}
-      <View style={[styles.section, { backgroundColor: colors.surface.white }]}>
-        <Text style={[styles.sectionTitle, { color: colors.ink }]}>
-          Spending Trends
-        </Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.inkSoft }]}>
-          {months > 3 ? "Weekly" : "Daily"} spending over time
-        </Text>
-        {trends.length > 0 ? (
-          <SpendingTrendChart data={trends} />
-        ) : (
-          <View style={styles.chartPlaceholder}>
-            <Text style={[styles.placeholderText, { color: colors.inkSoft }]}>
-              Not enough data
-            </Text>
-          </View>
-        )}
-      </View>
+        {/* Spending Trends */}
+        <View
+          style={[styles.section, { backgroundColor: colors.surface.white }]}
+        >
+          <Text style={[styles.sectionTitle, { color: colors.ink }]}>
+            Spending Trends
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.inkSoft }]}>
+            {months > 3 ? "Weekly" : "Daily"} spending over time
+          </Text>
+          {trends.length > 0 ? (
+            <SpendingTrendChart data={trends} />
+          ) : (
+            <View style={styles.chartPlaceholder}>
+              <Text style={[styles.placeholderText, { color: colors.inkSoft }]}>
+                Not enough data
+              </Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

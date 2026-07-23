@@ -10,29 +10,36 @@ import {
 import { Link } from "expo-router";
 import { useTheme } from "@/lib/theme/provider";
 import { useTimedLoading } from "@/lib/hooks/use-timed-loading";
+import { useMonthCursor } from "@/lib/hooks/use-month-cursor";
 import { trpc, type Transaction } from "@/lib/trpc/client";
 import { formatCurrency } from "@/lib/utils/format";
 import { GreetingHeader } from "@/components/greeting-header";
 import { BentoCard } from "@/components/bento-card";
-import { Mascot } from "@/components/mascot";
+import { MonthPicker } from "@/components/month-picker";
+import { IconChip } from "@/components/icon-chip";
 import { StatCard } from "@/components/dashboard/stat-card";
+import {
+  ClipboardList,
+  Coins,
+  FileSpreadsheet,
+  PiggyBank,
+  ReceiptText,
+  Star,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react-native";
 import { BudgetProgress } from "@/components/dashboard/budget-progress";
 import { TransactionItem } from "@/components/transactions/transaction-item";
 
 export default function DashboardScreen() {
   const { colors } = useTheme();
-  const now = new Date();
-  const [month] = useState(now.getMonth() + 1);
-  const [year] = useState(now.getFullYear());
+  const { month, year, range, goToPrevMonth, goToNextMonth } = useMonthCursor();
   const [refreshing, setRefreshing] = useState(false);
-
-  const startOfMonth = new Date(year, month - 1, 1);
-  const endOfMonth = new Date(year, month, 0, 23, 59, 59);
 
   const budgetQuery = trpc.analytics.get503020.useQuery({ month, year });
   const transactionsQuery = trpc.transactions.list.useQuery({
     limit: 5,
-    filters: { startDate: startOfMonth, endDate: endOfMonth },
+    filters: range,
   });
 
   const budget = budgetQuery.data;
@@ -40,8 +47,7 @@ export default function DashboardScreen() {
   const showBudgetSkeleton = useTimedLoading(budgetQuery.isLoading);
   const showTransactionsSkeleton = useTimedLoading(transactionsQuery.isLoading);
 
-  const netCashFlow =
-    (budget?.totalIncome ?? 0) - (budget?.totalExpenses ?? 0);
+  const netCashFlow = (budget?.totalIncome ?? 0) - (budget?.totalExpenses ?? 0);
   const monthLong = new Date(year, month - 1).toLocaleString("en-GB", {
     month: "long",
   });
@@ -71,10 +77,23 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         <GreetingHeader
-          mascot="wave2"
           title="Hey, there!"
           insight={budget ? aheadCopy : undefined}
         />
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginBottom: 2,
+          }}
+        >
+          <MonthPicker
+            month={month}
+            year={year}
+            onPrev={goToPrevMonth}
+            onNext={goToNextMonth}
+          />
+        </View>
 
         {/* Hero net-flow card */}
         <BentoCard
@@ -89,7 +108,11 @@ export default function DashboardScreen() {
         >
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text
-              style={{ fontSize: 12, fontWeight: "600", color: colors.deep.sky }}
+              style={{
+                fontSize: 12,
+                fontWeight: "600",
+                color: colors.deep.sky,
+              }}
             >
               Net flow · {monthLong}
             </Text>
@@ -107,14 +130,13 @@ export default function DashboardScreen() {
               {formatCurrency(Math.abs(netCashFlow)).replace(/\.\d+$/, "")}
             </Text>
             <Text style={{ fontSize: 11, color: colors.inkSoft, marginTop: 4 }}>
-              {netCashFlow >= 0
-                ? "Tracking ahead"
-                : "Spending exceeded income"}
+              {netCashFlow >= 0 ? "Tracking ahead" : "Spending exceeded income"}
             </Text>
           </View>
-          <Mascot
-            name={netCashFlow >= 0 ? "thumbsup" : "concerned"}
-            size={76}
+          <IconChip
+            icon={netCashFlow >= 0 ? TrendingUp : TrendingDown}
+            surface="white"
+            size="lg"
             style={{ marginRight: -10 }}
           />
         </BentoCard>
@@ -130,31 +152,40 @@ export default function DashboardScreen() {
         >
           <StatCard
             surface="sage"
-            mascot="coins"
+            icon={Coins}
             title="Income"
-            value={formatCurrency(budget?.totalIncome ?? 0).replace(/\.\d+$/, "")}
+            value={formatCurrency(budget?.totalIncome ?? 0).replace(
+              /\.\d+$/,
+              ""
+            )}
             meta={`${monthLong}`}
             isLoading={budgetQuery.isLoading}
           />
           <StatCard
             surface="peach"
-            mascot="receipt"
+            icon={ReceiptText}
             title="Expenses"
-            value={formatCurrency(budget?.totalExpenses ?? 0).replace(/\.\d+$/, "")}
+            value={formatCurrency(budget?.totalExpenses ?? 0).replace(
+              /\.\d+$/,
+              ""
+            )}
             meta="this month"
             isLoading={budgetQuery.isLoading}
           />
           <StatCard
             surface="lav"
-            mascot="piggy"
+            icon={PiggyBank}
             title="Savings"
-            value={formatCurrency(budget?.savings.actual ?? 0).replace(/\.\d+$/, "")}
+            value={formatCurrency(budget?.savings.actual ?? 0).replace(
+              /\.\d+$/,
+              ""
+            )}
             meta="vs target"
             isLoading={budgetQuery.isLoading}
           />
           <StatCard
             surface="lemon"
-            mascot="star"
+            icon={Star}
             title="Rate"
             value={`${(budget?.savingsRate ?? 0).toFixed(1)}%`}
             meta="goal 20%"
@@ -178,11 +209,13 @@ export default function DashboardScreen() {
               >
                 50/30/20 Budget
               </Text>
-              <Text style={{ fontSize: 11, color: colors.inkSoft, marginTop: 2 }}>
+              <Text
+                style={{ fontSize: 11, color: colors.inkSoft, marginTop: 2 }}
+              >
                 Spending vs. your goals
               </Text>
             </View>
-            <Mascot name="clipboard" size={44} />
+            <IconChip icon={ClipboardList} surface="white" size="lg" />
           </View>
 
           {showBudgetSkeleton ? (
@@ -221,7 +254,7 @@ export default function DashboardScreen() {
             </View>
           ) : (
             <View style={{ alignItems: "center", paddingVertical: 16 }}>
-              <Mascot name="csv" size={56} />
+              <IconChip icon={FileSpreadsheet} surface="white" size="lg" />
               <Text
                 style={{
                   color: colors.inkSoft,
@@ -283,13 +316,16 @@ export default function DashboardScreen() {
           ) : transactions.length > 0 ? (
             <View style={{ gap: 6 }}>
               {transactions.map((transaction: Transaction) => (
-                <TransactionItem key={transaction.id} transaction={transaction} />
+                <TransactionItem
+                  key={transaction.id}
+                  transaction={transaction}
+                />
               ))}
             </View>
           ) : (
             <BentoCard surface="white">
               <View style={{ alignItems: "center", paddingVertical: 20 }}>
-                <Mascot name="receipt" size={56} />
+                <IconChip icon={ReceiptText} surface="linen" size="lg" />
                 <Text
                   style={{ color: colors.ink, marginTop: 8, fontWeight: "700" }}
                 >

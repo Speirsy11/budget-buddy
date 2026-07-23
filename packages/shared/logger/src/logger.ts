@@ -28,7 +28,6 @@ function isBundledEnvironment(): boolean {
 }
 
 /**
- * Determine log level from environment
  * - Production: info (less verbose, better performance)
  * - Development: debug (more verbose for debugging)
  * - Test: silent (no logs during tests unless LOG_LEVEL is set)
@@ -44,17 +43,12 @@ function getLogLevel(): LogLevel {
   return isProduction ? "info" : "debug";
 }
 
-/**
- * Create pino logger options
- */
 function createLoggerOptions(): LoggerOptions {
   const level = getLogLevel();
 
   const baseOptions: LoggerOptions = {
     level,
-    // Add timestamp in ISO format
     timestamp: pino.stdTimeFunctions.isoTime,
-    // Redact sensitive fields automatically
     redact: {
       paths: [
         "password",
@@ -76,15 +70,13 @@ function createLoggerOptions(): LoggerOptions {
       ],
       censor: "[REDACTED]",
     },
-    // Format error objects properly
     serializers: {
       err: pino.stdSerializers.err,
       error: pino.stdSerializers.err,
     },
   };
 
-  // In development, use pino-pretty for human-readable output
-  // But skip transports in bundled environments (Next.js) where worker threads don't work
+  // Skip transports in bundled environments (Next.js) where worker threads don't work
   if (!isProduction && !isTest && !isBundledEnvironment()) {
     return {
       ...baseOptions,
@@ -103,8 +95,6 @@ function createLoggerOptions(): LoggerOptions {
 }
 
 /**
- * Singleton logger instance for the application
- *
  * @example
  * import { logger } from "@finance/logger";
  *
@@ -115,7 +105,6 @@ function createLoggerOptions(): LoggerOptions {
 export const logger = pino(createLoggerOptions());
 
 /**
- * Create a child logger with additional context
  * Use this when you want to add persistent context to all logs in a module
  *
  * @example
@@ -125,8 +114,6 @@ export const logger = pino(createLoggerOptions());
 export const child = logger.child.bind(logger);
 
 /**
- * Timer utility for measuring operation duration
- *
  * @example
  * const timer = createTimer();
  * await doSomething();

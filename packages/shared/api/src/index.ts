@@ -40,9 +40,6 @@ export const publicProcedure = t.procedure;
 export const middleware = t.middleware;
 export const createCallerFactory = t.createCallerFactory;
 
-/**
- * Middleware to enforce user authentication
- */
 const enforceUserIsAuthed = middleware(async ({ ctx, next }) => {
   if (!ctx.userId) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -55,12 +52,8 @@ const enforceUserIsAuthed = middleware(async ({ ctx, next }) => {
   });
 });
 
-/**
- * Create a rate limiting middleware with the given config
- */
 function createRateLimitMiddleware(config: RateLimitConfig) {
   return middleware(async ({ ctx, next }) => {
-    // Use userId if available, otherwise fall back to IP
     const identifier = ctx.userId || ctx.clientIp || "anonymous";
     const result = await checkRateLimit(identifier, config);
 
@@ -73,7 +66,6 @@ function createRateLimitMiddleware(config: RateLimitConfig) {
 }
 
 /**
- * Create a tier-aware rate limiting middleware.
  * Uses the user's subscription plan from context to select the appropriate rate limit.
  */
 function createTieredRateLimitMiddleware(
@@ -94,7 +86,6 @@ function createTieredRateLimitMiddleware(
 }
 
 /**
- * Middleware to enforce that the user has an active pro subscription.
  * Used to gate premium features like open banking.
  */
 const enforceProPlan = middleware(async ({ ctx, next }) => {
@@ -109,10 +100,8 @@ const enforceProPlan = middleware(async ({ ctx, next }) => {
   return next();
 });
 
-// Standard procedures
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 
-// Rate-limited procedures
 export const rateLimitedProcedure = t.procedure.use(
   createRateLimitMiddleware(rateLimits.standard)
 );
@@ -130,12 +119,10 @@ export const strictRateLimitedProtectedProcedure = t.procedure
   .use(enforceUserIsAuthed)
   .use(createRateLimitMiddleware(rateLimits.strict));
 
-// AI-specific rate-limited procedure
 export const aiRateLimitedProcedure = t.procedure
   .use(enforceUserIsAuthed)
   .use(createRateLimitMiddleware(rateLimits.ai));
 
-// Upload-specific rate-limited procedure
 export const uploadRateLimitedProcedure = t.procedure
   .use(enforceUserIsAuthed)
   .use(createRateLimitMiddleware(rateLimits.upload));
@@ -150,7 +137,6 @@ export const tieredUploadRateLimitedProcedure = t.procedure
   .use(enforceUserIsAuthed)
   .use(createTieredRateLimitMiddleware((tier) => tier.upload));
 
-// Pro-only procedure — requires active pro subscription + auth
 export const proProcedure = t.procedure
   .use(enforceUserIsAuthed)
   .use(enforceProPlan);
@@ -159,11 +145,9 @@ export type { Context as TRPCContext };
 export { TRPCError };
 export { z };
 
-// Export rate limiting utilities for custom configurations
 export { checkRateLimit, createRateLimitError, rateLimits };
 export type { RateLimitConfig } from "./rate-limit";
 
-// Export tier configuration
 export {
   getTierConfig,
   tierRateLimits,

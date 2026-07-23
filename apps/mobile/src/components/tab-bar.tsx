@@ -1,24 +1,48 @@
 import { View, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Mascot, type MascotName } from "./mascot";
+import {
+  BarChart3,
+  Landmark,
+  LayoutGrid,
+  PieChart,
+  ReceiptText,
+  Settings,
+  type LucideIcon,
+} from "lucide-react-native";
 import { useTheme } from "@/lib/theme/provider";
 
-type TabKey = "index" | "transactions" | "budget" | "analytics" | "banking" | "settings";
+type TabKey =
+  | "index"
+  | "transactions"
+  | "budget"
+  | "analytics"
+  | "banking"
+  | "settings";
+
+type SurfaceKey = "sage" | "peach" | "sky" | "lav" | "lemon" | "linen";
 
 const TAB_CONFIG: Record<
   TabKey,
-  { mascot: MascotName; surface: "sage" | "peach" | "sky" | "lav" | "lemon" | "linen" }
+  {
+    icon: LucideIcon;
+    surface: SurfaceKey;
+    label: string;
+  }
 > = {
-  index: { mascot: "coins", surface: "sage" },
-  transactions: { mascot: "receipt", surface: "peach" },
-  budget: { mascot: "pie", surface: "sky" },
-  analytics: { mascot: "bars", surface: "lav" },
-  banking: { mascot: "bank", surface: "lemon" },
-  settings: { mascot: "shield", surface: "linen" },
+  index: { icon: LayoutGrid, surface: "sage", label: "Overview" },
+  transactions: {
+    icon: ReceiptText,
+    surface: "peach",
+    label: "Transactions",
+  },
+  budget: { icon: PieChart, surface: "sky", label: "Budget" },
+  analytics: { icon: BarChart3, surface: "lav", label: "Analytics" },
+  banking: { icon: Landmark, surface: "lemon", label: "Open Banking" },
+  settings: { icon: Settings, surface: "linen", label: "Settings" },
 };
 
-export function BuddyTabBar({ state, navigation }: BottomTabBarProps) {
+export function TabBar({ state, navigation }: BottomTabBarProps) {
   const { colors, radius, shadow } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -44,6 +68,11 @@ export function BuddyTabBar({ state, navigation }: BottomTabBarProps) {
       {state.routes.map((route, index) => {
         const isFocused = state.index === index;
         const config = TAB_CONFIG[route.name as TabKey] ?? TAB_CONFIG.index;
+        const Icon = config.icon;
+        const deepColor =
+          config.surface === "linen"
+            ? colors.inkSoft
+            : colors.deep[config.surface];
 
         const onPress = () => {
           const event = navigation.emit({
@@ -60,6 +89,9 @@ export function BuddyTabBar({ state, navigation }: BottomTabBarProps) {
           <Pressable
             key={route.key}
             onPress={onPress}
+            accessibilityRole="tab"
+            accessibilityLabel={config.label}
+            accessibilityState={{ selected: isFocused }}
             style={{
               paddingHorizontal: 12,
               paddingVertical: 6,
@@ -69,7 +101,11 @@ export function BuddyTabBar({ state, navigation }: BottomTabBarProps) {
                 : "transparent",
             }}
           >
-            <Mascot name={config.mascot} size={28} />
+            <Icon
+              size={22}
+              strokeWidth={2.25}
+              color={isFocused ? deepColor : colors.sidebarMuted}
+            />
           </Pressable>
         );
       })}

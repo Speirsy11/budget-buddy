@@ -13,10 +13,11 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "BudgetBuddy - Smart Personal Finance",
+  title: "BudgetBuddy — Smart Personal Finance",
   description:
-    "Your friendly AI finance buddy with smart transaction categorization and personalized budget goals",
+    "Personal finance dashboard with AI transaction categorisation and 50/30/20 budgeting",
   keywords: ["finance", "budget", "AI", "personal finance", "money management"],
+  icons: { icon: "/budgetbuddy-mark.svg" },
 };
 
 export default function RootLayout({

@@ -84,12 +84,10 @@ export async function classifyTransactionsBatch(
 ): Promise<ClassificationResult[]> {
   if (transactions.length === 0) return [];
 
-  // For small batches, classify individually
   if (transactions.length <= 3) {
     return Promise.all(transactions.map(classifyTransaction));
   }
 
-  // For larger batches, use batch classification
   const transactionList = transactions
     .map(
       (t, i) =>

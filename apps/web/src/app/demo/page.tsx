@@ -26,7 +26,6 @@ import {
   TrendingUp,
   Landmark,
   Settings,
-  Smile,
   ChevronsLeft,
   Bell,
   Sun,
@@ -129,9 +128,7 @@ function DemoSidebar() {
       <div className="bg-card flex grow flex-col border-r">
         <div className="flex h-16 shrink-0 items-center justify-between border-b px-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md shadow-blue-600/25">
-              <Smile className="h-5 w-5 text-white" />
-            </div>
+            <img src="/budgetbuddy-mark.svg" alt="" className="h-9 w-9" />
             <span className="text-lg font-bold tracking-tight">
               BudgetBuddy
             </span>
@@ -198,10 +195,18 @@ function DemoHeader() {
           </p>
         </div>
         <div className="flex items-center gap-1.5">
-          <Button variant="ghost" size="icon" className="text-muted-foreground h-9 w-9">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground h-9 w-9"
+          >
             <Sun className="h-[1.15rem] w-[1.15rem]" />
           </Button>
-          <Button variant="ghost" size="icon" className="text-muted-foreground h-9 w-9">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground h-9 w-9"
+          >
             <Bell className="h-[1.15rem] w-[1.15rem]" />
           </Button>
           <div className="bg-border mx-1.5 h-6 w-px" />
@@ -270,7 +275,9 @@ export default function DemoPage() {
                   <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                     {formatCurrency(mockBudget.totalIncome)}
                   </div>
-                  <p className="text-muted-foreground mt-1 text-xs">{monthName}</p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    {monthName}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -288,7 +295,9 @@ export default function DemoPage() {
                   <div className="text-2xl font-bold text-red-600 dark:text-red-400">
                     {formatCurrency(mockBudget.totalExpenses)}
                   </div>
-                  <p className="text-muted-foreground mt-1 text-xs">{monthName}</p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    {monthName}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -306,7 +315,9 @@ export default function DemoPage() {
                   <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                     +{formatCurrency(netCashFlow)}
                   </div>
-                  <p className="text-muted-foreground mt-1 text-xs">{monthName}</p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    {monthName}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -328,10 +339,14 @@ export default function DemoPage() {
                     <div className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full">
                       <div
                         className="h-full rounded-full bg-violet-500 transition-all duration-500"
-                        style={{ width: `${Math.min((mockBudget.savingsRate / 20) * 100, 100)}%` }}
+                        style={{
+                          width: `${Math.min((mockBudget.savingsRate / 20) * 100, 100)}%`,
+                        }}
                       />
                     </div>
-                    <span className="text-muted-foreground text-xs">of 20%</span>
+                    <span className="text-muted-foreground text-xs">
+                      of 20%
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -402,7 +417,9 @@ export default function DemoPage() {
                           {tx.description[0]}
                         </div>
                         <div>
-                          <p className="text-sm font-medium">{tx.description}</p>
+                          <p className="text-sm font-medium">
+                            {tx.description}
+                          </p>
                           <p className="text-muted-foreground text-xs">
                             {tx.category} ·{" "}
                             {tx.date.toLocaleDateString("en-GB", {
