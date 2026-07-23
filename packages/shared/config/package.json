@@ -8,7 +8,7 @@
     "./typescript/nextjs": "./tsconfig.nextjs.json",
     "./typescript/library": "./tsconfig.library.json"
   },
-  "dependencies": {
+  "devDependencies": {
     "@eslint/js": "catalog:",
     "typescript-eslint": "catalog:"
   }
