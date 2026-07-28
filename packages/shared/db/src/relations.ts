@@ -5,6 +5,7 @@ import { categories } from "./schema/categories";
 import { budgets, budgetAllocations } from "./schema/budgets";
 import { subscriptions } from "./schema/subscriptions";
 import { bankConnections } from "./schema/bank-connections";
+import { categorizationRules } from "./schema/rules";
 
 export const usersRelations = relations(users, ({ many }) => ({
   transactions: many(transactions),
@@ -13,7 +14,22 @@ export const usersRelations = relations(users, ({ many }) => ({
   budgetAllocations: many(budgetAllocations),
   subscriptions: many(subscriptions),
   bankConnections: many(bankConnections),
+  categorizationRules: many(categorizationRules),
 }));
+
+export const categorizationRulesRelations = relations(
+  categorizationRules,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [categorizationRules.userId],
+      references: [users.id],
+    }),
+    category: one(categories, {
+      fields: [categorizationRules.categoryId],
+      references: [categories.id],
+    }),
+  })
+);
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
   user: one(users, {
@@ -48,6 +64,7 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
   }),
   transactions: many(transactions),
   budgets: many(budgets),
+  categorizationRules: many(categorizationRules),
 }));
 
 export const budgetsRelations = relations(budgets, ({ one }) => ({

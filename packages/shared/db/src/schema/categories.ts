@@ -1,11 +1,10 @@
 import { pgTable, text, timestamp, pgEnum, boolean } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
-export const necessityTypeEnum = pgEnum("necessity_type", [
-  "need",
-  "want",
-  "savings",
-]);
+export const necessityTypes = ["need", "want", "savings"] as const;
+export type NecessityType = (typeof necessityTypes)[number];
+
+export const necessityTypeEnum = pgEnum("necessity_type", necessityTypes);
 
 export const categories = pgTable("categories", {
   id: text("id")

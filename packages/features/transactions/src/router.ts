@@ -5,12 +5,33 @@ import {
   tieredUploadRateLimitedProcedure,
   z,
 } from "@finance/api";
-import { db, transactions, users, budgets, categories } from "@finance/db";
+import {
+  db,
+  transactions,
+  users,
+  budgets,
+  categories,
+  categorizationRules,
+  ensureUserDefaults,
+} from "@finance/db";
 import { logger, createTimer } from "@finance/logger";
-import { eq, and, gte, lte, desc, like, sql, or } from "drizzle-orm";
+import {
+  eq,
+  and,
+  gte,
+  lte,
+  desc,
+  asc,
+  like,
+  sql,
+  or,
+  inArray,
+} from "drizzle-orm";
 import { transactionFilterSchema } from "./schema";
 import { classifyTransaction, classifyTransactionsBatch } from "./classifier";
 import { generateFullExport } from "./export";
+import { applyRules } from "./rules";
+import { necessityScoreFor, resolveCategoryByName } from "./categorization";
 
 const log = logger.child({ module: "transactions" });
 
@@ -191,24 +212,63 @@ export const transactionsRouter = router({
         "createMany: starting bulk import"
       );
 
-      let transactionsToInsert = input.transactions.map((t) => ({
-        userId: ctx.userId,
-        amount: t.amount,
-        date: t.date,
-        description: t.description,
-        merchant: t.merchant,
-      }));
+      // Make sure the account has categories and starter rules. Without this,
+      // an import by a user who never had defaults provisioned has nothing to
+      // categorise into.
+      await ensureUserDefaults(ctx.userId);
 
-      if (input.autoClassify) {
+      const [userCategories, userRules] = await Promise.all([
+        db.query.categories.findMany({
+          where: eq(categories.userId, ctx.userId),
+        }),
+        db.query.categorizationRules.findMany({
+          where: and(
+            eq(categorizationRules.userId, ctx.userId),
+            eq(categorizationRules.enabled, true)
+          ),
+        }),
+      ]);
+
+      const categoryById = new Map(userCategories.map((c) => [c.id, c]));
+
+      // Rules run before AI: they are deterministic, free, and instant. Only
+      // what they miss is worth spending a model call on.
+      const { matched, unmatched } = applyRules(userRules, input.transactions);
+
+      log.info(
+        {
+          userId: ctx.userId,
+          ruleMatched: matched.length,
+          needsAi: unmatched.length,
+        },
+        "createMany: applied categorisation rules"
+      );
+
+      const categoryByTransaction = new Map<
+        (typeof input.transactions)[number],
+        { categoryId: string; categoryName: string; necessityScore: number }
+      >();
+
+      for (const match of matched) {
+        const category = categoryById.get(match.categoryId);
+        if (!category) continue;
+        categoryByTransaction.set(match.transaction, {
+          categoryId: category.id,
+          categoryName: category.name,
+          necessityScore: necessityScoreFor(category.necessityType),
+        });
+      }
+
+      if (input.autoClassify && unmatched.length > 0) {
         log.debug(
-          { userId: ctx.userId, count: input.transactions.length },
+          { userId: ctx.userId, count: unmatched.length },
           "createMany: starting AI classification"
         );
         const classifyTimer = createTimer();
 
         try {
           const classifications = await classifyTransactionsBatch(
-            input.transactions.map((t) => ({
+            unmatched.map((t) => ({
               description: t.description,
               amount: t.amount,
               merchant: t.merchant,
@@ -225,32 +285,73 @@ export const transactionsRouter = router({
             "createMany: AI classification completed"
           );
 
-          transactionsToInsert = transactionsToInsert.map((t, i) => {
-            // eslint-disable-next-line security/detect-object-injection -- Safe array index access within map callback
-            const classification = classifications[i];
-            return {
-              ...t,
-              aiClassified: classification?.category,
-              necessityScore:
-                classification?.necessityType === "need"
-                  ? 1
-                  : classification?.necessityType === "savings"
-                    ? 0.5
-                    : 0,
-            };
+          unmatched.forEach((transaction, index) => {
+            // eslint-disable-next-line security/detect-object-injection -- Safe array index access within forEach callback
+            const classification = classifications[index];
+            if (!classification) return;
+
+            const category = resolveCategoryByName(
+              userCategories,
+              classification.category
+            );
+
+            categoryByTransaction.set(transaction, {
+              // A model category we cannot map stays uncategorised rather than
+              // being filed somewhere arbitrary.
+              categoryId: category?.id ?? "",
+              categoryName: classification.category,
+              necessityScore: necessityScoreFor(classification.necessityType),
+            });
           });
         } catch (error) {
           log.error(
-            { userId: ctx.userId, error },
+            { err: error, userId: ctx.userId },
             "createMany: AI classification failed, proceeding without classification"
           );
         }
       }
 
+      const transactionsToInsert = input.transactions.map((t) => {
+        const resolved = categoryByTransaction.get(t);
+        return {
+          userId: ctx.userId,
+          amount: t.amount,
+          date: t.date,
+          description: t.description,
+          merchant: t.merchant,
+          // Both fields are written together. Analytics reads necessityScore /
+          // aiClassified while the transactions UI joins on categoryId, so
+          // setting only one of them makes the two views disagree.
+          categoryId: resolved?.categoryId || null,
+          aiClassified: resolved?.categoryName ?? null,
+          necessityScore: resolved?.necessityScore ?? null,
+        };
+      });
+
       const inserted = await db
         .insert(transactions)
         .values(transactionsToInsert)
         .returning();
+
+      // Usage counters let the rules UI show which rules are actually earning
+      // their place. Best-effort: a failure here must not fail the import.
+      if (matched.length > 0) {
+        const appliedRuleIds = [...new Set(matched.map((m) => m.ruleId))];
+        try {
+          await db
+            .update(categorizationRules)
+            .set({
+              timesApplied: sql`${categorizationRules.timesApplied} + 1`,
+              lastAppliedAt: new Date(),
+            })
+            .where(inArray(categorizationRules.id, appliedRuleIds));
+        } catch (error) {
+          log.warn(
+            { err: error, userId: ctx.userId },
+            "createMany: failed to update rule usage counters"
+          );
+        }
+      }
 
       log.info(
         {
@@ -479,6 +580,19 @@ export const transactionsRouter = router({
     );
 
     return { json: exportJson };
+  }),
+
+  /**
+   * The caller's category list, provisioning defaults first so a brand-new
+   * account never sees an empty picker.
+   */
+  categories: protectedProcedure.query(async ({ ctx }) => {
+    await ensureUserDefaults(ctx.userId);
+
+    return db.query.categories.findMany({
+      where: eq(categories.userId, ctx.userId),
+      orderBy: [asc(categories.name)],
+    });
   }),
 
   getSummary: protectedProcedure

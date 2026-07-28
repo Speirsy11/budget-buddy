@@ -31,5 +31,7 @@ export const db = new Proxy({} as Database, {
 
 export * from "./schema";
 export * from "./relations";
+export * from "./defaults";
+export * from "./provisioning";
 export { eq, and, or, gte, lte, desc, asc, like, sql } from "drizzle-orm";
 export type { InferSelectModel, InferInsertModel } from "drizzle-orm";

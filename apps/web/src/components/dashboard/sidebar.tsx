@@ -13,6 +13,7 @@ import {
   PieChart,
   ReceiptText,
   Settings,
+  Wand2,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -57,6 +58,12 @@ const navigation: NavItem[] = [
 ];
 
 const secondaryNavigation: NavItem[] = [
+  {
+    name: "Rules",
+    href: "/dashboard/rules",
+    icon: Wand2,
+    surface: "sage",
+  },
   {
     name: "Settings",
     href: "/dashboard/settings",

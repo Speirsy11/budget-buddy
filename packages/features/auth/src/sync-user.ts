@@ -1,5 +1,8 @@
-import { db, users } from "@finance/db";
+import { db, users, ensureUserDefaults } from "@finance/db";
 import { eq } from "drizzle-orm";
+import { logger } from "@finance/logger";
+
+const log = logger.child({ module: "sync-user" });
 
 interface ClerkUser {
   id: string;
@@ -39,6 +42,25 @@ export async function syncUser(clerkUser: ClerkUser) {
       lastName: clerkUser.lastName,
       imageUrl: clerkUser.imageUrl,
     });
+  }
+
+  // Categories are per-user, so without this a new account has none at all and
+  // every import lands uncategorised. Idempotent, hence safe on every sync.
+  try {
+    const provisioned = await ensureUserDefaults(clerkUser.id);
+    if (provisioned.categoriesCreated || provisioned.rulesCreated) {
+      log.info(
+        { userId: clerkUser.id, ...provisioned },
+        "syncUser: provisioned account defaults"
+      );
+    }
+  } catch (error) {
+    // Never block sign-in on provisioning; the user can still use the app and
+    // the next sync retries.
+    log.error(
+      { err: error, userId: clerkUser.id },
+      "syncUser: failed to provision defaults"
+    );
   }
 
   return db.query.users.findFirst({

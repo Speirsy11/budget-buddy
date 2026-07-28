@@ -1,6 +1,28 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["MOCK_FUNCTIONALITY"],
+  "globalEnv": [
+    "MOCK_FUNCTIONALITY",
+    "NODE_ENV",
+    "DATABASE_URL",
+    "REDIS_URL",
+    "OPENAI_API_KEY",
+    "CLERK_SECRET_KEY",
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_CLERK_SIGN_IN_URL",
+    "NEXT_PUBLIC_CLERK_SIGN_UP_URL",
+    "PLAID_CLIENT_ID",
+    "PLAID_SECRET",
+    "PLAID_ENV",
+    "PLAID_WEBHOOK_URL",
+    "STRIPE_SECRET_KEY",
+    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "STRIPE_PRO_MONTHLY_PRICE_ID",
+    "STRIPE_PRO_YEARLY_PRICE_ID",
+    "RESEND_API_KEY",
+    "FROM_EMAIL",
+    "APP_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

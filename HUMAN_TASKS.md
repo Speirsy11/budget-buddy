@@ -9,7 +9,7 @@ Each task lists what to do, where the value goes, and how to verify it worked.
 
 ## 1. Clerk — claim the keyless instance (do this first)
 
-**Why it matters:** The keys currently in `.env` are Clerk *keyless* (temporary) keys.
+**Why it matters:** The keys currently in `.env` are Clerk _keyless_ (temporary) keys.
 `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` decodes to `intense-wallaby-61.clerk.accounts.dev`,
 which is a throwaway instance Clerk provisioned automatically. If it expires you get a new
 user ID, and your existing data in Postgres (keyed by Clerk user ID) is orphaned.
