@@ -1,4 +1,4 @@
-import { analyticsRouter } from "@finance/analytics/server";
+import { analyticsRouter, accountsRouter } from "@finance/analytics/server";
 import { router } from "@finance/api";
 import { authRouter } from "@finance/auth/server";
 import { bankingRouter } from "@finance/banking/server";
@@ -10,6 +10,7 @@ export const appRouter = router({
   transactions: transactionsRouter,
   rules: rulesRouter,
   analytics: analyticsRouter,
+  accounts: accountsRouter,
   banking: bankingRouter,
   payments: paymentsRouter,
 });

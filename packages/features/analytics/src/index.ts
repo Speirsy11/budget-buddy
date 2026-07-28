@@ -10,6 +10,20 @@ export {
   type SpendingTrend,
 } from "./calculations";
 
+// Net worth calculations (client-safe)
+export {
+  calculateNetWorth,
+  buildNetWorthHistory,
+  monthEndDates,
+  netWorthChange,
+  creditUtilisation,
+  accountTypeLabel,
+  type NetWorthAccount,
+  type NetWorthBreakdown,
+  type NetWorthPoint,
+  type AccountGroup,
+} from "./net-worth";
+
 export { BudgetGauge } from "./components/budget-gauge";
 export { SpendingChart } from "./components/spending-chart";
 export { CategoryBreakdown } from "./components/category-breakdown";

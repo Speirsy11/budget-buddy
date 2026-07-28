@@ -14,6 +14,7 @@ import {
   ReceiptText,
   RefreshCw,
   Settings,
+  Wallet,
   Wand2,
   X,
   type LucideIcon,
@@ -31,6 +32,12 @@ interface NavItem {
 
 const navigation: NavItem[] = [
   { name: "Overview", href: "/dashboard", icon: LayoutGrid, surface: "sage" },
+  {
+    name: "Accounts",
+    href: "/dashboard/accounts",
+    icon: Wallet,
+    surface: "linen",
+  },
   {
     name: "Transactions",
     href: "/dashboard/transactions",

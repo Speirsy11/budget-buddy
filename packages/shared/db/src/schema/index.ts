@@ -5,3 +5,4 @@ export * from "./categories";
 export * from "./subscriptions";
 export * from "./bank-connections";
 export * from "./rules";
+export * from "./accounts";

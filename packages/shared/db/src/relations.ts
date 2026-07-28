@@ -6,6 +6,7 @@ import { budgets, budgetAllocations } from "./schema/budgets";
 import { subscriptions } from "./schema/subscriptions";
 import { bankConnections } from "./schema/bank-connections";
 import { categorizationRules } from "./schema/rules";
+import { accounts, accountBalanceSnapshots } from "./schema/accounts";
 
 export const usersRelations = relations(users, ({ many }) => ({
   transactions: many(transactions),
@@ -15,7 +16,35 @@ export const usersRelations = relations(users, ({ many }) => ({
   subscriptions: many(subscriptions),
   bankConnections: many(bankConnections),
   categorizationRules: many(categorizationRules),
+  accounts: many(accounts),
 }));
+
+export const accountsRelations = relations(accounts, ({ one, many }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
+  bankConnection: one(bankConnections, {
+    fields: [accounts.bankConnectionId],
+    references: [bankConnections.id],
+  }),
+  transactions: many(transactions),
+  balanceSnapshots: many(accountBalanceSnapshots),
+}));
+
+export const accountBalanceSnapshotsRelations = relations(
+  accountBalanceSnapshots,
+  ({ one }) => ({
+    account: one(accounts, {
+      fields: [accountBalanceSnapshots.accountId],
+      references: [accounts.id],
+    }),
+    user: one(users, {
+      fields: [accountBalanceSnapshots.userId],
+      references: [users.id],
+    }),
+  })
+);
 
 export const categorizationRulesRelations = relations(
   categorizationRules,
@@ -43,6 +72,10 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
   bankConnection: one(bankConnections, {
     fields: [transactions.bankConnectionId],
     references: [bankConnections.id],
+  }),
+  account: one(accounts, {
+    fields: [transactions.accountId],
+    references: [accounts.id],
   }),
 }));
 

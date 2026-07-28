@@ -15,6 +15,13 @@
       "when": 1785244148033,
       "tag": "0001_nice_ultragirl",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785245429551,
+      "tag": "0002_silent_the_santerians",
+      "breakpoints": true
     }
   ]
 }
