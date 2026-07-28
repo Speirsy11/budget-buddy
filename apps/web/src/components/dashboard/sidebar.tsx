@@ -12,6 +12,7 @@ import {
   PiggyBank,
   PieChart,
   ReceiptText,
+  RefreshCw,
   Settings,
   Wand2,
   X,
@@ -37,6 +38,12 @@ const navigation: NavItem[] = [
     surface: "peach",
   },
   { name: "Budget", href: "/dashboard/budget", icon: PieChart, surface: "sky" },
+  {
+    name: "Recurring",
+    href: "/dashboard/subscriptions",
+    icon: RefreshCw,
+    surface: "peach",
+  },
   {
     name: "Analytics",
     href: "/dashboard/analytics",

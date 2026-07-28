@@ -32,6 +32,7 @@ import { classifyTransaction, classifyTransactionsBatch } from "./classifier";
 import { generateFullExport } from "./export";
 import { applyRules } from "./rules";
 import { necessityScoreFor, resolveCategoryByName } from "./categorization";
+import { detectRecurringTransactions, summarizeRecurring } from "./recurring";
 
 const log = logger.child({ module: "transactions" });
 
@@ -581,6 +582,99 @@ export const transactionsRouter = router({
 
     return { json: exportJson };
   }),
+
+  /**
+   * Recurring payments detected from transaction history.
+   *
+   * Computed on read rather than stored: the answer changes every time a new
+   * transaction lands, and recomputing over a couple of years of history is
+   * only a few milliseconds.
+   */
+  recurring: protectedProcedure
+    .input(
+      z
+        .object({
+          /** History window. Two years covers annual subscriptions twice over. */
+          lookbackMonths: z.number().int().min(3).max(36).default(24),
+          lookaheadDays: z.number().int().min(1).max(90).default(30),
+          includeInactive: z.boolean().default(true),
+        })
+        .default({})
+    )
+    .query(async ({ ctx, input }) => {
+      const timer = createTimer();
+      const now = new Date();
+      const since = new Date(now);
+      since.setMonth(since.getMonth() - input.lookbackMonths);
+
+      const history = await db.query.transactions.findMany({
+        where: and(
+          eq(transactions.userId, ctx.userId),
+          gte(transactions.date, since)
+        ),
+        columns: {
+          id: true,
+          amount: true,
+          date: true,
+          description: true,
+          merchant: true,
+          categoryId: true,
+        },
+      });
+
+      const detected = detectRecurringTransactions(history, {
+        referenceDate: now,
+      });
+      const summary = summarizeRecurring(detected, {
+        referenceDate: now,
+        lookaheadDays: input.lookaheadDays,
+      });
+
+      // Attach category rows so the UI can colour each series without a
+      // second round-trip.
+      const userCategories = await db.query.categories.findMany({
+        where: eq(categories.userId, ctx.userId),
+      });
+      const categoryById = new Map(userCategories.map((c) => [c.id, c]));
+
+      const withCategory = detected
+        .filter((s) => input.includeInactive || s.isActive)
+        .map((s) => ({
+          ...s,
+          category: s.categoryId
+            ? (categoryById.get(s.categoryId) ?? null)
+            : null,
+        }));
+
+      log.info(
+        {
+          userId: ctx.userId,
+          analysed: history.length,
+          detected: detected.length,
+          activeCount: summary.activeCount,
+          durationMs: timer.elapsed(),
+        },
+        "recurring: completed"
+      );
+
+      return {
+        series: withCategory,
+        summary: {
+          activeCount: summary.activeCount,
+          totalMonthlyCost: summary.totalMonthlyCost,
+          totalAnnualCost: summary.totalAnnualCost,
+          upcomingCount: summary.upcoming.length,
+          inactiveCount: summary.inactive.length,
+        },
+        upcoming: summary.upcoming.map((s) => ({
+          key: s.key,
+          merchantName: s.merchantName,
+          medianAmount: s.medianAmount,
+          nextExpectedDate: s.nextExpectedDate,
+          cadenceLabel: s.cadenceLabel,
+        })),
+      };
+    }),
 
   /**
    * The caller's category list, provisioning defaults first so a brand-new
