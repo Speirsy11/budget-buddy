@@ -1,4 +1,4 @@
-import { db, transactions, eq, and, gte, lte } from "@finance/db";
+import { db, users, transactions, eq, and, gte, lte } from "@finance/db";
 import { notifyWeeklySummary, isEmailConfigured } from "@finance/email";
 import { calculate503020 } from "@finance/analytics";
 import { logger, createTimer } from "@finance/logger";
@@ -37,11 +37,25 @@ export async function POST(request: Request) {
   weekStart.setDate(weekStart.getDate() - 7);
   weekStart.setHours(0, 0, 0, 0);
 
+  // A week minus a day of slack: a scheduler that fires slightly early must
+  // not be treated as a new week, and a retry hours later must not resend.
+  const alreadyDeliveredSince = new Date(now);
+  alreadyDeliveredSince.setDate(alreadyDeliveredSince.getDate() - 6);
+
   const allUsers = await db.query.users.findMany();
   let sent = 0;
   let skipped = 0;
+  let failed = 0;
 
   for (const user of allUsers) {
+    if (
+      user.lastWeeklySummaryAt &&
+      user.lastWeeklySummaryAt > alreadyDeliveredSince
+    ) {
+      skipped += 1;
+      continue;
+    }
+
     const weekTransactions = await db.query.transactions.findMany({
       where: and(
         eq(transactions.userId, user.id),
@@ -85,7 +99,7 @@ export async function POST(request: Request) {
 
     const breakdown = calculate503020(totalIncome, weekTransactions);
 
-    await notifyWeeklySummary({
+    const result = await notifyWeeklySummary({
       email: user.email,
       userId: user.id,
       userName: user.firstName ?? "there",
@@ -111,13 +125,23 @@ export async function POST(request: Request) {
       },
     });
 
-    sent += 1;
+    // Only a confirmed delivery counts, and only a confirmed delivery marks
+    // the user as done — a provider failure must be retried, not swallowed.
+    if (result.success) {
+      sent += 1;
+      await db
+        .update(users)
+        .set({ lastWeeklySummaryAt: new Date() })
+        .where(eq(users.id, user.id));
+    } else {
+      failed += 1;
+    }
   }
 
   log.info(
-    { sent, skipped, durationMs: timer.elapsed() },
+    { sent, skipped, failed, durationMs: timer.elapsed() },
     "weekly-summary: completed"
   );
 
-  return Response.json({ sent, skipped });
+  return Response.json({ sent, skipped, failed });
 }

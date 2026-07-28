@@ -114,10 +114,25 @@ export const goalsRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, ...changes } = input;
-      await ownedGoal(ctx.userId, id);
+      const existing = await ownedGoal(ctx.userId, id);
 
       if (changes.linkedAccountId) {
         await assertOwnedAccount(ctx.userId, changes.linkedAccountId);
+      }
+
+      // A linked goal stores currentAmount: 0 and reads progress from the
+      // account. Unlinking without copying that balance across would appear to
+      // wipe the user's progress, so capture the last known figure first.
+      const isUnlinking =
+        changes.linkedAccountId === null && existing.linkedAccountId !== null;
+
+      if (isUnlinking && changes.currentAmount === undefined) {
+        const linkedAccount = await db.query.accounts.findFirst({
+          where: eq(accounts.id, existing.linkedAccountId as string),
+        });
+        if (linkedAccount) {
+          changes.currentAmount = linkedAccount.currentBalance;
+        }
       }
 
       const [updated] = await db

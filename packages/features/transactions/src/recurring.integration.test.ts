@@ -33,9 +33,17 @@ function monthlyCharges(
 ) {
   const now = new Date();
   return Array.from({ length: count }, (_, index) => {
-    const date = new Date(now);
-    date.setMonth(date.getMonth() - monthsAgoEnd - (count - 1 - index));
-    date.setDate(12);
+    // Built from year/month directly rather than by mutating a Date. Calling
+    // setMonth() on the 31st rolls into the following month (31 June becomes
+    // 1 July), which would make this suite pass or fail depending on the day
+    // it runs.
+    const monthsBack = monthsAgoEnd + (count - 1 - index);
+    const date = new Date(
+      now.getFullYear(),
+      now.getMonth() - monthsBack,
+      12,
+      12
+    );
     return { amount, date, description };
   });
 }

@@ -72,24 +72,30 @@ export const accountsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const [created] = await db
-        .insert(accounts)
-        .values({ ...input, userId: ctx.userId })
-        .returning();
+      // One transaction: an account whose opening snapshot failed to write
+      // would be missing from every historical net worth point.
+      const created = await db.transaction(async (tx) => {
+        const [account] = await tx
+          .insert(accounts)
+          .values({ ...input, userId: ctx.userId })
+          .returning();
 
-      if (!created) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Could not create the account.",
+        if (!account) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Could not create the account.",
+          });
+        }
+
+        // Seed the history immediately so a brand-new account still plots a
+        // point on the net worth chart.
+        await tx.insert(accountBalanceSnapshots).values({
+          accountId: account.id,
+          userId: ctx.userId,
+          balance: account.currentBalance,
         });
-      }
 
-      // Seed the history immediately so a brand-new account still plots a
-      // point on the net worth chart.
-      await db.insert(accountBalanceSnapshots).values({
-        accountId: created.id,
-        userId: ctx.userId,
-        balance: created.currentBalance,
+        return account;
       });
 
       log.info(
@@ -149,25 +155,31 @@ export const accountsRouter = router({
     .mutation(async ({ ctx, input }) => {
       const account = await ownedAccount(ctx.userId, input.id);
 
-      await db.insert(accountBalanceSnapshots).values({
-        accountId: account.id,
-        userId: ctx.userId,
-        balance: input.balance,
-        ...(input.recordedAt ? { recordedAt: input.recordedAt } : {}),
-      });
-
       // The account's own balance tracks the latest snapshot only. Backdated
       // entries fill in history without rewriting what the account is today.
       const isBackdated =
         input.recordedAt !== undefined && input.recordedAt < new Date();
 
-      const [updated] = isBackdated
-        ? [account]
-        : await db
-            .update(accounts)
-            .set({ currentBalance: input.balance, updatedAt: new Date() })
-            .where(eq(accounts.id, account.id))
-            .returning();
+      // One transaction: a snapshot without its matching balance update (or
+      // vice versa) leaves the chart and the account disagreeing.
+      const updated = await db.transaction(async (tx) => {
+        await tx.insert(accountBalanceSnapshots).values({
+          accountId: account.id,
+          userId: ctx.userId,
+          balance: input.balance,
+          ...(input.recordedAt ? { recordedAt: input.recordedAt } : {}),
+        });
+
+        if (isBackdated) return account;
+
+        const [row] = await tx
+          .update(accounts)
+          .set({ currentBalance: input.balance, updatedAt: new Date() })
+          .where(eq(accounts.id, account.id))
+          .returning();
+
+        return row;
+      });
 
       log.info(
         {

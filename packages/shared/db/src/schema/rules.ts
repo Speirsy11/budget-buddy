@@ -5,6 +5,7 @@ import {
   integer,
   boolean,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { categories } from "./categories";
@@ -65,6 +66,17 @@ export const categorizationRules = pgTable(
     index("categorization_rules_user_id_idx").on(table.userId),
     index("categorization_rules_category_id_idx").on(table.categoryId),
     index("categorization_rules_priority_idx").on(table.priority),
+    // Two rules with the same pattern, type and field are ambiguous by
+    // definition. This also gives the `onConflictDoNothing` in
+    // `ensureBuiltInRules` something to actually conflict against — without a
+    // constraint it is a no-op, and concurrent provisioning would duplicate
+    // the whole built-in set.
+    uniqueIndex("categorization_rules_user_pattern_uniq").on(
+      table.userId,
+      table.pattern,
+      table.matchType,
+      table.matchField
+    ),
   ]
 );
 

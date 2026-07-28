@@ -66,6 +66,16 @@ export default function TransactionsPage() {
 
   const clearSelection = () => setSelectedIds(new Set());
 
+  /**
+   * Any change to the result set must drop the selection. Otherwise the bulk
+   * bar keeps reporting rows that scrolled out of view — and Delete would
+   * happily remove transactions the user can no longer see.
+   */
+  const resetView = () => {
+    setOffset(0);
+    clearSelection();
+  };
+
   const bulkCategoryMutation = trpc.transactions.bulkUpdateCategory.useMutation(
     {
       onSuccess: () => {
@@ -105,10 +115,12 @@ export default function TransactionsPage() {
 
   const handleNextPage = () => {
     setOffset(offset + limit);
+    clearSelection();
   };
 
   const handlePrevPage = () => {
     setOffset(Math.max(0, offset - limit));
+    clearSelection();
   };
 
   const handleExportVisibleTransactions = () => {
@@ -159,7 +171,7 @@ export default function TransactionsPage() {
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setOffset(0);
+              resetView();
             }}
             className="pl-10"
           />
@@ -169,7 +181,7 @@ export default function TransactionsPage() {
             value={category}
             onValueChange={(value) => {
               setCategory(value);
-              setOffset(0);
+              resetView();
             }}
           >
             <SelectTrigger className="w-[160px]">
@@ -187,7 +199,7 @@ export default function TransactionsPage() {
             value={period}
             onValueChange={(value) => {
               setPeriod(value);
-              setOffset(0);
+              resetView();
             }}
           >
             <SelectTrigger className="w-[140px]">
@@ -205,7 +217,7 @@ export default function TransactionsPage() {
             value={direction}
             onValueChange={(value) => {
               setDirection(value);
-              setOffset(0);
+              resetView();
             }}
           >
             <SelectTrigger className="w-[130px]">
@@ -222,7 +234,7 @@ export default function TransactionsPage() {
             size="sm"
             onClick={() => {
               setUncategorizedOnly((on) => !on);
-              setOffset(0);
+              resetView();
             }}
             aria-pressed={uncategorizedOnly}
           >

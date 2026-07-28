@@ -24,7 +24,7 @@ user ID, and your existing data in Postgres (keyed by Clerk user ID) is orphaned
    - `apps/web/.env.local` (used by the Next.js app)
 4. If your Clerk user ID changes, re-point existing data:
    ```sql
-   UPDATE users SET id = '<new_clerk_id>' WHERE email = 'charliespeirs11@gmail.com';
+   UPDATE users SET id = '<new_clerk_id>' WHERE email = '<your_account_email>';
    ```
    (Cascades to transactions, budgets, goals, accounts via FK.)
 
@@ -172,8 +172,15 @@ on a schedule. It is a plain authenticated POST, so any scheduler works.
    curl -X POST -H "Authorization: Bearer $CRON_SECRET" https://your-app/api/cron/weekly-summary
    ```
 
-**Verify:** Call it by hand with the header. It returns `{"sent":N,"skipped":M}` — users
-with no transactions in the last week are skipped rather than sent an empty summary.
+**In production**, `CRON_SECRET` must be set in the hosting environment (Vercel project
+settings, fly secrets, container env — wherever the app actually runs), not just in a local
+file, and the scheduler must send the same value as `Authorization: Bearer <secret>`. It is
+already declared in `turbo.json` `globalEnv`, so Turbo-run tasks receive it.
+
+**Verify:** Call it by hand with the header. It returns `{"sent":N,"skipped":M,"failed":K}`.
+Users with no transactions in the last week are skipped rather than sent an empty summary,
+and anyone already sent to in the last six days is skipped — so a retry after a partial run
+resumes rather than resending.
 
 ---
 

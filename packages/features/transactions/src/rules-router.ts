@@ -7,12 +7,15 @@ import {
   ensureUserDefaults,
 } from "@finance/db";
 import { logger, createTimer } from "@finance/logger";
-import { eq, and, asc, inArray } from "drizzle-orm";
+import { eq, and, asc, gt, inArray, isNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { applyRules } from "./rules";
 import { necessityScoreFor } from "./categorization";
 
 const log = logger.child({ module: "rules" });
+
+/** Rows pulled per round-trip when backfilling categories over history. */
+const APPLY_BATCH_SIZE = 500;
 
 const matchTypeSchema = z.enum(["contains", "starts_with", "equals", "regex"]);
 const matchFieldSchema = z.enum(["description", "merchant", "any"]);
@@ -248,65 +251,85 @@ export const rulesRouter = router({
         }),
       ]);
 
-      const existing = await db.query.transactions.findMany({
-        where: eq(transactions.userId, ctx.userId),
-        columns: {
-          id: true,
-          description: true,
-          merchant: true,
-          categoryId: true,
-        },
-      });
-
-      const candidates = input.onlyUncategorized
-        ? existing.filter((t) => !t.categoryId)
-        : existing;
-
-      const { matched } = applyRules(userRules, candidates);
       const categoryById = new Map(userCategories.map((c) => [c.id, c]));
 
-      // Group by target category so this is a handful of bulk updates rather
-      // than one round-trip per transaction.
-      const idsByCategory = new Map<string, string[]>();
-      for (const match of matched) {
-        const ids = idsByCategory.get(match.categoryId) ?? [];
-        ids.push(match.transaction.id);
-        idsByCategory.set(match.categoryId, ids);
-      }
-
+      // Keyset pagination on id, not offset. When onlyUncategorized is set the
+      // rows we just categorised drop straight out of the filter, so an offset
+      // would skip the rows that shifted into its place.
       let updatedCount = 0;
-      for (const [categoryId, ids] of idsByCategory) {
-        const category = categoryById.get(categoryId);
-        if (!category) continue;
+      let candidateCount = 0;
+      let cursor: string | null = null;
 
-        await db
-          .update(transactions)
-          .set({
-            categoryId,
-            aiClassified: category.name,
-            necessityScore: necessityScoreFor(category.necessityType),
-            updatedAt: new Date(),
-          })
-          .where(
-            and(
-              eq(transactions.userId, ctx.userId),
-              inArray(transactions.id, ids)
-            )
-          );
+      for (;;) {
+        const conditions = [eq(transactions.userId, ctx.userId)];
+        if (input.onlyUncategorized) {
+          conditions.push(isNull(transactions.categoryId));
+        }
+        if (cursor) conditions.push(gt(transactions.id, cursor));
 
-        updatedCount += ids.length;
+        const page = await db.query.transactions.findMany({
+          where: and(...conditions),
+          columns: {
+            id: true,
+            description: true,
+            merchant: true,
+            categoryId: true,
+          },
+          orderBy: [asc(transactions.id)],
+          limit: APPLY_BATCH_SIZE,
+        });
+
+        if (page.length === 0) break;
+
+        candidateCount += page.length;
+        cursor = page[page.length - 1]?.id ?? null;
+
+        const { matched } = applyRules(userRules, page);
+
+        // Group by target category so each page costs a handful of bulk
+        // updates rather than one round-trip per transaction.
+        const idsByCategory = new Map<string, string[]>();
+        for (const match of matched) {
+          const ids = idsByCategory.get(match.categoryId) ?? [];
+          ids.push(match.transaction.id);
+          idsByCategory.set(match.categoryId, ids);
+        }
+
+        for (const [categoryId, ids] of idsByCategory) {
+          const category = categoryById.get(categoryId);
+          if (!category) continue;
+
+          await db
+            .update(transactions)
+            .set({
+              categoryId,
+              aiClassified: category.name,
+              necessityScore: necessityScoreFor(category.necessityType),
+              updatedAt: new Date(),
+            })
+            .where(
+              and(
+                eq(transactions.userId, ctx.userId),
+                inArray(transactions.id, ids)
+              )
+            );
+
+          updatedCount += ids.length;
+        }
+
+        if (page.length < APPLY_BATCH_SIZE) break;
       }
 
       log.info(
         {
           userId: ctx.userId,
-          candidates: candidates.length,
+          candidateCount,
           updatedCount,
           durationMs: timer.elapsed(),
         },
         "rules.applyToExisting: completed"
       );
 
-      return { updatedCount, candidateCount: candidates.length };
+      return { updatedCount, candidateCount };
     }),
 });

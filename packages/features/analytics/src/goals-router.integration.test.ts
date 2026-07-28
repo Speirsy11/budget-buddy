@@ -181,4 +181,56 @@ describe("goalsRouter (integration)", () => {
     expect(required).toBeGreaterThan(900);
     expect(required).toBeLessThan(1100);
   });
+
+  it("keeps accumulated progress when a goal is unlinked from its account", async () => {
+    const accountsCaller = createAccountsCaller(ctxFor(userId));
+    const account = await accountsCaller.create({
+      name: "Savings pot",
+      type: "savings",
+      currentBalance: 3200,
+    });
+
+    const goalsCaller = createGoalsCaller(ctxFor(userId));
+    const created = await goalsCaller.create({
+      name: "Deposit",
+      targetAmount: 10000,
+      linkedAccountId: account.id,
+    });
+    if (!created) throw new Error("expected a goal");
+
+    // A linked goal stores currentAmount: 0 and reads progress from the
+    // account, so unlinking must carry the balance across or the user watches
+    // their progress reset to zero.
+    await goalsCaller.update({ id: created.id, linkedAccountId: null });
+
+    const after = await goalsCaller.list({});
+    expect(after.goals[0].progress.currentAmount).toBe(3200);
+    expect(after.goals[0].linkedAccountId).toBeNull();
+  });
+
+  it("respects an explicit currentAmount when unlinking", async () => {
+    const accountsCaller = createAccountsCaller(ctxFor(userId));
+    const account = await accountsCaller.create({
+      name: "Savings pot",
+      type: "savings",
+      currentBalance: 3200,
+    });
+
+    const goalsCaller = createGoalsCaller(ctxFor(userId));
+    const created = await goalsCaller.create({
+      name: "Deposit",
+      targetAmount: 10000,
+      linkedAccountId: account.id,
+    });
+    if (!created) throw new Error("expected a goal");
+
+    await goalsCaller.update({
+      id: created.id,
+      linkedAccountId: null,
+      currentAmount: 500,
+    });
+
+    const after = await goalsCaller.list({});
+    expect(after.goals[0].progress.currentAmount).toBe(500);
+  });
 });
