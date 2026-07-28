@@ -20,9 +20,12 @@ import {
   and,
   gte,
   lte,
+  gt,
+  lt,
   desc,
   asc,
-  like,
+  ilike,
+  isNull,
   sql,
   or,
   inArray,
@@ -35,6 +38,7 @@ import { necessityScoreFor, resolveCategoryByName } from "./categorization";
 import { detectRecurringTransactions, summarizeRecurring } from "./recurring";
 import { detectBudgetAlerts } from "./budget-alerts";
 import { notifyBudgetAlert } from "@finance/email";
+import { TRPCError } from "@trpc/server";
 
 const log = logger.child({ module: "transactions" });
 
@@ -183,10 +187,42 @@ export const transactionsRouter = router({
       if (input.filters?.maxAmount !== undefined) {
         conditions.push(lte(transactions.amount, input.filters.maxAmount));
       }
+      if (input.filters?.accountId) {
+        conditions.push(eq(transactions.accountId, input.filters.accountId));
+      }
+      if (input.filters?.uncategorizedOnly) {
+        conditions.push(isNull(transactions.categoryId));
+      }
+      if (input.filters?.direction === "expense") {
+        conditions.push(lt(transactions.amount, 0));
+      }
+      if (input.filters?.direction === "income") {
+        conditions.push(gt(transactions.amount, 0));
+      }
+      if (input.filters?.necessityType) {
+        // necessityScore encodes the type numerically: 1 need, 0.5 savings,
+        // 0 want. The analytics layer buckets on the same thresholds.
+        const necessity = input.filters.necessityType;
+        if (necessity === "need") {
+          conditions.push(gte(transactions.necessityScore, 0.7));
+        } else if (necessity === "want") {
+          conditions.push(lte(transactions.necessityScore, 0.3));
+        } else {
+          // Everything in `conditions` is ANDed, so the two bounds can be
+          // pushed separately rather than combined.
+          conditions.push(gt(transactions.necessityScore, 0.3));
+          conditions.push(lt(transactions.necessityScore, 0.7));
+        }
+      }
       if (input.filters?.search) {
-        conditions.push(
-          like(transactions.description, `%${input.filters.search}%`)
+        const pattern = `%${input.filters.search}%`;
+        // ilike, not like: Postgres `like` is case-sensitive, so searching
+        // "tesco" would miss every "TESCO STORES" on a bank statement.
+        const matchesSearch = or(
+          ilike(transactions.description, pattern),
+          ilike(transactions.merchant, pattern)
         );
+        if (matchesSearch) conditions.push(matchesSearch);
       }
 
       const [data, countResult] = await Promise.all([
@@ -801,6 +837,99 @@ export const transactionsRouter = router({
           cadenceLabel: s.cadenceLabel,
         })),
       };
+    }),
+
+  /**
+   * Recategorise many transactions at once.
+   *
+   * Every write is scoped by userId as well as id, so a crafted list of
+   * someone else's transaction IDs updates nothing rather than partially
+   * succeeding.
+   */
+  bulkUpdateCategory: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string()).min(1).max(500),
+        categoryId: z.string().nullable(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const timer = createTimer();
+
+      let category = null;
+      if (input.categoryId) {
+        category = await db.query.categories.findFirst({
+          where: and(
+            eq(categories.id, input.categoryId),
+            eq(categories.userId, ctx.userId)
+          ),
+        });
+
+        if (!category) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Category not found.",
+          });
+        }
+      }
+
+      const updated = await db
+        .update(transactions)
+        .set({
+          categoryId: category?.id ?? null,
+          // Keep the three category fields consistent; analytics reads the
+          // other two and would otherwise disagree with the table view.
+          aiClassified: category?.name ?? null,
+          necessityScore: category
+            ? necessityScoreFor(category.necessityType)
+            : null,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(transactions.userId, ctx.userId),
+            inArray(transactions.id, input.ids)
+          )
+        )
+        .returning({ id: transactions.id });
+
+      log.info(
+        {
+          userId: ctx.userId,
+          requested: input.ids.length,
+          updated: updated.length,
+          categoryId: category?.id ?? null,
+          durationMs: timer.elapsed(),
+        },
+        "bulkUpdateCategory: completed"
+      );
+
+      return { updatedCount: updated.length };
+    }),
+
+  bulkDelete: protectedProcedure
+    .input(z.object({ ids: z.array(z.string()).min(1).max(500) }))
+    .mutation(async ({ ctx, input }) => {
+      const deleted = await db
+        .delete(transactions)
+        .where(
+          and(
+            eq(transactions.userId, ctx.userId),
+            inArray(transactions.id, input.ids)
+          )
+        )
+        .returning({ id: transactions.id });
+
+      log.info(
+        {
+          userId: ctx.userId,
+          requested: input.ids.length,
+          deleted: deleted.length,
+        },
+        "bulkDelete: completed"
+      );
+
+      return { deletedCount: deleted.length };
     }),
 
   /**

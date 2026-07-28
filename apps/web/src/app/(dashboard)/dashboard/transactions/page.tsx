@@ -33,6 +33,9 @@ export default function TransactionsPage() {
   const [period, setPeriod] = useState("30");
   const [limit] = useState(25);
   const [offset, setOffset] = useState(0);
+  const [uncategorizedOnly, setUncategorizedOnly] = useState(false);
+  const [direction, setDirection] = useState("all");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const periodFilter = useMemo(() => {
     if (period === "all") return {};
@@ -50,7 +53,34 @@ export default function TransactionsPage() {
       ...(category !== "all"
         ? { necessityType: category as "need" | "want" | "savings" }
         : {}),
+      ...(uncategorizedOnly ? { uncategorizedOnly: true } : {}),
+      ...(direction !== "all"
+        ? { direction: direction as "expense" | "income" }
+        : {}),
       ...periodFilter,
+    },
+  });
+
+  const categoriesQuery = trpc.transactions.categories.useQuery();
+  const utils = trpc.useUtils();
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const bulkCategoryMutation = trpc.transactions.bulkUpdateCategory.useMutation(
+    {
+      onSuccess: () => {
+        clearSelection();
+        void utils.transactions.invalidate();
+        void utils.analytics.invalidate();
+      },
+    }
+  );
+
+  const bulkDeleteMutation = trpc.transactions.bulkDelete.useMutation({
+    onSuccess: () => {
+      clearSelection();
+      void utils.transactions.invalidate();
+      void utils.analytics.invalidate();
     },
   });
 
@@ -171,6 +201,33 @@ export default function TransactionsPage() {
               <SelectItem value="all">All time</SelectItem>
             </SelectContent>
           </Select>
+          <Select
+            value={direction}
+            onValueChange={(value) => {
+              setDirection(value);
+              setOffset(0);
+            }}
+          >
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">In and out</SelectItem>
+              <SelectItem value="expense">Money out</SelectItem>
+              <SelectItem value="income">Money in</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            variant={uncategorizedOnly ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setUncategorizedOnly((on) => !on);
+              setOffset(0);
+            }}
+            aria-pressed={uncategorizedOnly}
+          >
+            Uncategorised
+          </Button>
           <div className="bg-border hidden h-6 w-px sm:block" />
           <Button
             variant="outline"
@@ -193,12 +250,73 @@ export default function TransactionsPage() {
         </div>
       </Card>
 
+      {/* Bulk action bar, shown only while something is selected */}
+      {selectedIds.size > 0 && (
+        <Card
+          surface="white"
+          className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="text-sm font-medium">
+            {selectedIds.size} selected
+            <button
+              type="button"
+              onClick={clearSelection}
+              className="text-muted-foreground hover:text-foreground ml-3 text-sm font-normal underline"
+            >
+              Clear
+            </button>
+          </p>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
+              onValueChange={(categoryId) =>
+                bulkCategoryMutation.mutate({
+                  ids: [...selectedIds],
+                  categoryId: categoryId === "none" ? null : categoryId,
+                })
+              }
+            >
+              <SelectTrigger className="w-[190px]">
+                <SelectValue placeholder="Move to category…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Remove category</SelectItem>
+                {categoriesQuery.data?.map((option) => (
+                  <SelectItem key={option.id} value={option.id}>
+                    {option.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bulkDeleteMutation.isPending}
+              onClick={() => {
+                // eslint-disable-next-line no-alert -- Bulk delete is destructive and irreversible
+                const confirmed = window.confirm(
+                  `Delete ${selectedIds.size} transaction(s)? This cannot be undone.`
+                );
+                if (confirmed) {
+                  bulkDeleteMutation.mutate({ ids: [...selectedIds] });
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </div>
+        </Card>
+      )}
+
       {/* Transactions Table */}
       <TransactionTable
         transactions={transactions.map((t) => ({
           ...t,
           category: t.category ?? undefined,
         }))}
+        selectedIds={selectedIds}
+        onSelectionChange={setSelectedIds}
         isLoading={transactionsQuery.isLoading}
         onClassify={(id) => classifyMutation.mutate({ id })}
         onDelete={(id) => {

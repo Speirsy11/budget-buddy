@@ -15,10 +15,16 @@ export const transactionFilterSchema = z.object({
   startDate: z.date().optional(),
   endDate: z.date().optional(),
   categoryId: z.string().optional(),
+  accountId: z.string().optional(),
   minAmount: z.number().optional(),
   maxAmount: z.number().optional(),
+  /** Matched case-insensitively against both description and merchant. */
   search: z.string().optional(),
   necessityType: z.enum(["need", "want", "savings"]).optional(),
+  /** Show only transactions with no category — the ones needing attention. */
+  uncategorizedOnly: z.boolean().optional(),
+  /** "expense" is amount < 0, "income" is amount > 0. */
+  direction: z.enum(["expense", "income"]).optional(),
 });
 
 export type TransactionFilter = z.infer<typeof transactionFilterSchema>;

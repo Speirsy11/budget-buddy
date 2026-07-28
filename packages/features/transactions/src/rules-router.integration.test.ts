@@ -338,3 +338,199 @@ describe("applyToExisting", () => {
     expect(after?.category?.name).toBe("Travel");
   });
 });
+
+describe("bulk operations", () => {
+  async function seedThree() {
+    const caller = createTransactionsCaller(ctxFor(userId));
+    const created = await Promise.all([
+      caller.create({
+        amount: -10,
+        date: new Date("2026-03-01"),
+        description: "ONE",
+      }),
+      caller.create({
+        amount: -20,
+        date: new Date("2026-03-02"),
+        description: "TWO",
+      }),
+      caller.create({
+        amount: -30,
+        date: new Date("2026-03-03"),
+        description: "THREE",
+      }),
+    ]);
+    return created.map((t) => {
+      if (!t) throw new Error("expected a transaction");
+      return t.id;
+    });
+  }
+
+  it("recategorises many transactions at once", async () => {
+    const ids = await seedThree();
+    await createRulesCaller(ctxFor(userId)).list();
+    const travel = await categoryNamed(userId, "Travel");
+
+    const result = await createTransactionsCaller(
+      ctxFor(userId)
+    ).bulkUpdateCategory({ ids, categoryId: travel.id });
+
+    expect(result.updatedCount).toBe(3);
+
+    const stored = await db.query.transactions.findMany({
+      where: eq(transactions.userId, userId),
+    });
+    for (const row of stored) {
+      expect(row.categoryId).toBe(travel.id);
+      // All three category fields must move together.
+      expect(row.aiClassified).toBe("Travel");
+      expect(row.necessityScore).toBe(0);
+    }
+  });
+
+  it("clears the category when passed null", async () => {
+    const ids = await seedThree();
+    await createRulesCaller(ctxFor(userId)).list();
+    const travel = await categoryNamed(userId, "Travel");
+    const caller = createTransactionsCaller(ctxFor(userId));
+
+    await caller.bulkUpdateCategory({ ids, categoryId: travel.id });
+    await caller.bulkUpdateCategory({ ids, categoryId: null });
+
+    const stored = await db.query.transactions.findMany({
+      where: eq(transactions.userId, userId),
+    });
+    expect(stored.every((row) => row.categoryId === null)).toBe(true);
+    expect(stored.every((row) => row.aiClassified === null)).toBe(true);
+  });
+
+  it("cannot touch another user's transactions", async () => {
+    const otherUser = await seedUser();
+    const theirs = await createTransactionsCaller(ctxFor(otherUser)).create({
+      amount: -99,
+      date: new Date("2026-03-01"),
+      description: "THEIRS",
+    });
+    if (!theirs) throw new Error("expected a transaction");
+
+    await createRulesCaller(ctxFor(userId)).list();
+    const travel = await categoryNamed(userId, "Travel");
+
+    const result = await createTransactionsCaller(
+      ctxFor(userId)
+    ).bulkUpdateCategory({ ids: [theirs.id], categoryId: travel.id });
+
+    // Scoped by userId as well as id, so nothing is updated.
+    expect(result.updatedCount).toBe(0);
+
+    const untouched = await db.query.transactions.findFirst({
+      where: eq(transactions.id, theirs.id),
+    });
+    expect(untouched?.categoryId).toBeNull();
+  });
+
+  it("rejects a category owned by someone else", async () => {
+    const ids = await seedThree();
+    const otherUser = await seedUser();
+    await createRulesCaller(ctxFor(otherUser)).list();
+    const theirCategory = await categoryNamed(otherUser, "Travel");
+
+    await expect(
+      createTransactionsCaller(ctxFor(userId)).bulkUpdateCategory({
+        ids,
+        categoryId: theirCategory.id,
+      })
+    ).rejects.toThrow(/not found/i);
+  });
+
+  it("bulk deletes only the caller's transactions", async () => {
+    const ids = await seedThree();
+    const otherUser = await seedUser();
+    const theirs = await createTransactionsCaller(ctxFor(otherUser)).create({
+      amount: -99,
+      date: new Date("2026-03-01"),
+      description: "THEIRS",
+    });
+    if (!theirs) throw new Error("expected a transaction");
+
+    const result = await createTransactionsCaller(ctxFor(userId)).bulkDelete({
+      ids: [...ids, theirs.id],
+    });
+
+    expect(result.deletedCount).toBe(3);
+    const survivor = await db.query.transactions.findFirst({
+      where: eq(transactions.id, theirs.id),
+    });
+    expect(survivor).toBeTruthy();
+  });
+});
+
+describe("transaction filters", () => {
+  beforeEach(async () => {
+    const caller = createTransactionsCaller(ctxFor(userId));
+    await caller.create({
+      amount: -45,
+      date: new Date("2026-03-01"),
+      description: "TESCO STORES",
+      merchant: "Tesco",
+    });
+    await caller.create({
+      amount: 2500,
+      date: new Date("2026-03-02"),
+      description: "ACME SALARY",
+    });
+  });
+
+  it("searches case-insensitively", async () => {
+    // Postgres LIKE is case-sensitive; a lowercase query must still match
+    // an uppercase bank description.
+    const result = await createTransactionsCaller(ctxFor(userId)).list({
+      filters: { search: "tesco" },
+    });
+
+    expect(result.total).toBe(1);
+    expect(result.data[0].description).toBe("TESCO STORES");
+  });
+
+  it("searches the merchant field as well as the description", async () => {
+    const result = await createTransactionsCaller(ctxFor(userId)).list({
+      filters: { search: "Tesco" },
+    });
+    expect(result.total).toBe(1);
+  });
+
+  it("filters to money out", async () => {
+    const result = await createTransactionsCaller(ctxFor(userId)).list({
+      filters: { direction: "expense" },
+    });
+
+    expect(result.total).toBe(1);
+    expect(result.data[0].amount).toBeLessThan(0);
+  });
+
+  it("filters to money in", async () => {
+    const result = await createTransactionsCaller(ctxFor(userId)).list({
+      filters: { direction: "income" },
+    });
+
+    expect(result.total).toBe(1);
+    expect(result.data[0].amount).toBeGreaterThan(0);
+  });
+
+  it("filters to uncategorised only", async () => {
+    await createRulesCaller(ctxFor(userId)).list();
+    const travel = await categoryNamed(userId, "Travel");
+    const all = await createTransactionsCaller(ctxFor(userId)).list({});
+
+    await createTransactionsCaller(ctxFor(userId)).bulkUpdateCategory({
+      ids: [all.data[0].id],
+      categoryId: travel.id,
+    });
+
+    const result = await createTransactionsCaller(ctxFor(userId)).list({
+      filters: { uncategorizedOnly: true },
+    });
+
+    expect(result.total).toBe(1);
+    expect(result.data[0].categoryId).toBeNull();
+  });
+});
