@@ -167,7 +167,7 @@ function SavingsGoalCard() {
   const pct = goal > 0 ? Math.min(100, (saved / goal) * 100) : 0;
 
   return (
-    <div className="relative mt-auto overflow-hidden rounded-[18px] bg-white/[0.04] p-3.5">
+    <div className="relative overflow-hidden rounded-[18px] bg-white/[0.04] p-3.5">
       <div className="text-[11px] text-[#A39C8E]">Monthly savings goal</div>
       <div className="mt-1 flex items-baseline gap-1.5">
         <div className="text-xl font-extrabold text-white">
@@ -218,25 +218,35 @@ export function DashboardSidebar() {
       {/* Desktop sidebar */}
       <aside className="bg-sidebar text-sidebar hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-[244px] lg:flex-col lg:p-4">
         <BrandBlock />
-        <nav className="flex flex-col gap-1">
-          {navigation.map((item) => (
-            <NavLink
-              key={item.name}
-              item={item}
-              active={pathname === item.href}
-            />
-          ))}
-        </nav>
-        <div className="mt-5 border-t border-white/[0.06] pt-3">
-          {secondaryNavigation.map((item) => (
-            <NavLink
-              key={item.name}
-              item={item}
-              active={pathname === item.href}
-            />
-          ))}
+        {/*
+          The nav scrolls and the savings card stays pinned. Without this the
+          links push the card off the bottom of a short viewport, where it is
+          clipped rather than reachable. min-h-0 is required for a flex child
+          to be allowed to shrink below its content height.
+        */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <nav className="flex flex-col gap-1">
+            {navigation.map((item) => (
+              <NavLink
+                key={item.name}
+                item={item}
+                active={pathname === item.href}
+              />
+            ))}
+          </nav>
+          <div className="mt-5 border-t border-white/[0.06] pt-3">
+            {secondaryNavigation.map((item) => (
+              <NavLink
+                key={item.name}
+                item={item}
+                active={pathname === item.href}
+              />
+            ))}
+          </div>
         </div>
-        <SavingsGoalCard />
+        <div className="shrink-0 pt-3">
+          <SavingsGoalCard />
+        </div>
       </aside>
 
       {/* Mobile bottom navigation */}
@@ -323,27 +333,32 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
           </button>
         </div>
 
-        <nav className="flex flex-col gap-1">
-          {navigation.map((item) => (
-            <NavLink
-              key={item.name}
-              item={item}
-              active={pathname === item.href}
-              onClick={onClose}
-            />
-          ))}
-        </nav>
-        <div className="mt-5 border-t border-white/[0.06] pt-3">
-          {secondaryNavigation.map((item) => (
-            <NavLink
-              key={item.name}
-              item={item}
-              active={pathname === item.href}
-              onClick={onClose}
-            />
-          ))}
+        {/* Same scroll/pin split as the desktop sidebar. */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <nav className="flex flex-col gap-1">
+            {navigation.map((item) => (
+              <NavLink
+                key={item.name}
+                item={item}
+                active={pathname === item.href}
+                onClick={onClose}
+              />
+            ))}
+          </nav>
+          <div className="mt-5 border-t border-white/[0.06] pt-3">
+            {secondaryNavigation.map((item) => (
+              <NavLink
+                key={item.name}
+                item={item}
+                active={pathname === item.href}
+                onClick={onClose}
+              />
+            ))}
+          </div>
         </div>
-        <SavingsGoalCard />
+        <div className="shrink-0 pt-3">
+          <SavingsGoalCard />
+        </div>
       </div>
     </div>
   );

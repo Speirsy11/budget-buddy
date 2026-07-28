@@ -90,6 +90,23 @@ const MIN_OCCURRENCES = 3;
 const MIN_CONFIDENCE = 0.5;
 
 /**
+ * Widest amount spread, relative to the typical charge, that still counts as a
+ * recurring payment.
+ *
+ * A recurring payment is a commitment with a predictable cost — you can budget
+ * for it, and you could cancel it. Utility bills drift with usage and season,
+ * so the allowance has to be generous. But a merchant whose charges range from
+ * £20 to £95 is repeat shopping, not a subscription.
+ *
+ * This is a separate rejection rather than another term in the confidence
+ * score because it is disqualifying on its own: a weekly supermarket run can
+ * be perfectly regular in timing and still not be something you can cancel.
+ * Without it, several visits a month at random days produce enough ~7 day gaps
+ * by chance to look convincingly weekly.
+ */
+const MAX_RECURRING_AMOUNT_SPREAD = 1;
+
+/**
  * Reduce a bank description to a stable merchant key.
  *
  * Bank descriptions carry store numbers, cities, card suffixes and reference
@@ -279,6 +296,10 @@ export function detectRecurringTransactions(
     const amountSpread =
       medianAmount > 0 ? (maxAmount - minAmount) / medianAmount : 0;
     const isFixedAmount = amountSpread <= 0.1;
+
+    // Disqualifying regardless of how regular the timing looks — see the note
+    // on MAX_RECURRING_AMOUNT_SPREAD.
+    if (amountSpread > MAX_RECURRING_AMOUNT_SPREAD) continue;
 
     // More observations make a pattern more believable, with diminishing
     // returns — six charges is plenty, sixty is not ten times better.

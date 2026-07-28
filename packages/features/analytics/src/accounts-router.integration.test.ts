@@ -159,7 +159,14 @@ describe("accountsRouter (integration)", () => {
 
     const result = await caller.netWorth({ months: 6 });
 
-    expect(result.history).toHaveLength(6);
+    // History starts at the first recorded balance, not at the start of the
+    // requested window — months with nothing recorded are omitted rather than
+    // drawn as zero.
+    expect(result.history.length).toBeGreaterThan(0);
+    expect(result.history.length).toBeLessThanOrEqual(6);
+    expect(result.history.every((point) => point.date >= threeMonthsAgo)).toBe(
+      true
+    );
     // Latest point reflects the current balance, not the backdated one.
     expect(result.history.at(-1)?.netWorth).toBe(1000);
   });

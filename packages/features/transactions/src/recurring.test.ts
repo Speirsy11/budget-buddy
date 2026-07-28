@@ -349,3 +349,49 @@ describe("summarizeRecurring", () => {
     });
   });
 });
+
+describe("amount-spread rejection", () => {
+  const referenceDate = new Date("2026-07-28");
+
+  it("does not treat repeat supermarket shopping as a subscription", () => {
+    // Regular enough in timing to look weekly, but the amounts range from a
+    // top-up shop to a big weekly one — not something you can cancel.
+    const amounts = [22.4, 71.8, 18.9, 64.2, 33.15, 88.4, 25.6, 59.9];
+    const input = amounts.map((amount, index) => ({
+      id: `tesco-${index}`,
+      amount: -amount,
+      date: new Date(2026, 5, 1 + index * 7),
+      description: "TESCO EXTRA",
+    }));
+
+    expect(detectRecurringTransactions(input, { referenceDate })).toEqual([]);
+  });
+
+  it("still accepts a utility bill that drifts with usage", () => {
+    // Seasonal variation, but nothing like a 4x swing.
+    const amounts = [131.2, 148.6, 156.9, 139.4, 144.1, 151.3];
+    const input = amounts.map((amount, index) => ({
+      id: `energy-${index}`,
+      amount: -amount,
+      date: new Date(2026, index, 2),
+      description: "OCTOPUS ENERGY",
+    }));
+
+    const [found] = detectRecurringTransactions(input, { referenceDate });
+    expect(found).toBeDefined();
+    expect(found.cadence).toBe("monthly");
+    expect(found.isFixedAmount).toBe(false);
+  });
+
+  it("accepts a fixed subscription", () => {
+    const input = Array.from({ length: 6 }, (_, index) => ({
+      id: `netflix-${index}`,
+      amount: -15.99,
+      date: new Date(2026, index, 5),
+      description: "NETFLIX.COM",
+    }));
+
+    const [found] = detectRecurringTransactions(input, { referenceDate });
+    expect(found.isFixedAmount).toBe(true);
+  });
+});
