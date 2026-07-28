@@ -14,6 +14,7 @@ import {
   ReceiptText,
   RefreshCw,
   Settings,
+  Target,
   Wallet,
   Wand2,
   X,
@@ -45,6 +46,12 @@ const navigation: NavItem[] = [
     surface: "peach",
   },
   { name: "Budget", href: "/dashboard/budget", icon: PieChart, surface: "sky" },
+  {
+    name: "Goals",
+    href: "/dashboard/goals",
+    icon: Target,
+    surface: "lav",
+  },
   {
     name: "Recurring",
     href: "/dashboard/subscriptions",

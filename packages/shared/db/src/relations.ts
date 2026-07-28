@@ -7,6 +7,7 @@ import { subscriptions } from "./schema/subscriptions";
 import { bankConnections } from "./schema/bank-connections";
 import { categorizationRules } from "./schema/rules";
 import { accounts, accountBalanceSnapshots } from "./schema/accounts";
+import { goals } from "./schema/goals";
 
 export const usersRelations = relations(users, ({ many }) => ({
   transactions: many(transactions),
@@ -17,6 +18,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   bankConnections: many(bankConnections),
   categorizationRules: many(categorizationRules),
   accounts: many(accounts),
+  goals: many(goals),
 }));
 
 export const accountsRelations = relations(accounts, ({ one, many }) => ({
@@ -125,5 +127,16 @@ export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
   user: one(users, {
     fields: [subscriptions.userId],
     references: [users.id],
+  }),
+}));
+
+export const goalsRelations = relations(goals, ({ one }) => ({
+  user: one(users, {
+    fields: [goals.userId],
+    references: [users.id],
+  }),
+  linkedAccount: one(accounts, {
+    fields: [goals.linkedAccountId],
+    references: [accounts.id],
   }),
 }));
