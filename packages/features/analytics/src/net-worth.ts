@@ -1,4 +1,25 @@
-import { isLiabilityType, type AccountType } from "@finance/db";
+// Type-only import: this module is exported from the package's client-safe
+// entry point, and a value import from @finance/db would pull the Postgres
+// driver into the browser bundle.
+import type { AccountType } from "@finance/db";
+
+/**
+ * Which account types reduce net worth.
+ *
+ * Deliberately duplicated from the schema rather than imported, for the
+ * bundling reason above. `TYPE_LABELS` below is a `Record<AccountType, string>`,
+ * so adding a type to the schema fails to compile here until it is handled —
+ * that is the guard against this list going stale.
+ */
+const LIABILITY_TYPES = new Set<AccountType>([
+  "credit_card",
+  "loan",
+  "mortgage",
+]);
+
+function isLiabilityType(type: AccountType): boolean {
+  return LIABILITY_TYPES.has(type);
+}
 
 /**
  * Net worth calculations.

@@ -33,8 +33,125 @@ import { generateFullExport } from "./export";
 import { applyRules } from "./rules";
 import { necessityScoreFor, resolveCategoryByName } from "./categorization";
 import { detectRecurringTransactions, summarizeRecurring } from "./recurring";
+import { detectBudgetAlerts } from "./budget-alerts";
+import { notifyBudgetAlert } from "@finance/email";
 
 const log = logger.child({ module: "transactions" });
+
+/**
+ * Compare each affected category's month-to-date spend before and after an
+ * import, and email an alert for any budget threshold newly crossed.
+ *
+ * "Before" is derived by subtracting the imported amounts from the stored
+ * total rather than querying twice — the rows are already written by the time
+ * this runs, and a second query would race with a concurrent import.
+ */
+async function raiseBudgetAlerts(
+  userId: string,
+  imported: { categoryId: string | null; amount: number; date: Date }[]
+): Promise<void> {
+  const affected = imported.filter((t) => t.categoryId && t.amount < 0) as {
+    categoryId: string;
+    amount: number;
+    date: Date;
+  }[];
+  if (affected.length === 0) return;
+
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+  const monthStart = new Date(year, month - 1, 1);
+  const monthEnd = new Date(year, month, 0, 23, 59, 59);
+
+  const categoryIds = [...new Set(affected.map((t) => t.categoryId))];
+
+  const [user, categoryBudgets, monthSpend] = await Promise.all([
+    db.query.users.findFirst({ where: eq(users.id, userId) }),
+    db.query.budgets.findMany({
+      where: and(
+        eq(budgets.userId, userId),
+        eq(budgets.month, month),
+        eq(budgets.year, year),
+        inArray(budgets.categoryId, categoryIds)
+      ),
+    }),
+    db
+      .select({
+        categoryId: transactions.categoryId,
+        total: sql<number>`sum(abs(${transactions.amount}))`,
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          gte(transactions.date, monthStart),
+          lte(transactions.date, monthEnd),
+          lte(transactions.amount, 0),
+          inArray(transactions.categoryId, categoryIds)
+        )
+      )
+      .groupBy(transactions.categoryId),
+  ]);
+
+  if (!user?.email || categoryBudgets.length === 0) return;
+
+  const spentByCategory = new Map(
+    monthSpend.map((row) => [row.categoryId, Number(row.total ?? 0)])
+  );
+
+  // Only amounts dated inside the current month moved this month's totals.
+  const importedByCategory = new Map<string, number>();
+  for (const transaction of affected) {
+    if (transaction.date < monthStart || transaction.date > monthEnd) continue;
+    importedByCategory.set(
+      transaction.categoryId,
+      (importedByCategory.get(transaction.categoryId) ?? 0) +
+        Math.abs(transaction.amount)
+    );
+  }
+
+  const userCategories = await db.query.categories.findMany({
+    where: inArray(categories.id, categoryIds),
+  });
+  const categoryNameById = new Map(userCategories.map((c) => [c.id, c.name]));
+
+  const alerts = detectBudgetAlerts(
+    categoryBudgets.flatMap((budget) => {
+      if (!budget.categoryId) return [];
+      const spentAfter = spentByCategory.get(budget.categoryId) ?? 0;
+      const delta = importedByCategory.get(budget.categoryId) ?? 0;
+
+      return [
+        {
+          categoryId: budget.categoryId,
+          categoryName: categoryNameById.get(budget.categoryId) ?? budget.name,
+          budgetAmount: budget.amount,
+          spentBefore: spentAfter - delta,
+          spentAfter,
+        },
+      ];
+    })
+  );
+
+  for (const alert of alerts) {
+    await notifyBudgetAlert({
+      email: user.email,
+      userName: user.firstName ?? "there",
+      userId,
+      categoryName: alert.categoryName,
+      budgetAmount: alert.budgetAmount,
+      spentAmount: alert.spentAmount,
+      percentageUsed: alert.percentageUsed,
+    });
+  }
+
+  if (alerts.length > 0) {
+    log.info(
+      { userId, alertCount: alerts.length },
+      "createMany: budget alerts raised"
+    );
+  }
+}
 
 export const transactionsRouter = router({
   list: protectedProcedure
@@ -333,6 +450,16 @@ export const transactionsRouter = router({
         .insert(transactions)
         .values(transactionsToInsert)
         .returning();
+
+      // Alerting is best-effort and never blocks the import result.
+      void raiseBudgetAlerts(ctx.userId, transactionsToInsert).catch(
+        (error: unknown) => {
+          log.warn(
+            { err: error, userId: ctx.userId },
+            "createMany: budget alerting failed"
+          );
+        }
+      );
 
       // Usage counters let the rules UI show which rules are actually earning
       // their place. Best-effort: a failure here must not fail the import.

@@ -26,7 +26,8 @@
     "drizzle-orm": "catalog:",
     "lucide-react": "catalog:",
     "papaparse": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@finance/email": "workspace:*"
   },
   "peerDependencies": {
     "react": "catalog:"

@@ -7,6 +7,14 @@ export {
   type SendEmailResult,
 } from "./send";
 
+export {
+  isEmailConfigured,
+  notifyWelcome,
+  notifyBudgetAlert,
+  notifyWeeklySummary,
+  type NotificationResult,
+} from "./notifications";
+
 // Templates (for preview/testing)
 export { WelcomeEmail } from "./templates/welcome";
 export { BudgetAlertEmail } from "./templates/budget-alert";

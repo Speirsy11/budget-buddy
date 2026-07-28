@@ -570,6 +570,9 @@ importers:
       '@finance/db':
         specifier: workspace:*
         version: link:../../packages/shared/db
+      '@finance/email':
+        specifier: workspace:*
+        version: link:../../packages/shared/email
       '@finance/logger':
         specifier: workspace:*
         version: link:../../packages/shared/logger
@@ -735,6 +738,9 @@ importers:
       '@finance/db':
         specifier: workspace:*
         version: link:../../shared/db
+      '@finance/email':
+        specifier: workspace:*
+        version: link:../../shared/email
       '@finance/logger':
         specifier: workspace:*
         version: link:../../shared/logger
@@ -855,6 +861,9 @@ importers:
       '@finance/db':
         specifier: workspace:*
         version: link:../../shared/db
+      '@finance/email':
+        specifier: workspace:*
+        version: link:../../shared/email
       '@finance/logger':
         specifier: workspace:*
         version: link:../../shared/logger
@@ -997,6 +1006,9 @@ importers:
 
   packages/shared/email:
     dependencies:
+      '@finance/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@react-email/components':
         specifier: 'catalog:'
         version: 0.0.31(react-dom@19.2.4(react@18.3.1))(react@18.3.1)

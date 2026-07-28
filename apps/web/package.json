@@ -37,7 +37,8 @@
     "superjson": "catalog:",
     "zod": "catalog:",
     "ioredis": "catalog:",
-    "postgres": "catalog:"
+    "postgres": "catalog:",
+    "@finance/email": "workspace:*"
   },
   "devDependencies": {
     "@finance/config": "workspace:*",

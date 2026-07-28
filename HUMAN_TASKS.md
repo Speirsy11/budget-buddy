@@ -133,9 +133,51 @@ warning — the app works, but no mail leaves.
 Without a key you will instead see `email skipped: RESEND_API_KEY not set` in the logs —
 that is the expected no-key behaviour, not a failure.
 
+**What is wired where:**
+
+| Email          | Trigger                                                        |
+| -------------- | -------------------------------------------------------------- |
+| Welcome        | First sign-in only, from `syncUser`                            |
+| Budget alert   | A CSV import pushes a category past 80% or 100% of its budget  |
+| Weekly summary | `POST /api/cron/weekly-summary` — needs a scheduler, see below |
+
+Budget alerts fire only when an import _crosses_ a threshold it was not already past, so
+re-importing the same file sends nothing.
+
 ---
 
-## 6. Optional — free port 3000
+## 6. Weekly summary — pick a scheduler
+
+**Why it matters:** The weekly summary endpoint exists and is tested, but nothing calls it
+on a schedule. It is a plain authenticated POST, so any scheduler works.
+
+**Steps:**
+
+1. Choose a secret and set it in `apps/web/.env.local`:
+   ```
+   CRON_SECRET=<a long random string>
+   ```
+   Without it the route rejects every request with a 401 — an unconfigured deployment
+   cannot be triggered by anyone.
+2. Point a scheduler at it weekly. On Vercel, add to `vercel.json`:
+   ```json
+   {
+     "crons": [{ "path": "/api/cron/weekly-summary", "schedule": "0 9 * * 1" }]
+   }
+   ```
+   Vercel sends its own auth header, so you would adjust `isAuthorised` in
+   `apps/web/src/app/api/cron/weekly-summary/route.ts` to accept it. Anywhere else, a
+   plain curl on a timer works:
+   ```bash
+   curl -X POST -H "Authorization: Bearer $CRON_SECRET" https://your-app/api/cron/weekly-summary
+   ```
+
+**Verify:** Call it by hand with the header. It returns `{"sent":N,"skipped":M}` — users
+with no transactions in the last week are skipped rather than sent an empty summary.
+
+---
+
+## 7. Optional — free port 3000
 
 **Why it matters:** AdGuard Home (Docker) holds port 3000, so the web app falls back to
 3001, which collides with the marketing site's hardcoded `next dev -p 3001`. You cannot run
@@ -155,8 +197,8 @@ This is a machine-local decision, so it is left to you rather than changed in th
 
 These are noted for completeness but do not affect daily use:
 
-- **Production deploy pipeline** — `pnpm db:migrate` is not yet wired into any deploy step.
-  `__drizzle_migrations` currently has 0 rows because the schema was applied with `db:push`.
-  Only matters when you deploy somewhere real.
+- **Production deploy pipeline** — `pnpm db:migrate` now works (the existing `0000`
+  migration has been baselined and later migrations apply cleanly), but nothing runs it on
+  deploy yet. Only matters when you deploy somewhere real.
 - **Convex migration** — `CONVEX_MIGRATION_PLAN.md` proposes replacing Postgres/Drizzle/tRPC
   wholesale. Worth deciding before investing further in the Postgres layer.

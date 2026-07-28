@@ -1,6 +1,7 @@
 import { db, users, ensureUserDefaults } from "@finance/db";
 import { eq } from "drizzle-orm";
 import { logger } from "@finance/logger";
+import { notifyWelcome } from "@finance/email";
 
 const log = logger.child({ module: "sync-user" });
 
@@ -41,6 +42,15 @@ export async function syncUser(clerkUser: ClerkUser) {
       firstName: clerkUser.firstName,
       lastName: clerkUser.lastName,
       imageUrl: clerkUser.imageUrl,
+    });
+
+    // Welcome only genuinely new accounts, never on subsequent sign-ins.
+    // Deliberately not awaited into the critical path beyond its own
+    // error handling — a mail problem must not block signing in.
+    void notifyWelcome({
+      email: primaryEmail,
+      userName: clerkUser.firstName ?? "there",
+      userId: clerkUser.id,
     });
   }
 
