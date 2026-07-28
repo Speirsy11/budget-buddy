@@ -28,6 +28,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { trpc } from "@/trpc/client";
+import { InsightsPanel } from "@/components/dashboard/insights-panel";
 import { Greeting } from "@/components/dashboard/greeting";
 
 export default function AnalyticsPage() {
@@ -146,12 +147,15 @@ export default function AnalyticsPage() {
         }
       />
 
-      {/* Insights */}
+      {/* Headline figures for the selected window */}
       <div className="grid gap-4 md:grid-cols-3">
         {insights.map((insight, i) => (
           <InsightCard key={i} {...insight} />
         ))}
       </div>
+
+      {/* Generated insights: month-over-month moves, anomalies, projections */}
+      <InsightsPanel limit={4} />
 
       {/* Monthly Overview - Full Width */}
       {comparisonQuery.isLoading ? (

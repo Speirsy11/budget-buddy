@@ -33,6 +33,18 @@ export {
   type GoalPace,
 } from "./goals";
 
+// Insight generation (client-safe)
+export {
+  buildInsights,
+  compareCategories,
+  detectUnusualTransactions,
+  projectMonthEnd,
+  topMerchant,
+  type Insight,
+  type InsightKind,
+  type InsightSeverity,
+} from "./insights";
+
 export { BudgetGauge } from "./components/budget-gauge";
 export { SpendingChart } from "./components/spending-chart";
 export { CategoryBreakdown } from "./components/category-breakdown";

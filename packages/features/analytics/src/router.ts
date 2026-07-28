@@ -7,6 +7,7 @@ import {
   calculateSpendingTrends,
   calculateCategoryTotals,
 } from "./calculations";
+import { buildInsights } from "./insights";
 
 const log = logger.child({ module: "analytics" });
 
@@ -382,5 +383,81 @@ export const analyticsRouter = router({
       );
 
       return result;
+    }),
+
+  /**
+   * Ranked spending insights for the dashboard.
+   *
+   * Pulls three months so month-over-month comparison has a baseline and the
+   * unusual-charge detector has enough history to know what "usual" is.
+   */
+  getInsights: protectedProcedure
+    .input(
+      z
+        .object({ limit: z.number().int().min(1).max(12).default(6) })
+        .default({})
+    )
+    .query(async ({ ctx, input }) => {
+      const timer = createTimer();
+      const now = new Date();
+
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const previousMonthStart = new Date(
+        now.getFullYear(),
+        now.getMonth() - 1,
+        1
+      );
+      const historyStart = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+
+      const history = await db.query.transactions.findMany({
+        where: and(
+          eq(transactions.userId, ctx.userId),
+          gte(transactions.date, historyStart)
+        ),
+        with: { category: true },
+      });
+
+      const shaped = history.map((t) => ({
+        id: t.id,
+        amount: t.amount,
+        date: new Date(t.date),
+        description: t.description,
+        merchant: t.merchant,
+        categoryId: t.categoryId,
+        categoryName: t.category?.name ?? null,
+      }));
+
+      const currentMonth = shaped.filter((t) => t.date >= currentMonthStart);
+      const previousMonth = shaped.filter(
+        (t) => t.date >= previousMonthStart && t.date < currentMonthStart
+      );
+
+      // Budget context lets the projection say "over by X" rather than just
+      // stating a number.
+      const allocation = await db.query.budgetAllocations.findFirst({
+        where: and(
+          eq(budgetAllocations.userId, ctx.userId),
+          eq(budgetAllocations.month, now.getMonth() + 1),
+          eq(budgetAllocations.year, now.getFullYear())
+        ),
+      });
+
+      const insights = buildInsights(currentMonth, previousMonth, shaped, {
+        referenceDate: now,
+        monthlyBudget: allocation?.totalIncome,
+        limit: input.limit,
+      });
+
+      log.info(
+        {
+          userId: ctx.userId,
+          analysed: shaped.length,
+          insightCount: insights.length,
+          durationMs: timer.elapsed(),
+        },
+        "getInsights: completed"
+      );
+
+      return insights;
     }),
 });
