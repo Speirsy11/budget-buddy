@@ -12,7 +12,11 @@ import {
   PiggyBank,
   PieChart,
   ReceiptText,
+  RefreshCw,
   Settings,
+  Target,
+  Wallet,
+  Wand2,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -30,12 +34,30 @@ interface NavItem {
 const navigation: NavItem[] = [
   { name: "Overview", href: "/dashboard", icon: LayoutGrid, surface: "sage" },
   {
+    name: "Accounts",
+    href: "/dashboard/accounts",
+    icon: Wallet,
+    surface: "linen",
+  },
+  {
     name: "Transactions",
     href: "/dashboard/transactions",
     icon: ReceiptText,
     surface: "peach",
   },
   { name: "Budget", href: "/dashboard/budget", icon: PieChart, surface: "sky" },
+  {
+    name: "Goals",
+    href: "/dashboard/goals",
+    icon: Target,
+    surface: "lav",
+  },
+  {
+    name: "Recurring",
+    href: "/dashboard/subscriptions",
+    icon: RefreshCw,
+    surface: "peach",
+  },
   {
     name: "Analytics",
     href: "/dashboard/analytics",
@@ -57,6 +79,12 @@ const navigation: NavItem[] = [
 ];
 
 const secondaryNavigation: NavItem[] = [
+  {
+    name: "Rules",
+    href: "/dashboard/rules",
+    icon: Wand2,
+    surface: "sage",
+  },
   {
     name: "Settings",
     href: "/dashboard/settings",

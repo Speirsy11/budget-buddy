@@ -1,0 +1,2 @@
+ALTER TABLE "users" ADD COLUMN "last_weekly_summary_at" timestamp;--> statement-breakpoint
+CREATE UNIQUE INDEX "categorization_rules_user_pattern_uniq" ON "categorization_rules" USING btree ("user_id","pattern","match_type","match_field");

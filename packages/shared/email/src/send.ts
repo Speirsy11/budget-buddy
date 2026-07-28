@@ -93,7 +93,8 @@ export async function sendWeeklySummaryEmail(
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: `Your Weekly Finance Summary - $${data.totalSpent.toFixed(0)} spent`,
+      // The app formats in GBP throughout; the subject line must match.
+      subject: `Your weekly finance summary — £${data.totalSpent.toFixed(0)} spent`,
       react: WeeklySummaryEmail(data),
     });
 

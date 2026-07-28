@@ -21,7 +21,8 @@
     "@finance/api": "workspace:*",
     "@finance/logger": "workspace:*",
     "drizzle-orm": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@finance/email": "workspace:*"
   },
   "peerDependencies": {
     "react": "catalog:",

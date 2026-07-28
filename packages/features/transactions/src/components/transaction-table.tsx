@@ -38,6 +38,12 @@ interface TransactionTableProps {
   onDelete?: (id: string) => void;
   onClassify?: (id: string) => void;
   isLoading?: boolean;
+  /**
+   * Selection is opt-in: pass `selectedIds` and `onSelectionChange` to show
+   * checkboxes. Callers that do not care about bulk actions are unaffected.
+   */
+  selectedIds?: Set<string>;
+  onSelectionChange?: (ids: Set<string>) => void;
 }
 
 export function TransactionTable({
@@ -46,7 +52,36 @@ export function TransactionTable({
   onDelete,
   onClassify,
   isLoading,
+  selectedIds,
+  onSelectionChange,
 }: TransactionTableProps) {
+  const selectable = Boolean(selectedIds && onSelectionChange);
+
+  const toggleOne = (id: string) => {
+    if (!selectedIds || !onSelectionChange) return;
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    onSelectionChange(next);
+  };
+
+  // Header checkbox acts on the visible page only — selecting rows the user
+  // cannot see would make the count meaningless.
+  const allVisibleSelected =
+    selectable &&
+    transactions.length > 0 &&
+    transactions.every((t) => selectedIds?.has(t.id));
+
+  const toggleAllVisible = () => {
+    if (!selectedIds || !onSelectionChange) return;
+    const next = new Set(selectedIds);
+    if (allVisibleSelected) {
+      for (const t of transactions) next.delete(t.id);
+    } else {
+      for (const t of transactions) next.add(t.id);
+    }
+    onSelectionChange(next);
+  };
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -76,6 +111,17 @@ export function TransactionTable({
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
+            {selectable && (
+              <TableHead className="w-[40px]">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 cursor-pointer rounded border-gray-300"
+                  checked={allVisibleSelected}
+                  onChange={toggleAllVisible}
+                  aria-label="Select all transactions on this page"
+                />
+              </TableHead>
+            )}
             <TableHead className="w-[120px]">Date</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Category</TableHead>
@@ -85,7 +131,24 @@ export function TransactionTable({
         </TableHeader>
         <TableBody>
           {transactions.map((transaction) => (
-            <TableRow key={transaction.id} className="group">
+            <TableRow
+              key={transaction.id}
+              className={cn(
+                "group",
+                selectedIds?.has(transaction.id) && "bg-muted/50"
+              )}
+            >
+              {selectable && (
+                <TableCell>
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 cursor-pointer rounded border-gray-300"
+                    checked={selectedIds?.has(transaction.id) ?? false}
+                    onChange={() => toggleOne(transaction.id)}
+                    aria-label={`Select ${transaction.description}`}
+                  />
+                </TableCell>
+              )}
               <TableCell className="text-muted-foreground font-medium">
                 {format(new Date(transaction.date), "MMM d, yyyy")}
               </TableCell>

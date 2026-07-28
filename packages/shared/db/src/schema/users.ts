@@ -6,6 +6,14 @@ export const users = pgTable("users", {
   firstName: text("first_name"),
   lastName: text("last_name"),
   imageUrl: text("image_url"),
+  /**
+   * When the weekly summary was last successfully delivered.
+   *
+   * The cron route is a single request that emails every user in turn, so a
+   * timeout part-way through means the scheduler retries the whole window.
+   * Recording delivery per user makes that retry resume rather than resend.
+   */
+  lastWeeklySummaryAt: timestamp("last_weekly_summary_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

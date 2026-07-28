@@ -1,10 +1,18 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
+/**
+ * Routes that must not require a Clerk session.
+ *
+ * The API entries here are not unauthenticated: the Stripe webhook verifies
+ * its signature and the cron route requires a bearer secret. They are exempt
+ * because neither caller is a signed-in user.
+ */
 const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
-  "/api/webhooks(.*)",
+  "/api/stripe/webhook",
+  "/api/cron(.*)",
   "/demo(.*)",
 ]);
 

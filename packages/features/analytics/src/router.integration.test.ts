@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { createCallerFactory } from "@finance/api";
-import { db, users, transactions } from "@finance/db";
+import { db, users, transactions, categories } from "@finance/db";
 import { analyticsRouter } from "./router";
 
 const createCaller = createCallerFactory(analyticsRouter);
@@ -100,5 +100,69 @@ describe("analyticsRouter (integration)", () => {
         savingsPercent: 30,
       })
     ).rejects.toThrow(/sum to 100/);
+  });
+});
+
+describe("analyticsRouter.getInsights (integration)", () => {
+  /** Spending in the current month, on a given day. */
+  function thisMonth(day: number, amount: number, description: string) {
+    const now = new Date();
+    return {
+      userId,
+      amount,
+      date: new Date(now.getFullYear(), now.getMonth(), day, 12),
+      description,
+    };
+  }
+
+  function lastMonth(day: number, amount: number, description: string) {
+    const now = new Date();
+    return {
+      userId,
+      amount,
+      date: new Date(now.getFullYear(), now.getMonth() - 1, day, 12),
+      description,
+    };
+  }
+
+  it("returns an empty list for a user with no history", async () => {
+    expect(await callerFor(userId).getInsights({})).toEqual([]);
+  });
+
+  it("reports a category that jumped against last month", async () => {
+    const [category] = await db
+      .insert(categories)
+      .values({ userId, name: "Dining Out", necessityType: "want" })
+      .returning();
+
+    await db.insert(transactions).values([
+      { ...lastMonth(5, -100, "RESTAURANT"), categoryId: category.id },
+      { ...thisMonth(3, -400, "RESTAURANT"), categoryId: category.id },
+    ]);
+
+    const insights = await callerFor(userId).getInsights({});
+    const spike = insights.find((i) => i.kind === "category_spike");
+
+    expect(spike).toBeDefined();
+    expect(spike?.title).toContain("Dining Out");
+  });
+
+  it("does not leak another user's spending into insights", async () => {
+    const otherUser = await seedUser();
+    await db.insert(transactions).values([
+      { ...thisMonth(3, -900, "THEIR SPEND"), userId: otherUser },
+      { ...lastMonth(3, -50, "THEIR SPEND"), userId: otherUser },
+    ]);
+
+    expect(await callerFor(userId).getInsights({})).toEqual([]);
+  });
+
+  it("respects the requested limit", async () => {
+    await db
+      .insert(transactions)
+      .values([thisMonth(3, -500, "A"), thisMonth(4, -300, "B")]);
+
+    const insights = await callerFor(userId).getInsights({ limit: 1 });
+    expect(insights.length).toBeLessThanOrEqual(1);
   });
 });

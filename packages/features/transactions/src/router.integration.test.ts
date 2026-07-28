@@ -85,7 +85,12 @@ describe("transactionsRouter (integration)", () => {
 
     expect(result.count).toBe(4);
     const tesco = result.transactions.find((t) => t.description === "TESCO");
-    expect(tesco?.aiClassified).toBe("Food & Groceries");
+
+    // The built-in "tesco" rule claims this before the classifier is consulted,
+    // so the stored name is the user's own category rather than the model's
+    // vocabulary ("Food & Groceries"), and it carries a real categoryId.
+    expect(tesco?.aiClassified).toBe("Groceries");
+    expect(tesco?.categoryId).toBeTruthy();
     // Needs map to a necessity score of 1.
     expect(tesco?.necessityScore).toBe(1);
   });

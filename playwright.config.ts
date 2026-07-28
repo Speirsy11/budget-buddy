@@ -52,7 +52,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `pnpm --filter=@finance/web exec next dev --port ${port}`,
+    // Must match the bundler used by `pnpm dev` (apps/web uses --turbopack).
+    // Mixing webpack and Turbopack output in the same .next directory produces
+    // "Cannot find module '../chunks/ssr/[turbopack]_runtime.js'" on next boot.
+    command: `pnpm --filter=@finance/web exec next dev --turbopack --port ${port}`,
     url: baseURL,
     env: {
       ...process.env,
