@@ -140,7 +140,9 @@ describe("buildNetWorthHistory", () => {
     expect(history[1].netWorth).toBe(7000);
   });
 
-  it("ignores snapshots recorded after the date being computed", () => {
+  it("does not let a later snapshot leak into an earlier date", () => {
+    // The January point has no balance to report, so it is omitted entirely
+    // rather than shown as zero — see the leading-gap tests below.
     const history = buildNetWorthHistory(
       accounts,
       [
@@ -150,10 +152,11 @@ describe("buildNetWorthHistory", () => {
           recordedAt: new Date("2026-06-01"),
         },
       ],
-      [new Date("2026-01-31")]
+      [new Date("2026-01-31"), new Date("2026-06-30")]
     );
 
-    expect(history[0].netWorth).toBe(0);
+    expect(history).toHaveLength(1);
+    expect(history[0].netWorth).toBe(9000);
   });
 
   it("subtracts liability snapshots", () => {
@@ -180,6 +183,8 @@ describe("buildNetWorthHistory", () => {
   });
 
   it("ignores snapshots for excluded accounts", () => {
+    // Every account is excluded, so there is no history to draw at all —
+    // which is not the same as a history that happens to be zero.
     const history = buildNetWorthHistory(
       [account({ id: "current", includeInNetWorth: false })],
       [
@@ -192,7 +197,7 @@ describe("buildNetWorthHistory", () => {
       [new Date("2026-01-31")]
     );
 
-    expect(history[0].netWorth).toBe(0);
+    expect(history).toEqual([]);
   });
 
   it("returns points in chronological order regardless of input order", () => {
@@ -293,5 +298,49 @@ describe("accountTypeLabel", () => {
   it("gives human labels for each type", () => {
     expect(accountTypeLabel("checking")).toBe("Current accounts");
     expect(accountTypeLabel("credit_card")).toBe("Credit cards");
+  });
+});
+
+describe("buildNetWorthHistory — dates before any record", () => {
+  const accounts = [
+    {
+      id: "current",
+      name: "Current",
+      type: "checking" as const,
+      currentBalance: 0,
+      includeInNetWorth: true,
+      isActive: true,
+    },
+  ];
+
+  it("omits dates earlier than the first snapshot", () => {
+    // Plotting these as zero draws a cliff that looks like a collapse in net
+    // worth, when in fact nothing had been recorded yet.
+    const history = buildNetWorthHistory(
+      accounts,
+      [
+        {
+          accountId: "current",
+          balance: 5000,
+          recordedAt: new Date("2026-04-30"),
+        },
+      ],
+      [
+        new Date("2026-01-31"),
+        new Date("2026-02-28"),
+        new Date("2026-04-30"),
+        new Date("2026-05-31"),
+      ]
+    );
+
+    expect(history).toHaveLength(2);
+    expect(history[0].date.toISOString().slice(0, 7)).toBe("2026-04");
+    expect(history.every((point) => point.netWorth === 5000)).toBe(true);
+  });
+
+  it("returns nothing when there are no snapshots at all", () => {
+    expect(
+      buildNetWorthHistory(accounts, [], [new Date("2026-01-31")])
+    ).toEqual([]);
   });
 });

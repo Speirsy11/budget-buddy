@@ -171,8 +171,22 @@ export function buildNetWorthHistory(
     list.sort((a, b) => a.recordedAt.getTime() - b.recordedAt.getTime());
   }
 
+  // Dates before the first recorded balance have no answer, and plotting them
+  // as zero draws a cliff that reads as "net worth collapsed" rather than
+  // "nothing was recorded yet".
+  const recordedTimes = [...byAccount.values()].flatMap((list) =>
+    list.length > 0 ? [list[0].recordedAt.getTime()] : []
+  );
+
+  // No balances recorded for any included account — there is no history to
+  // draw, which is different from a history that happens to be zero.
+  if (recordedTimes.length === 0) return [];
+
+  const firstRecordedAt = Math.min(...recordedTimes);
+
   return [...dates]
     .sort((a, b) => a.getTime() - b.getTime())
+    .filter((date) => date.getTime() >= firstRecordedAt)
     .map((date) => {
       let assets = 0;
       let liabilities = 0;

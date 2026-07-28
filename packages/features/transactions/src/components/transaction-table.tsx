@@ -44,6 +44,12 @@ interface TransactionTableProps {
    */
   selectedIds?: Set<string>;
   onSelectionChange?: (ids: Set<string>) => void;
+  /**
+   * True when the caller has filters applied. An empty result then means "no
+   * matches", not "no data" — telling someone to import a bank statement when
+   * they have 300 transactions and a filter on is just confusing.
+   */
+  isFiltered?: boolean;
 }
 
 export function TransactionTable({
@@ -54,6 +60,7 @@ export function TransactionTable({
   isLoading,
   selectedIds,
   onSelectionChange,
+  isFiltered,
 }: TransactionTableProps) {
   const selectable = Boolean(selectedIds && onSelectionChange);
 
@@ -98,9 +105,13 @@ export function TransactionTable({
         <div className="bg-muted mb-4 rounded-full p-4">
           <Sparkles className="text-muted-foreground h-8 w-8" />
         </div>
-        <h3 className="text-lg font-semibold">No transactions yet</h3>
+        <h3 className="text-lg font-semibold">
+          {isFiltered ? "No matching transactions" : "No transactions yet"}
+        </h3>
         <p className="text-muted-foreground mt-1">
-          Import your bank statement or add transactions manually.
+          {isFiltered
+            ? "Try widening the date range or clearing a filter."
+            : "Import your bank statement or add transactions manually."}
         </p>
       </div>
     );

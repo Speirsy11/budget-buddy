@@ -100,6 +100,37 @@ function makeDate(year, monthIndex, day, hour = 12, minute = 0) {
   return new Date(year, monthIndex, safeDay, hour, minute, 0);
 }
 
+/**
+ * Small deterministic PRNG (mulberry32) seeded from a string.
+ *
+ * Seeding has to be reproducible — re-running should not silently reshuffle
+ * every historical transaction — but the output still has to look irregular,
+ * which Math.sin-based noise does not.
+ */
+function makeRandom(seed) {
+  let h = 1779033703 ^ seed.length;
+  for (let i = 0; i < seed.length; i += 1) {
+    h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  let a = h >>> 0;
+  return function random() {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function randomInt(random, min, max) {
+  return min + Math.floor(random() * (max - min + 1));
+}
+
+function roundMoney(value) {
+  return Math.round(value * 100) / 100;
+}
+
 function amountWithNoise(base, monthOffset, index, variance = 0.08) {
   const wobble = Math.sin((monthOffset + 1) * (index + 2)) * variance;
   return Number((base * (1 + wobble)).toFixed(2));
@@ -203,78 +234,136 @@ function buildTransactions(userId, bankConnectionId, months) {
     },
   ];
 
-  const variable = [
+  /*
+   * Discretionary spending: several irregular visits a month, not one charge
+   * on a fixed day.
+   *
+   * This matters beyond looking plausible. The recurring-payment detector
+   * groups by merchant and looks for a consistent gap between charges, so a
+   * supermarket billed once a month on the 7th is, correctly, indistinguishable
+   * from a subscription. Real grocery shopping is 3-6 visits at irregular
+   * intervals for varying amounts, which is what stops it being detected.
+   */
+  const discretionary = [
     {
-      day: 7,
-      amount: -72.45,
+      minPerMonth: 3,
+      maxPerMonth: 6,
+      minAmount: 18,
+      maxAmount: 96,
       description: "Tesco Extra",
       merchant: "Tesco",
       category: "groceries",
       score: 1,
     },
     {
-      day: 10,
-      amount: -46.2,
+      minPerMonth: 2,
+      maxPerMonth: 5,
+      minAmount: 9,
+      maxAmount: 58,
       description: "Sainsbury's Local",
       merchant: "Sainsbury's",
       category: "groceries",
       score: 1,
     },
     {
-      day: 13,
-      amount: -18.8,
+      minPerMonth: 1,
+      maxPerMonth: 3,
+      minAmount: 24,
+      maxAmount: 89,
+      description: "Waitrose",
+      merchant: "Waitrose",
+      category: "groceries",
+      score: 1,
+    },
+    {
+      minPerMonth: 4,
+      maxPerMonth: 11,
+      minAmount: 2.6,
+      maxAmount: 14.5,
       description: "Pret A Manger",
       merchant: "Pret A Manger",
       category: "dining",
       score: 0,
     },
     {
-      day: 15,
-      amount: -86.1,
-      description: "BP Fuel",
-      merchant: "BP",
-      category: "transport",
-      score: 1,
-    },
-    {
-      day: 17,
-      amount: -54.35,
+      minPerMonth: 1,
+      maxPerMonth: 5,
+      minAmount: 16,
+      maxAmount: 74,
       description: "Deliveroo",
       merchant: "Deliveroo",
       category: "dining",
       score: 0,
     },
     {
-      day: 19,
-      amount: -39.99,
+      minPerMonth: 0,
+      maxPerMonth: 3,
+      minAmount: 22,
+      maxAmount: 68,
+      description: "The Crown Pub",
+      merchant: "The Crown",
+      category: "dining",
+      score: 0,
+    },
+    {
+      minPerMonth: 1,
+      maxPerMonth: 3,
+      minAmount: 42,
+      maxAmount: 95,
+      description: "BP Fuel",
+      merchant: "BP",
+      category: "transport",
+      score: 1,
+    },
+    {
+      minPerMonth: 0,
+      maxPerMonth: 4,
+      minAmount: 4.2,
+      maxAmount: 28,
+      description: "Uber Trip",
+      merchant: "Uber",
+      category: "transport",
+      score: 1,
+    },
+    {
+      minPerMonth: 0,
+      maxPerMonth: 2,
+      minAmount: 8,
+      maxAmount: 46,
       description: "Boots Pharmacy",
       merchant: "Boots",
       category: "health",
       score: 1,
     },
     {
-      day: 21,
-      amount: -92.0,
+      minPerMonth: 0,
+      maxPerMonth: 2,
+      minAmount: 18,
+      maxAmount: 140,
       description: "Zara",
       merchant: "Zara",
       category: "shopping",
       score: 0,
     },
     {
-      day: 24,
-      amount: -31.5,
+      minPerMonth: 0,
+      maxPerMonth: 3,
+      minAmount: 6.5,
+      maxAmount: 82,
+      description: "Amazon Marketplace",
+      merchant: "Amazon",
+      category: "shopping",
+      score: 0,
+    },
+    {
+      minPerMonth: 0,
+      maxPerMonth: 2,
+      minAmount: 11,
+      maxAmount: 38,
       description: "Vue Cinema",
       merchant: "Vue",
       category: "entertainment",
       score: 0,
-    },
-    {
-      day: 27,
-      amount: -68.72,
-      description: "Waitrose",
-      merchant: "Waitrose",
-      category: "groceries",
-      score: 1,
     },
   ];
 
@@ -314,7 +403,7 @@ function buildTransactions(userId, bankConnectionId, months) {
     const monthIndex = monthDate.getMonth();
     const monthLabel = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
 
-    for (const tx of [...recurring, ...variable]) {
+    for (const tx of recurring) {
       const index = sequence++;
       rows.push({
         id: `${SEED_PREFIX}-tx-${monthLabel}-${String(index).padStart(4, "0")}`,
@@ -336,6 +425,56 @@ function buildTransactions(userId, bankConnectionId, months) {
         external_id: `${SEED_PREFIX}-external-${monthLabel}-${String(index).padStart(4, "0")}`,
         source: "open_banking",
       });
+    }
+
+    for (const tx of discretionary) {
+      // Seeded per merchant and month: stable across runs, but the visit count,
+      // days and amounts all differ month to month, so no cadence emerges.
+      const random = makeRandom(`${SEED_PREFIX}|${tx.merchant}|${monthLabel}`);
+      const visits = randomInt(random, tx.minPerMonth, tx.maxPerMonth);
+      const daysThisMonth = daysInMonth(year, monthIndex);
+      const usedDays = new Set();
+
+      for (let visit = 0; visit < visits; visit += 1) {
+        let day = randomInt(random, 1, daysThisMonth);
+        // Two charges at the same merchant on one day happen, but a run of
+        // them looks like a data error rather than a shopping trip.
+        let attempts = 0;
+        while (usedDays.has(day) && attempts < 4) {
+          day = randomInt(random, 1, daysThisMonth);
+          attempts += 1;
+        }
+        usedDays.add(day);
+
+        // Skip anything dated in the future — a statement cannot contain it.
+        const date = makeDate(
+          year,
+          monthIndex,
+          day,
+          8 + randomInt(random, 0, 13),
+          randomInt(random, 0, 59)
+        );
+        if (date.getTime() > Date.now()) continue;
+
+        const index = sequence++;
+        rows.push({
+          id: `${SEED_PREFIX}-tx-${monthLabel}-${String(index).padStart(4, "0")}`,
+          user_id: userId,
+          amount: -roundMoney(
+            tx.minAmount + random() * (tx.maxAmount - tx.minAmount)
+          ),
+          date,
+          description: tx.description,
+          merchant: tx.merchant,
+          category_id: categoryId(tx.category),
+          necessity_score: tx.score,
+          ai_classified: tx.category,
+          notes: "Seeded demo transaction",
+          bank_connection_id: bankConnectionId,
+          external_id: `${SEED_PREFIX}-external-${monthLabel}-${String(index).padStart(4, "0")}`,
+          source: "open_banking",
+        });
+      }
     }
 
     for (const tx of occasional) {
@@ -360,6 +499,144 @@ function buildTransactions(userId, bankConnectionId, months) {
   }
 
   return rows.sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+
+/**
+ * Accounts, with a balance recorded each month so the net-worth chart has a
+ * trend rather than a single point.
+ *
+ * Liability balances are stored as positive magnitudes owed — the schema's
+ * convention — and the mortgage amortises while the savings grow, so net worth
+ * climbs steadily rather than sitting flat.
+ */
+function buildAccounts(userId, months) {
+  const current = monthStart(new Date());
+  const templates = [
+    {
+      slug: "current",
+      name: "Monzo Current Account",
+      type: "checking",
+      institution: "Monzo",
+      startBalance: 1850,
+      monthlyDelta: 45,
+    },
+    {
+      slug: "savings",
+      name: "Chase Saver",
+      type: "savings",
+      institution: "Chase",
+      startBalance: 6200,
+      monthlyDelta: 420,
+    },
+    {
+      slug: "isa",
+      name: "Vanguard Stocks & Shares ISA",
+      type: "investment",
+      institution: "Vanguard",
+      startBalance: 14100,
+      monthlyDelta: 610,
+    },
+    {
+      slug: "credit",
+      name: "Amex Gold",
+      type: "credit_card",
+      institution: "American Express",
+      startBalance: 1240,
+      monthlyDelta: -35,
+      creditLimit: 6000,
+    },
+    {
+      slug: "mortgage",
+      name: "Nationwide Mortgage",
+      type: "mortgage",
+      institution: "Nationwide",
+      startBalance: 214500,
+      monthlyDelta: -640,
+    },
+  ];
+
+  const accounts = [];
+  const snapshots = [];
+
+  for (const template of templates) {
+    const id = `${SEED_PREFIX}-account-${template.slug}`;
+    const random = makeRandom(`${SEED_PREFIX}|account|${template.slug}`);
+
+    let balance = template.startBalance;
+    for (let monthOffset = months - 1; monthOffset >= 0; monthOffset -= 1) {
+      const monthDate = addMonths(current, -monthOffset);
+      // A little jitter so the line is not suspiciously straight.
+      const jitter = 1 + (random() - 0.5) * 0.04;
+      balance = Math.max(0, roundMoney(balance * jitter));
+
+      snapshots.push({
+        id: `${SEED_PREFIX}-snapshot-${template.slug}-${monthOffset}`,
+        account_id: id,
+        user_id: userId,
+        balance,
+        recorded_at: makeDate(
+          monthDate.getFullYear(),
+          monthDate.getMonth(),
+          28,
+          12,
+          0
+        ),
+      });
+
+      balance = roundMoney(balance + template.monthlyDelta);
+    }
+
+    accounts.push({
+      id,
+      user_id: userId,
+      name: template.name,
+      type: template.type,
+      institution_name: template.institution,
+      currency: "GBP",
+      current_balance: balance,
+      credit_limit: template.creditLimit ?? null,
+      include_in_net_worth: true,
+      is_active: true,
+      bank_connection_id: null,
+    });
+  }
+
+  // Snapshots dated in the future would be invented history.
+  const usable = snapshots.filter((s) => s.recorded_at.getTime() <= Date.now());
+  return { accounts, snapshots: usable };
+}
+
+/** A couple of goals: one tracking a real account, one tracked by hand. */
+function buildGoals(userId) {
+  const targetDate = addMonths(monthStart(new Date()), 9);
+
+  return [
+    {
+      id: `${SEED_PREFIX}-goal-emergency`,
+      user_id: userId,
+      name: "Emergency fund",
+      target_amount: 12000,
+      current_amount: 0, // linked: progress comes from the account balance
+      target_date: targetDate,
+      linked_account_id: `${SEED_PREFIX}-account-savings`,
+      icon: "ShieldCheck",
+      color: "#22c55e",
+      status: "active",
+    },
+    {
+      id: `${SEED_PREFIX}-goal-japan`,
+      user_id: userId,
+      name: "Trip to Japan",
+      target_amount: 3500,
+      current_amount: 1150,
+      target_date: addMonths(monthStart(new Date()), 6),
+      linked_account_id: null,
+      icon: "Plane",
+      color: "#14b8a6",
+      status: "active",
+    },
+  ];
 }
 
 function buildBudgets(userId, months) {
@@ -440,6 +717,8 @@ async function main() {
     options.months
   );
   const { budgets, allocations } = buildBudgets(options.userId, options.months);
+  const { accounts, snapshots } = buildAccounts(options.userId, options.months);
+  const goals = buildGoals(options.userId);
 
   try {
     await sql.begin(async (tx) => {
@@ -447,6 +726,9 @@ async function main() {
         await tx`delete from transactions where user_id = ${options.userId} and (id like ${`${SEED_PREFIX}-%`} or external_id like ${`${SEED_PREFIX}-%`})`;
         await tx`delete from budgets where user_id = ${options.userId} and id like ${`${SEED_PREFIX}-%`}`;
         await tx`delete from budget_allocations where user_id = ${options.userId} and id like ${`${SEED_PREFIX}-%`}`;
+        await tx`delete from goals where user_id = ${options.userId} and id like ${`${SEED_PREFIX}-%`}`;
+        await tx`delete from account_balance_snapshots where user_id = ${options.userId} and id like ${`${SEED_PREFIX}-%`}`;
+        await tx`delete from accounts where user_id = ${options.userId} and id like ${`${SEED_PREFIX}-%`}`;
         await tx`delete from bank_connections where user_id = ${options.userId} and id like ${`${SEED_PREFIX}-%`}`;
         await tx`delete from categories where user_id = ${options.userId} and id like ${`${SEED_PREFIX}-%`}`;
       }
@@ -476,6 +758,10 @@ async function main() {
       await tx`insert into budget_allocations ${tx(allocations)} on conflict (id) do update set total_income = excluded.total_income, needs_percent = excluded.needs_percent, wants_percent = excluded.wants_percent, savings_percent = excluded.savings_percent, updated_at = now()`;
       await tx`insert into budgets ${tx(budgets)} on conflict (id) do update set name = excluded.name, amount = excluded.amount, period = excluded.period, updated_at = now()`;
       await tx`insert into transactions ${tx(transactions)} on conflict (id) do update set amount = excluded.amount, date = excluded.date, description = excluded.description, merchant = excluded.merchant, category_id = excluded.category_id, necessity_score = excluded.necessity_score, ai_classified = excluded.ai_classified, notes = excluded.notes, bank_connection_id = excluded.bank_connection_id, external_id = excluded.external_id, source = excluded.source, updated_at = now()`;
+
+      await tx`insert into accounts ${tx(accounts)} on conflict (id) do update set name = excluded.name, type = excluded.type, institution_name = excluded.institution_name, current_balance = excluded.current_balance, credit_limit = excluded.credit_limit, include_in_net_worth = excluded.include_in_net_worth, is_active = excluded.is_active, updated_at = now()`;
+      await tx`insert into account_balance_snapshots ${tx(snapshots)} on conflict (id) do update set balance = excluded.balance, recorded_at = excluded.recorded_at`;
+      await tx`insert into goals ${tx(goals)} on conflict (id) do update set name = excluded.name, target_amount = excluded.target_amount, current_amount = excluded.current_amount, target_date = excluded.target_date, linked_account_id = excluded.linked_account_id, status = excluded.status, updated_at = now()`;
     });
 
     console.log(`Seeded Budget Buddy demo data for ${options.userId}`);
@@ -483,6 +769,8 @@ async function main() {
     console.log(`  transactions: ${transactions.length}`);
     console.log(`  budgets: ${budgets.length}`);
     console.log(`  allocations: ${allocations.length}`);
+    console.log(`  accounts: ${accounts.length} (${snapshots.length} balance snapshots)`);
+    console.log(`  goals: ${goals.length}`);
   } finally {
     await sql.end();
   }

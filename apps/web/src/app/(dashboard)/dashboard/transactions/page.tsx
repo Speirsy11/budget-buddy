@@ -329,6 +329,13 @@ export default function TransactionsPage() {
         }))}
         selectedIds={selectedIds}
         onSelectionChange={setSelectedIds}
+        isFiltered={Boolean(
+          search ||
+          category !== "all" ||
+          uncategorizedOnly ||
+          direction !== "all" ||
+          period !== "all"
+        )}
         isLoading={transactionsQuery.isLoading}
         onClassify={(id) => classifyMutation.mutate({ id })}
         onDelete={(id) => {

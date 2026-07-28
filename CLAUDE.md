@@ -288,6 +288,10 @@ pnpm clean                  # Clean all build artifacts
 - **Category state lives in three fields.** `categoryId` (joined by the transactions UI),
   `aiClassified` and `necessityScore` (read by analytics). Always write all three together
   or the two views disagree.
+- **`DEV_AUTH_USER_ID` signs you in as a seeded user without Clerk**, for opening the
+  dashboard to check it visually. Only honoured when `NODE_ENV=development`; a production
+  build throws at startup if it is set (`apps/web/src/instrumentation.ts`). Get a user ID
+  from `pnpm db:seed` output or the `users` table.
 - **Client-safe exports must not import values from `@finance/db`.** Anything re-exported
   from a feature package's `index.ts` reaches the browser; a value import pulls in the
   Postgres driver and breaks the bundle. Use `import type`.

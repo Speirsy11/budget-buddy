@@ -11,6 +11,7 @@ import { createCallerFactory } from "@finance/api";
 import { db, subscriptions, eq, and } from "@finance/db";
 import { logger } from "@finance/logger";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import { devAuthUserId } from "./dev-auth";
 
 const log = logger.child({ module: "trpc-context" });
 
@@ -96,6 +97,14 @@ async function syncClerkUserById(userId: string) {
 export async function createContext(
   opts?: FetchCreateContextFnOptions
 ): Promise<TRPCContext> {
+  // Local development only. Resolved before anything else so no Clerk call is
+  // attempted for a session that does not exist.
+  const devUserId = devAuthUserId();
+  if (devUserId) {
+    log.debug({ userId: devUserId }, "createContext: using dev test session");
+    return { userId: devUserId, userPlan: await getUserPlan(devUserId) };
+  }
+
   const bearerUserId = await getBearerUserId(opts?.req);
   const session = bearerUserId ? null : await auth();
   const userId = bearerUserId ?? session?.userId ?? null;
