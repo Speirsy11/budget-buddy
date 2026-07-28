@@ -8,6 +8,7 @@ import {
   categorizationRules,
   eq,
   and,
+  isNull,
 } from "@finance/db";
 import { rulesRouter } from "./rules-router";
 import { transactionsRouter } from "./router";
@@ -311,6 +312,37 @@ describe("applyToExisting", () => {
       with: { category: true },
     });
     expect(after[0].category?.name).toBe("Groceries");
+  });
+
+  it("categorises across more than one page of history", async () => {
+    // APPLY_BATCH_SIZE is 500, so 600 rows forces the keyset cursor to advance
+    // at least once. This is the case plain offset paging would get wrong:
+    // categorising a row removes it from the uncategorised filter, so an
+    // offset would skip whatever shifted into its place.
+    await createRulesCaller(ctxFor(userId)).list();
+
+    const rows = Array.from({ length: 600 }, (_, index) => ({
+      userId,
+      amount: -5,
+      date: new Date(2026, 2, 1 + (index % 27)),
+      description: `TESCO STORES ${index}`,
+    }));
+    await db.insert(transactions).values(rows);
+
+    const result = await createRulesCaller(ctxFor(userId)).applyToExisting({
+      onlyUncategorized: true,
+    });
+
+    expect(result.updatedCount).toBe(600);
+
+    const stillUncategorised = await db.query.transactions.findMany({
+      where: and(
+        eq(transactions.userId, userId),
+        isNull(transactions.categoryId)
+      ),
+      columns: { id: true },
+    });
+    expect(stillUncategorised).toHaveLength(0);
   });
 
   it("does not overwrite a category the user set by hand", async () => {

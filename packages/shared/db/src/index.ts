@@ -33,5 +33,21 @@ export * from "./schema";
 export * from "./relations";
 export * from "./defaults";
 export * from "./provisioning";
-export { eq, and, or, gte, lte, desc, asc, like, sql } from "drizzle-orm";
+export {
+  eq,
+  and,
+  or,
+  gt,
+  lt,
+  gte,
+  lte,
+  desc,
+  asc,
+  like,
+  ilike,
+  isNull,
+  isNotNull,
+  inArray,
+  sql,
+} from "drizzle-orm";
 export type { InferSelectModel, InferInsertModel } from "drizzle-orm";
