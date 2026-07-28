@@ -33,8 +33,10 @@ packages/compositions/
 
 packages/features/              # Features (can import shared only)
 ├── auth/                       # Clerk integration
-├── transactions/               # CSV parsing, AI classification, export
-├── analytics/                  # 50/30/20 budgeting, charts
+├── transactions/               # CSV parsing, rules engine, AI classification,
+│                               #   recurring detection, export
+├── analytics/                  # 50/30/20 budgeting, charts, accounts and net
+│                               #   worth, savings goals, insights
 ├── banking/                    # Plaid/Open Banking integration
 └── payments/                   # Stripe integration
 
@@ -253,20 +255,42 @@ pnpm clean                  # Clean all build artifacts
 
 ### TODO
 
-- [ ] Set up PostgreSQL database and run migrations (run `pnpm infra:up` then `pnpm db:migrate`)
-- [ ] Wire `pnpm db:migrate` into the deployment pipeline (see P0 #3 deployment work)
+- [ ] Wire `pnpm db:migrate` into the deployment pipeline (migrations themselves work;
+      nothing runs them on deploy)
+- [ ] Credential setup — see `HUMAN_TASKS.md` (Clerk, OpenAI, Stripe, Plaid, Resend)
 
 ### Recently Completed
 
-- [x] Add Vitest unit/component coverage (94 tests passing)
-- [x] Implement reachable Stripe billing (checkout, portal, signed webhooks, subscription persistence, settings UI)
-- [x] Add marketing site (apps/marketing with hero, features, pricing, FAQ)
-- [x] Add E2E tests with Playwright (public landing and demo flows)
-- [x] Set up CI/CD pipeline (lint, typecheck, coverage, Postgres integration, E2E, audit, build)
-- [x] Add email notifications (Resend + React Email: welcome, budget alerts, weekly summary)
-- [x] Implement data export feature (CSV, JSON, full data export)
-- [x] Add Docker infrastructure (PostgreSQL, Redis via docker-compose)
-- [x] Add rate limiting on API routes (Redis-backed with in-memory fallback)
+- [x] Categorisation rules engine (deterministic matching ahead of the AI classifier,
+      ~100 built-in UK merchant rules, preview and backfill)
+- [x] Account defaults provisioned on signup (categories + starter rules)
+- [x] Accounts and net worth (asset/liability types, balance snapshot history)
+- [x] Recurring payment and subscription detection (statistical, no merchant list)
+- [x] Savings goals with pacing (required contribution, projection, on-track/behind)
+- [x] Spending insights and anomaly detection
+- [x] Bulk transaction editing and advanced filters
+- [x] Email notifications wired to real triggers (welcome, budget alerts, weekly summary)
+- [x] Vitest coverage (231 unit, 61 integration against real Postgres)
+- [x] Stripe billing, marketing site, Playwright E2E, CI/CD, data export, Docker infra,
+      Redis-backed rate limiting
+
+### Gotchas worth knowing
+
+- **Env files are per-app.** Next.js only reads `.env` from `apps/web/`, not the repo root.
+  Root `.env` is used by `pnpm db:seed` and Playwright; `apps/web/.env.local` is what the
+  app itself reads. Both need the same values.
+- **Turbo runs in strict env mode.** Any new environment variable must be declared in
+  `turbo.json` `globalEnv` or tasks will not see it.
+- **Playwright and dev share `apps/web/.next`.** Both must use the same bundler; the
+  Playwright web server passes `--turbopack` to match. Running `pnpm build` (webpack)
+  before `pnpm dev` can still leave mixed artifacts — `rm -rf apps/web/.next` if the dev
+  server reports a missing runtime chunk.
+- **Category state lives in three fields.** `categoryId` (joined by the transactions UI),
+  `aiClassified` and `necessityScore` (read by analytics). Always write all three together
+  or the two views disagree.
+- **Client-safe exports must not import values from `@finance/db`.** Anything re-exported
+  from a feature package's `index.ts` reaches the browser; a value import pulls in the
+  Postgres driver and breaks the bundle. Use `import type`.
 
 ## Security Considerations
 
